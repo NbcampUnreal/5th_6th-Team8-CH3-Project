@@ -22,8 +22,18 @@ protected:
 	float BobbingHeight;
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 public:
-	FTimerManager BobbingTimerHandle;
+	FTimerHandle BobbingTimerHandle;
 	AHealthPack();
 	void Bobbing();
+
+	UFUNCTION()
+	virtual void OnOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 };
