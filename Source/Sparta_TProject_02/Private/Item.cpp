@@ -2,10 +2,11 @@
 
 AItem::AItem()
 {
+	PrimaryActorTick.bCanEverTick = false;
+
 	StaticMeshCompoent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMeshCompoent->SetupAttachment(RootComponent);
 
- 	PrimaryActorTick.bCanEverTick = false;
 	CurrentStack = 1;
 	MaxStack = 1;
 }
