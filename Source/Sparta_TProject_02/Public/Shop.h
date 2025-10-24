@@ -24,19 +24,40 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	TArray<Item> CraftableList;
-	Inventory* PlayerInventory;
+	APlayerController* PC;
 
+	//SHOP WIDGET
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
 	TSubclassOf<UUserWidget> ShopWidgetClass;
 	UUserWidget* ShopWidgetInstance;
+	bool ShopVisible;
 
+	//ITEM MANAGEMENT
+	/*UPROPERTY(BlueprintReadOnly, Category = "Shop")
+	UItem* SelectedItem;*/
 
 public:	
+	void SetShopPlayerController(APlayerController* PC);
+
+	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void OpenShop();
+	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void CloseShop();
+	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void UpdateList();
+	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void UpdateDescription();
-	TArray<Item>* GetCraftableList();
+
+	//UFUNCTION(BlueprintPure, Category = "Shop")
+	//TArray<Item>* GetCraftableList();
+
+	/*UFUNCTION(BlueprintCallable, Category = "Shop")
+	void OnItemHovered(UItem* HoveredItem);
+
+	UFUNCTION(BlueprintCallable, Category = "Shop")
+	void OnBuyButtonClicked(UItem* SelectedItem);
+
+	UFUNCTION(BlueprintCallable, Category = "Shop")
+	void AddItemToInventory(UItem* SelectedItem, ACharacter* PlayerCharacter);*/
 
 };
