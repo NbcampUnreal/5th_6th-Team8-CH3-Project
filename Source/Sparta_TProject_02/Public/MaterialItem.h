@@ -4,8 +4,15 @@
 #include "MaterialItem.generated.h"
 
 UCLASS()
-class SPARTA_TPROJECT_02_API AMaterialItem : public AItem
+class UMaterialItem : public UItem
 {
 	GENERATED_BODY()
-	
+
+protected:
+	int32 CurrentStack;
+	int32 MaxStack;
+public:
+	UMaterialItem();
+	virtual int32 GetCurrentStack();
+	virtual int32 GetItemMaxStack();
 };

@@ -1,7 +1,7 @@
 #include "BasicPistol.h"
 
-ABasicPistol::ABasicPistol()
+UBasicPistol::UBasicPistol()
 {
-	damage = 10;
-
+	ItemName = "BasicPistol";
+	Damage = 10;
 }
