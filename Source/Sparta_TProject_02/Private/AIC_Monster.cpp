@@ -8,6 +8,8 @@
 #include "Perception/AISenseConfig_Damage.h" // 데미지 센서
 #include "BehaviorTree/BlackboardComponent.h" // 블랙보드 사용
 #include "Sparta_TProject_02/Sparta_TProject_02Character.h" 
+#include "AIMonsterBase.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 AAIC_Monster::AAIC_Monster()
@@ -21,7 +23,7 @@ AAIC_Monster::AAIC_Monster()
     {
         SightConfig->SightRadius = 1500.0f;       // 시야 반경
         SightConfig->LoseSightRadius = 1600.0f;  // 시야를 잃는 반경 (더 크게 설정해야 안정적)
-        SightConfig->PeripheralVisionAngleDegrees = 75.0f; // 시야각
+        SightConfig->PeripheralVisionAngleDegrees = 85.0f; // 시야각 (추천 75.0f~90.0f)
         SightConfig->SetMaxAge(5.0f); // 감지 정보를 5초간 기억함
 
         SightConfig->DetectionByAffiliation.bDetectEnemies = true;
@@ -36,7 +38,7 @@ AAIC_Monster::AAIC_Monster()
     UAISenseConfig_Hearing* HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
     if (HearingConfig)
     {
-        HearingConfig->HearingRange = 1500.0f;      // 청력 반경
+        HearingConfig->HearingRange = 1000.0f;      // 청력 반경
         HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
         HearingConfig->DetectionByAffiliation.bDetectNeutrals = false;
         HearingConfig->DetectionByAffiliation.bDetectFriendlies = false;
@@ -55,6 +57,41 @@ AAIC_Monster::AAIC_Monster()
 
     // 6. 인지 정보 업데이트 함수 바인딩
     AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AAIC_Monster::OnTargetPerceptionUpdated);
+}
+
+void AAIC_Monster::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    AAIMonsterBase* Monster = Cast<AAIMonsterBase>(GetPawn());
+    if (Monster == nullptr) return;
+
+    if (Monster->bIsAttacking)
+    {
+        UObject* TargetObject = GetBlackboardComponent()->GetValueAsObject(TEXT("TargetActor"));
+        AActor* TargetActor = Cast<AActor>(TargetObject);
+
+        if (TargetActor)
+        {
+            FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(
+                Monster->GetActorLocation(),
+                TargetActor->GetActorLocation()
+            );
+            FRotator DeltaRot = (TargetRotation - AttackStartRotation).GetNormalized();
+            float MaxYaw = 90.0f;   // 몬스터 회전 반경 (권장 90.0f)
+            DeltaRot.Yaw = FMath::Clamp(DeltaRot.Yaw, -MaxYaw, MaxYaw);
+            FRotator ClampedTargetRotation = AttackStartRotation + DeltaRot;
+
+            FRotator NewRotation = FMath::RInterpTo(
+                GetControlRotation(),
+                ClampedTargetRotation,
+                DeltaSeconds,
+                3.0f    // 몬스터 회전 속도 (권장 : 1.0~5.0f)
+            );
+
+            SetControlRotation(FRotator(0.f, NewRotation.Yaw, 0.f));
+        }
+    }
 }
 
 void AAIC_Monster::OnPossess(APawn* InPawn)
@@ -94,7 +131,7 @@ void AAIC_Monster::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus
     }
     else
     {
-        // [감지 실패 - 시야에서 놓침]
+  
         // 1. 현재 블랙보드에 등록된 타겟이 방금 놓친 그 액터인지 확인
         // (다른 액터를 추적 중에 엉뚱한 액터가 사라졌다는 신호를 무시하기 위함)
         AActor* CurrentTarget = Cast<AActor>(MyBlackboard->GetValueAsObject(TEXT("TargetActor")));
