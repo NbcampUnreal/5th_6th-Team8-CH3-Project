@@ -86,7 +86,10 @@ void AShop::UpdateList()
 
 void AShop::UpdateDescription()
 {
-
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("UpdateDescription():Shop.cpp Called."));
+	}
 }
 
 void AShop::SetShopPlayerController(APlayerController* MyPlayerController)

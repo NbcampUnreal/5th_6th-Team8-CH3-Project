@@ -7,6 +7,7 @@
 #include "ShopUserWidget.generated.h"
 
 class UUserWidget;
+class AShop;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API UShopUserWidget : public UUserWidget
@@ -16,6 +17,10 @@ class SPARTA_TPROJECT_02_API UShopUserWidget : public UUserWidget
 public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* CloseButton_X;
+	UPROPERTY(meta = (BindWidget))
+	UButton* HoverButton;
+
+	AShop* ShopActor;
 
 protected:
 	virtual void NativeConstruct() override;
@@ -23,5 +28,7 @@ protected:
 private:
 	UFUNCTION()
 	void OnCloseButtonClicked();
+	UFUNCTION()
+	void OnItemButtonHovered();
 
 };

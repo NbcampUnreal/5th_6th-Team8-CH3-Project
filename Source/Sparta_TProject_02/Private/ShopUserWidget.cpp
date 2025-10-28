@@ -15,21 +15,39 @@ void UShopUserWidget::NativeConstruct()
 		CloseButton_X->OnClicked.AddDynamic(this, &UShopUserWidget::OnCloseButtonClicked);
 	}
 
+	if (HoverButton)
+	{
+		HoverButton->OnHovered.AddDynamic(this, &UShopUserWidget::OnItemButtonHovered);
+	}
+
 }
 
 void UShopUserWidget::OnCloseButtonClicked()
 {
-	TArray<AActor*> FoundShops;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShop::StaticClass(), FoundShops);
-	AShop* ShopActor = (FoundShops.Num() > 0) ? Cast<AShop>(FoundShops[0]) : nullptr;
+	if (ShopActor == nullptr)
+	{
+		TArray<AActor*> FoundShops;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShop::StaticClass(), FoundShops);
+		ShopActor = (FoundShops.Num() > 0) ? Cast<AShop>(FoundShops[0]) : nullptr;
+	}
 
 	if (ShopActor)
 	{
 		ShopActor->CloseShop();
+	}
+}
 
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("ShopUI Closed"));
-		}
+void UShopUserWidget::OnItemButtonHovered()
+{
+	if (ShopActor == nullptr)
+	{
+		TArray<AActor*> FoundShops;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShop::StaticClass(), FoundShops);
+		ShopActor = (FoundShops.Num() > 0) ? Cast<AShop>(FoundShops[0]) : nullptr;
+	}
+
+	if (ShopActor)
+	{
+		ShopActor->UpdateDescription();
 	}
 }
