@@ -2,17 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Logging/LogMacros.h"
+#include "WeaponType.h"
 #include "PlayerCharacter.generated.h"
 
-class UInputComponent;
+class UInputAction;
 class USkeletalMeshComponent;
 class UCameraComponent;
-class UInputAction;
-class UInputMappingContext;
-struct FInputActionValue;
 class AGunBase;
-enum class EWeaponType : uint8; 
+struct FInputActionValue;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
@@ -35,56 +32,53 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
 	USkeletalMeshComponent* PlayerMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputMappingContext* DefaultMappingContext;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* MoveAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* MoveAction;
+	UInputAction* LookAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* JumpAction;
+	UInputAction* JumpAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* LookAction;
+	UInputAction* SprintAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* SprintAction;
+	UInputAction* CrouchAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* CrouchAction;
+	UInputAction* ShootAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* ShootAction;
+	UInputAction* ReloadAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* ReloadAction;
+	UInputAction* EquipShotgunAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* NextWeaponAction;
+	UInputAction* EquipRifleAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputAction* PrevWeaponAction;
+	UInputAction* EquipPistolAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float NormalSpeed;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SprintSpeedMultiplier;
 
 	float SprintSpeed;
 
-	// 변경: 단일 총기 클래스에서 시작 무기 클래스 배열로 변경
 	UPROPERTY(EditDefaultsOnly, Category = "Gun")
 	TArray<TSubclassOf<AGunBase>> StartWeaponClasses;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Gun")
-	AGunBase* CurrentWeapon;
-
-	// 추가: 스폰된 모든 무기를 보관할 배열
-	UPROPERTY(VisibleInstanceOnly, Category = "Gun")
 	TArray<AGunBase*> Weapons;
 
-	// 추가: 현재 들고 있는 무기의 인덱스
+	UPROPERTY(VisibleInstanceOnly, Category = "Gun")
+	AGunBase* CurrentWeapon;
+
 	int32 CurrentWeaponIndex;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
@@ -93,44 +87,60 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
 	TMap<EWeaponType, int32> MaxCarryAmmo;
 
-	// 수정: AGunBase에서 접근해야 하므로 protected에서 public으로 이동합니다.
 public:
-	// 탄약 추가 (아이템 획득, 상점 구매 등)
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void AddAmmo(EWeaponType WeaponType, int32 Amount);
 
-	// 탄약 사용 (재장전 시)
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	int32 ConsumeAmmoForReload(EWeaponType WeaponType, int32 RequestedAmount);
 
-	// 현재 예비탄약 가져오기
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	int32 GetReserveAmmo(EWeaponType WeaponType) const;
 
-protected: 
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	AGunBase* GetCurrentWeapon() const { return CurrentWeapon; }
+
+	bool IsSprinting() const { return bWantsToSprint; }
+	bool IsAiming() const { return bIsAiming; }
+	bool IsFiring() const { return bIsFiring; } // << [수정 1] bIsFiring 상태를 위한 Getter 추가
+
+protected:
 	void Move(const FInputActionValue& value);
 	void Look(const FInputActionValue& value);
-
 	void StartJump(const FInputActionValue& value);
 	void StopJump(const FInputActionValue& value);
-
 	void StartSprint(const FInputActionValue& value);
 	void StopSprint(const FInputActionValue& value);
-
 	void StartCrouch(const FInputActionValue& value);
 	void StopCrouch(const FInputActionValue& value);
-
 	void StartShoot(const FInputActionValue& value);
 	void StopShoot(const FInputActionValue& value);
 	void StartReload(const FInputActionValue& value);
+	void EquipShotgun(const FInputActionValue& value);
+	void EquipRifle(const FInputActionValue& value);
+	void EquipPistol(const FInputActionValue& value);
 
-	// 추가: 무기 교체 함수
-	void NextWeapon(const FInputActionValue& value);
-	void PrevWeapon(const FInputActionValue& value);
+	void EquipWeaponByType(EWeaponType TypeToEquip);
 	void EquipWeapon(int32 Index);
 
+	UFUNCTION()
+	void OnWeaponStartFire();
+
+	UFUNCTION()
+	void OnWeaponStopFire();
+
+	UFUNCTION()
+	void OnWeaponStartReload();
+
+	UFUNCTION()
+	void OnWeaponFinishReload();
+
+private:
+	bool bWantsToSprint;
+	bool bIsAiming;
+	bool bIsFiring; // << [수정 1] 발사 상태를 추적하기 위해 추가
+
 public:
-	USkeletalMeshComponent* GetPlayerMesh() const { return PlayerMesh; }
-	UCameraComponent* GetCameraComp() const { return CameraComp; }
-	USkeletalMeshComponent* GetFPMesh() const { return FP_Mesh; }
+		UFUNCTION(BlueprintPure, Category = "Mesh")
+		USkeletalMeshComponent* GetFPMesh() const { return FP_Mesh; } // << [수정 4] FP_Mesh Getter 함수 추가
 };

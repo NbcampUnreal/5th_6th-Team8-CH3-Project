@@ -1,23 +1,22 @@
 #include "PlayerCharacterController.h"
 #include "EnhancedInputSubsystems.h"
-#include "Blueprint/UserWidget.h"
-#include "Kismet/GameplayStatics.h"
-#include "Components/TextBlock.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Engine/LocalPlayer.h"
 
 APlayerCharacterController::APlayerCharacterController()
 	: InputMappingContext(nullptr)
 {
+	bShowMouseCursor = false;
+	bEnableClickEvents = false;
+	bEnableMouseOverEvents = false;
 }
 
 void APlayerCharacterController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(GetLocalPlayer()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
-			LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
 			if (InputMappingContext)
 			{
@@ -26,5 +25,3 @@ void APlayerCharacterController::BeginPlay()
 		}
 	}
 }
-
-

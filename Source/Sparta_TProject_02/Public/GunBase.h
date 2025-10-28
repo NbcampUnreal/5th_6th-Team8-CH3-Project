@@ -3,13 +3,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "WeaponType.h"
-#include "Particles/ParticleSystem.h" 
 #include "GunBase.generated.h"
 
 class USkeletalMeshComponent;
 class UAnimMontage;
 class APlayerCharacter;
 class USoundBase;
+class UParticleSystem;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponEvent);
 
 UCLASS()
 class SPARTA_TPROJECT_02_API AGunBase : public AActor
@@ -19,65 +21,103 @@ class SPARTA_TPROJECT_02_API AGunBase : public AActor
 public:
 	AGunBase();
 
-protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	// Events
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+	FOnWeaponEvent OnStartFire;
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+	FOnWeaponEvent OnStopFire;
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+	FOnWeaponEvent OnStartReload;
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+	FOnWeaponEvent OnFinishReload;
+
+	// API
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	bool IsReloading() const { return bIsReloading; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	EWeaponType GetWeaponType() const { return WeaponType; }
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void StartFire();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void StopFire();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void Reload();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void FinishReload();
+
+	// Getter montages for external (Player) to play on FP mesh
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	UAnimMontage* GetFireMontage() const { return FireMontage; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
+
+	// hide/show
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SetWeaponHidden(bool bShouldBeHidden);
+
+	// Get current ammo for HUD
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	int32 GetCurrentAmmo() const { return CurrentAmmo; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	int32 GetMaxMagazineAmmo() const { return MaxMagazineAmmo; }
+
+protected:
+	// perform actual trace / damage; can be overridden by derived classes (shotgun)
+	virtual void TraceFire();
+
+	// Components
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USkeletalMeshComponent* GunMesh;
 
+	// Stats
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	float Damage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	int32 MaxMagazineAmmo;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
 	int32 CurrentAmmo;
-	bool bIsReloading;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	float FireRate;
+	float FireRate; // RPM or 0 for single-shot
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	EWeaponType WeaponType;
 
-	// 추가: 총구 화염 파티클 (BP에서 설정)
+	// Effects
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Effects")
 	UParticleSystem* MuzzleFlash;
 
-	// 추가: 발사 사운드 (BP에서 설정)
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Effects")
 	USoundBase* FireSound;
 
-	// 추가: 1인칭 팔 발사 몽타주 (BP에서 설정)
+	// Animation montages (BP에서 할당)
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Animation")
 	UAnimMontage* FireMontage;
 
-	// 추가: 1인칭 팔 재장전 몽타주 (BP에서 설정)
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Animation")
 	UAnimMontage* ReloadMontage;
 
+	// Timer handles
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ReloadTimerHandle;
 
-	// 추가: 재장전을 위해 소유 플레이어 캐릭터를 저장
+	// Cached owner player
 	UPROPERTY()
 	APlayerCharacter* OwningPlayer;
 
-
-	virtual void TraceFire();
-
-public:
-	virtual void StartFire();
-	virtual void StopFire();
-
-	void Reload();
-	void FinishReload();
-
-	// 수정: 매개변수 이름 bHidden -> bShouldBeHidden으로 변경 (AActor 멤버 변수와 충돌 방지)
-	void SetWeaponHidden(bool bShouldBeHidden);
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void Shoot();
-
-	USkeletalMeshComponent* GetGunMesh() const { return GunMesh; }
+	bool bIsReloading;
 };

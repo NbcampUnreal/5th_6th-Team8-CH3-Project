@@ -160,8 +160,8 @@ void APlayerCharacter::Move(const FInputActionValue& value)
 void APlayerCharacter::Look(const FInputActionValue& value)
 {
 	FVector2D LookInput = value.Get<FVector2D>();
-	AddControllerYawInput(LookInput.X * -1.0f); 
-	AddControllerPitchInput(LookInput.Y);
+	AddControllerYawInput(LookInput.X); // << [수정 2] Yaw (좌우 회전): 일반적인 FPS 조작을 위해 반전(-1.0f) 제거
+	AddControllerPitchInput(LookInput.Y * -1.0f); // << [수정 2] Pitch (상하 회전): 일반적인 FPS 조작 (마우스를 위로 올리면 화면이 올라가는)을 위해 -1.0f 곱하기 추가
 }
 
 void APlayerCharacter::StartJump(const FInputActionValue& value) { Jump(); }
