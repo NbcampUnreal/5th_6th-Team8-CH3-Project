@@ -1,7 +1,13 @@
 #include "GunBase.h"
+#include "PlayerCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Engine/World.h"
+#include "GameFramework/Controller.h" 
+#include "GameFramework/Pawn.h" 
+#include "Animation/AnimInstance.h" 
+#include "Particles/ParticleSystem.h" 
 
 AGunBase::AGunBase()
 {
@@ -10,35 +16,55 @@ AGunBase::AGunBase()
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMesh"));
 	RootComponent = GunMesh;
 
+	WeaponType = EWeaponType::WT_Pistol;
 	Damage = 20.0f;
 	MaxMagazineAmmo = 30;
-	FireRate = 600.0f; 
+	FireRate = 600.0f;
 
 	CurrentAmmo = MaxMagazineAmmo;
 	bIsReloading = false;
+
+	OwningPlayer = nullptr;
 }
 
 void AGunBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OwningPlayer = Cast<APlayerCharacter>(GetOwner()); // 소유자 캐스팅 및 저장
 }
 
 void AGunBase::TraceFire()
 {
 	if (CurrentAmmo <= 0 || bIsReloading)
 	{
-		StopFire(); 
+		StopFire();
 		return;
 	}
 
 	CurrentAmmo--;
 
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (!OwnerPawn) return;
+	if (!OwningPlayer) return;
 
-	AController* OwnerController = OwnerPawn->GetController();
+	AController* OwnerController = OwningPlayer->GetController();
 	if (!OwnerController) return;
+
+	// --- 추가: 이펙트 재생 ---
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GunMesh, FName("Muzzle"));
+	}
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
+	// 1인칭 팔 메쉬에서 발사 몽타주 재생
+	if (FireMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
+	{
+		OwningPlayer->GetFPMesh()->GetAnimInstance()->Montage_Play(FireMontage);
+	}
+	// --- 이펙트 재생 끝 ---
+
 
 	FVector StartLocation;
 	FRotator CameraRotation;
@@ -48,8 +74,8 @@ void AGunBase::TraceFire()
 
 	FHitResult Hit;
 	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this); 
-	QueryParams.AddIgnoredActor(GetOwner()); 
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.AddIgnoredActor(GetOwner());
 
 	if (GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, TraceEnd, ECC_Visibility, QueryParams))
 	{
@@ -60,7 +86,7 @@ void AGunBase::TraceFire()
 			Hit,
 			OwnerController,
 			this,
-			nullptr 
+			nullptr
 		);
 	}
 }
@@ -74,21 +100,14 @@ void AGunBase::StartFire()
 {
 	if (bIsReloading || GetWorldTimerManager().IsTimerActive(FireTimerHandle)) return;
 
-	// 1. 발사 속도(FireRate)가 0인지 아닌지 먼저 검사
 	if (FireRate <= 0.0f)
 	{
-		// 발사 속도가 0이하면 (반자동), TraceFire 한 발만 쏘고 끝
 		TraceFire();
 	}
 	else
 	{
-		// 발사 속도가 0보다 크면 (자동)
 		float TimeBetweenShots = 60.0f / FireRate;
-
-		// 일단 한 발 쏘고
 		TraceFire();
-
-		// 타이머 설정
 		GetWorldTimerManager().SetTimer(
 			FireTimerHandle,
 			this,
@@ -106,27 +125,57 @@ void AGunBase::StopFire()
 
 void AGunBase::Reload()
 {
-	if (bIsReloading || CurrentAmmo == MaxMagazineAmmo) return;
+	//수정: 재장전 로직 (예비 탄창 검사 추가)
+	if (bIsReloading || CurrentAmmo == MaxMagazineAmmo || !OwningPlayer) return;
+
+	if (WeaponType != EWeaponType::WT_Pistol)
+	{
+		if (OwningPlayer->GetReserveAmmo(WeaponType) <= 0)
+		{
+			return;
+		}
+	}
 
 	bIsReloading = true;
-
-	// 재장전 시 발사 중지 (필수!)
 	StopFire();
 
+	float ReloadTime = 3.0f;
+	if (ReloadMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
+	{
+		OwningPlayer->GetFPMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
+		ReloadTime = ReloadMontage->GetPlayLength();
+	}
+
 	GetWorldTimerManager().SetTimer(
-		ReloadTimerHandle, // <-- FireTimerHandle 대신 ReloadTimerHandle 사용
+		ReloadTimerHandle,
 		this,
 		&AGunBase::FinishReload,
-		3.0f,
+		ReloadTime,
 		false
 	);
 }
 
 void AGunBase::FinishReload()
 {
-	CurrentAmmo = MaxMagazineAmmo;
+	// 수정: 재장전 완료 로직 (예비 탄약 소모 로직)
 	bIsReloading = false;
-
-	// FireTimerHandle을 건드리지 않고, ReloadTimerHandle만 제거
 	GetWorldTimerManager().ClearTimer(ReloadTimerHandle);
+
+	if (!OwningPlayer) return;
+
+	int32 AmmoToReload = MaxMagazineAmmo - CurrentAmmo;
+	if (AmmoToReload <= 0) return;
+
+	// APlayerCharacter의 public 함수를 호출하여 탄약 소모
+	int32 AmmoConsumed = OwningPlayer->ConsumeAmmoForReload(WeaponType, AmmoToReload);
+
+	CurrentAmmo += AmmoConsumed;
+}
+
+// 수정: 매개변수 이름 bHidden -> bShouldBeHidden으로 변경
+void AGunBase::SetWeaponHidden(bool bShouldBeHidden)
+{
+	SetActorHiddenInGame(bShouldBeHidden);
+	SetActorEnableCollision(!bShouldBeHidden);
+	SetActorTickEnabled(!bShouldBeHidden);
 }

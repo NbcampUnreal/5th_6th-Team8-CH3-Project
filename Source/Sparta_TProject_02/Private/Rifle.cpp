@@ -2,8 +2,9 @@
 
 ARifle::ARifle()
 {
-	// 라이플에 맞는 스탯으로 조정합니다 (예시 값)
 	Damage = 30.0f;
 	MaxMagazineAmmo = 30;
-	FireRate = 600.0f; // 분당 600발 (자동 연사)
+	FireRate = 600.0f;
+
+	WeaponType = EWeaponType::WT_Rifle; // 추가: 라이플 타입 명시
 }

@@ -3,18 +3,20 @@
 #include "Kismet/KismetMathLibrary.h" 
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
+#include "PlayerCharacter.h" // 추가: OwningPlayer 사용을 위해
 
 AShotgun::AShotgun()
 {
-	Damage = 15.0f; // 펠릿 당 대미지
+	Damage = 15.0f;
 	MaxMagazineAmmo = 8;
-	FireRate = 0.0f;  // 반자동으로 설정 (AGunBase가 알아서 처리)
+	FireRate = 0.0f;
 
-	PelletsPerShot = 8; // 펠릿 8개
+	PelletsPerShot = 8;
 	SpreadAngle = 5.0f;
+
+	WeaponType = EWeaponType::WT_Shotgun; // 추가: 샷건 타입 명시
 }
 
-// 샷건의 핵심 로직: 다중 펠릿 트레이스
 void AShotgun::TraceFire()
 {
 	if (CurrentAmmo <= 0 || bIsReloading)
@@ -25,10 +27,26 @@ void AShotgun::TraceFire()
 
 	CurrentAmmo--;
 
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (!OwnerPawn) return;
-	AController* OwnerController = OwnerPawn->GetController();
+	// 변경: OwnerPawn 대신 캐시해둔 OwningPlayer 사용
+	if (!OwningPlayer) return;
+	AController* OwnerController = OwningPlayer->GetController();
 	if (!OwnerController) return;
+
+	// --- 추가: 샷건 이펙트 재생 (TraceFire가 한 번만 호출되므로 여기에 둬야 함) ---
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GunMesh, FName("Muzzle"));
+	}
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
+	if (FireMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
+	{
+		OwningPlayer->GetFPMesh()->GetAnimInstance()->Montage_Play(FireMontage);
+	}
+	// --- 이펙트 재생 끝 ---
+
 
 	FVector StartLocation;
 	FRotator CameraRotation;
@@ -39,9 +57,8 @@ void AShotgun::TraceFire()
 
 	for (int32 i = 0; i < PelletsPerShot; i++)
 	{
-		// KismetMathLibrary를 사용해 SpreadAngle 내에서 랜덤한 방향 벡터 생성
 		FVector SpreadVector = UKismetMathLibrary::RandomUnitVectorInConeInRadians(ShootDir, ConeHalfAngleRad);
-		FVector TraceEnd = StartLocation + (SpreadVector * 10000.f); // 사거리 10000
+		FVector TraceEnd = StartLocation + (SpreadVector * 10000.f);
 
 		FHitResult Hit;
 		FCollisionQueryParams QueryParams;
@@ -50,7 +67,6 @@ void AShotgun::TraceFire()
 
 		if (GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, TraceEnd, ECC_Visibility, QueryParams))
 		{
-			// 펠릿 당 대미지 적용
 			UGameplayStatics::ApplyPointDamage(
 				Hit.GetActor(),
 				Damage,
