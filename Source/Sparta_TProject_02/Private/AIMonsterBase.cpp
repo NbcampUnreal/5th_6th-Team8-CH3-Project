@@ -3,6 +3,11 @@
 #include "AIMonsterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "Sparta_TProject_02/Sparta_TProject_02Character.h"
+#include "AIController.h"
+#include "BrainComponent.h"
 
 AAIMonsterBase::AAIMonsterBase()
 {
@@ -44,16 +49,62 @@ float AAIMonsterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
         {
             Die();
         }
+        else
+        {
+            if (HitReactMontage)
+            {
+                PlayAnimMontage(HitReactMontage);
+            }
+        }
     }
 
     return ActualDamage;
 }
 
-// Attack 함수는 자식 클래스에서 구체적으로 구현할 것이므로 여기서는 비워두거나 기본 로그만 남깁니다.
 void AAIMonsterBase::Attack()
 {
     if (bIsDead) return;
-    UE_LOG(LogTemp, Warning, TEXT("Base Attack Called on %s. This should be overridden!"), *GetName());
+
+    FVector StartPoint = GetActorLocation();
+    FVector EndPoint = StartPoint + (GetActorForwardVector() * AttackRange);
+
+    FCollisionShape Sphere = FCollisionShape::MakeSphere(50.0f);
+
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(this);
+
+    TArray<FHitResult> HitResults;
+
+    bool bIsHit = GetWorld()->SweepMultiByChannel(
+        HitResults,
+        StartPoint,
+        EndPoint,
+        FQuat::Identity,
+        ECC_Pawn,
+        Sphere,
+        Params
+    );
+
+    if (bIsHit)
+    {
+        for (const auto& Hit : HitResults)
+        {
+            ASparta_TProject_02Character* PlayerCharacter = Cast<ASparta_TProject_02Character>(Hit.GetActor());
+            if (PlayerCharacter)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("%s's attack hit %s! Applying %f damage."), *GetName(), *PlayerCharacter->GetName(), AttackDamage);
+                
+                UGameplayStatics::ApplyDamage(
+                    PlayerCharacter,
+                    AttackDamage,
+                    GetController(),
+                    this,
+                    nullptr
+                );
+                break;
+            }
+        }
+    }
 }
 
 void AAIMonsterBase::Die()
@@ -63,18 +114,26 @@ void AAIMonsterBase::Die()
     bIsDead = true;
     UE_LOG(LogTemp, Warning, TEXT("%s has died."), *GetName());
 
-    // 충돌 비활성화
-    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    // 움직임 정지
-    GetCharacterMovement()->StopMovementImmediately();
-    // AI 로직 정지 (AIController가 있다면)
-    AController* AIController = GetController();
-    if (AIController)
+    AAIController* AIController = Cast<AAIController>(GetController());
+    if (AIController && AIController->GetBrainComponent())
     {
-        AIController->StopMovement();
+        AIController->GetBrainComponent()->StopLogic("Died");
     }
 
-    // TODO: 죽는 애니메이션 재생 및 일정 시간 후 액터 파괴 로직 추가
-    // 예: PlayAnimMontage(...)
-    // SetLifeSpan(5.0f); // 5초 뒤에 사라짐
+    // 충돌 비활성화
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    USkeletalMeshComponent* MyMesh = GetMesh();
+    if (MyMesh)
+    {
+        MyMesh->SetSimulatePhysics(true);
+        MyMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+    }
+
+    if (DeathMontage)
+    {
+        PlayAnimMontage(DeathMontage, 1.0f);
+    }
+
+    SetLifeSpan(5.0f);
 }

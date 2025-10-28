@@ -2,38 +2,58 @@
 
 
 #include "AIC_Monster.h"
-#include "Perception/AIPerceptionComponent.h"
-#include "Perception/AISenseConfig_Sight.h"
-#include "BehaviorTree/BlackboardComponent.h" // 블랙보드 사용을 위해 추가
-#include "Sparta_TProject_02/Sparta_TProject_02Character.h"
+#include "Perception/AIPerceptionComponent.h" // Perception 사용
+#include "Perception/AISenseConfig_Sight.h" // 시각 센서
+#include "Perception/AISenseConfig_Hearing.h" // 청각 센서
+#include "Perception/AISenseConfig_Damage.h" // 데미지 센서
+#include "BehaviorTree/BlackboardComponent.h" // 블랙보드 사용
+#include "Sparta_TProject_02/Sparta_TProject_02Character.h" 
+
 
 AAIC_Monster::AAIC_Monster()
 {
     // 1. Perception Component 생성
     AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
 
-    // 2. 시각 감각(Sight) 설정 객체 생성
+    // 2. 시각(Sight) 설정
     SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
     if (SightConfig)
     {
-        // 3. 시각 감각의 상세 설정
         SightConfig->SightRadius = 1500.0f;       // 시야 반경
         SightConfig->LoseSightRadius = 1600.0f;  // 시야를 잃는 반경 (더 크게 설정해야 안정적)
         SightConfig->PeripheralVisionAngleDegrees = 75.0f; // 시야각
         SightConfig->SetMaxAge(5.0f); // 감지 정보를 5초간 기억함
 
-        // 어떤 대상을 감지할지 설정 (적대적, 중립적, 우호적)
         SightConfig->DetectionByAffiliation.bDetectEnemies = true;
         SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
         SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
-        // 4. 생성한 시각 설정을 Perception Component에 적용
         AIPerceptionComponent->ConfigureSense(*SightConfig);
-        // 주된 감각을 시각으로 설정
-        AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
+
     }
 
-    // 5. 인지 정보가 업데이트될 때 호출할 함수를 바인딩(연결)
+    // 3. 청각(Hearing) 설정
+    UAISenseConfig_Hearing* HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
+    if (HearingConfig)
+    {
+        HearingConfig->HearingRange = 1500.0f;      // 청력 반경
+        HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
+        HearingConfig->DetectionByAffiliation.bDetectNeutrals = false;
+        HearingConfig->DetectionByAffiliation.bDetectFriendlies = false;
+        AIPerceptionComponent->ConfigureSense(*HearingConfig);
+    }
+
+    // 4. 촉각(Damage) 설정
+    UAISenseConfig_Damage* DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
+    if (DamageConfig)
+    {
+        AIPerceptionComponent->ConfigureSense(*DamageConfig);
+    }
+
+    // 5. 주된 감각을 시각으로 설정
+    AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
+
+    // 6. 인지 정보 업데이트 함수 바인딩
     AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AAIC_Monster::OnTargetPerceptionUpdated);
 }
 
@@ -42,7 +62,6 @@ void AAIC_Monster::OnPossess(APawn* InPawn)
     Super::OnPossess(InPawn);
 
     // 빙의 시 행동 트리 실행 (기존 로직)
-    // ... RunBehaviorTree ...
 }
 
 // 6. 인지 정보 업데이트 시 실행될 함수의 내용 구현

@@ -52,4 +52,10 @@ protected:
     // 죽었는지 확인하는 플래그
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI State")
     bool bIsDead;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI Combat")
+    class UAnimMontage* HitReactMontage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI Combat")
+    class UAnimMontage* DeathMontage;
 };
