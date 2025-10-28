@@ -19,6 +19,12 @@ AAIMonsterBase::AAIMonsterBase()
     AttackDamage = 10.0f;
     AttackRange = 150.0f;
     bIsDead = false;
+    bIsAttacking = false;
+
+    bUseControllerRotationYaw = true;
+    GetCharacterMovement()->bOrientRotationToMovement = false;
+    GetCharacterMovement()->bUseControllerDesiredRotation = true;
+    GetCharacterMovement()->RotationRate = FRotator(0.0f, 360.0f, 0.0f);
 }
 
 void AAIMonsterBase::BeginPlay()
