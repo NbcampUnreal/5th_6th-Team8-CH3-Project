@@ -48,6 +48,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AI Behavior")
     void Die();
 
+    bool bIsAttacking;
+
 protected:
     // 죽었는지 확인하는 플래그
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI State")
