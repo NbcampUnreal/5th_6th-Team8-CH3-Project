@@ -2,6 +2,7 @@
 
 
 #include "BTT_Attack.h"
+#include "AIC_Monster.h"
 #include "AIController.h"
 #include "AIMonsterBase.h"
 #include "Animation/AnimInstance.h"
@@ -21,13 +22,13 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 
 	MyOwnerComp = &OwnerComp;
 
-	AAIController* AIController = OwnerComp.GetAIOwner();
-	if (AIController == nullptr)
+	AAIC_Monster* MonsterController = Cast<AAIC_Monster>(OwnerComp.GetAIOwner());
+	if (MonsterController == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	AAIMonsterBase* Monster = Cast<AAIMonsterBase>(AIController->GetPawn());
+	AAIMonsterBase* Monster = Cast<AAIMonsterBase>(MonsterController->GetPawn());
 	if (Monster == nullptr)
 	{
 		return EBTNodeResult::Failed;
@@ -44,6 +45,8 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 		return EBTNodeResult::Failed;
 	}
 
+	MonsterController->AttackStartRotation = MonsterController->GetControlRotation();
+	Monster->bIsAttacking = true;
 	FOnMontageEnded MontageEndedDelegate;
 	MontageEndedDelegate.BindUObject(this, &UBTT_Attack::OnMontageEnded, &OwnerComp);
 
@@ -55,6 +58,16 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 
 void UBTT_Attack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted, UBehaviorTreeComponent* OwnerComp)
 {
+	AAIController* AIController = OwnerComp->GetAIOwner();
+	if (AIController)
+	{
+		AAIMonsterBase* Monster = Cast<AAIMonsterBase>(AIController->GetPawn());
+		if (Monster)
+		{
+			Monster->bIsAttacking = false;
+		}
+	}
+
 	if (bInterrupted)
 	{
 		FinishLatentTask(*OwnerComp, EBTNodeResult::Failed);
@@ -70,10 +83,14 @@ EBTNodeResult::Type UBTT_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, ui
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (AIController)
 	{
-		AAIMonsterBase* Monster = Cast<AAIMonsterBase>(AIController->GetPawn());
-		if (Monster && Monster->GetMesh() && Monster->GetMesh()->GetAnimInstance())
+		AAIMonsterBase * Monster = Cast<AAIMonsterBase>(AIController->GetPawn());
+		if (Monster)
 		{
-			Monster->GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, MontageToPlay);
+			Monster->bIsAttacking = false;
+			if (Monster->GetMesh() && Monster->GetMesh()->GetAnimInstance())
+			{
+				Monster->GetMesh()->GetAnimInstance()->Montage_Stop(0.1f, MontageToPlay);
+			}
 		}
 	}
 
