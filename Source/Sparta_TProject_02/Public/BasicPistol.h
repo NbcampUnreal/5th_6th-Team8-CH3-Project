@@ -4,10 +4,10 @@
 #include "BasicPistol.generated.h"
 
 UCLASS()
-class SPARTA_TPROJECT_02_API ABasicPistol : public AWeapon
+class UBasicPistol : public UWeapon
 {
 	GENERATED_BODY()
 	
 public:
-	ABasicPistol();
+	UBasicPistol();
 };

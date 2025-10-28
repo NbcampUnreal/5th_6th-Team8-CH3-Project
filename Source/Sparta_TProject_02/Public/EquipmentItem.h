@@ -4,7 +4,7 @@
 #include "EquipmentItem.generated.h"
 
 UCLASS()
-class SPARTA_TPROJECT_02_API AEquipmentItem : public AItem
+class UEquipmentItem : public UItem
 {
 	GENERATED_BODY()
 	

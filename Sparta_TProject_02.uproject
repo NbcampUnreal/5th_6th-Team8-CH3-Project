@@ -9,8 +9,7 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine",
-				"UMG"
+				"Engine"
 			]
 		}
 	],
@@ -21,14 +20,6 @@
 			"TargetAllowList": [
 				"Editor"
 			]
-		},
-		{
-			"Name": "PCG",
-			"Enabled": true
-		},
-		{
-			"Name": "PCGGeometryScriptInterop",
-			"Enabled": true
 		}
 	]
 }

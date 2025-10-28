@@ -1,6 +1,7 @@
 #include "Weapon.h"
 
-AWeapon::AWeapon()
+UWeapon::UWeapon()
 {
-	damage = 0;
+	Damage = 0;
+	ItemType = "Weapon";
 }

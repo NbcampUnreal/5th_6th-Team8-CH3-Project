@@ -4,12 +4,12 @@
 #include "Weapon.generated.h"
 
 UCLASS()
-class SPARTA_TPROJECT_02_API AWeapon : public AEquipmentItem
+class UWeapon : public UEquipmentItem
 {
 	GENERATED_BODY()
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable")
-	int damage;
+	int Damage;
 public:
-	AWeapon();
+	UWeapon();
 };

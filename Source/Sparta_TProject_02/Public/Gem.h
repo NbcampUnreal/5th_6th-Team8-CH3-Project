@@ -4,8 +4,10 @@
 #include "Gem.generated.h"
 
 UCLASS()
-class SPARTA_TPROJECT_02_API AGem : public AEquipmentItem
+class UGem : public UEquipmentItem
 {
 	GENERATED_BODY()
 	
+public:
+	UGem();
 };

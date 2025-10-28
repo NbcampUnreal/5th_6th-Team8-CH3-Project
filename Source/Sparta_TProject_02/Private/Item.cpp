@@ -1,22 +1,34 @@
 #include "Item.h"
 
-AItem::AItem()
+UItem::UItem()
 {
-	StaticMeshCompoent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	StaticMeshCompoent->SetupAttachment(RootComponent);
-
- 	PrimaryActorTick.bCanEverTick = false;
-	CurrentStack = 1;
-	MaxStack = 1;
+	ItemName = "";
+	ItemType = "Item";
+	ItemPrice = 1;
+	bIsStackable = false;
 }
 
-void AItem::BeginPlay()
+FName UItem::GetItemName()
 {
-	Super::BeginPlay();
-	
+	return ItemName;
 }
 
-void AItem::Use()
+FName UItem::GetItemType()
+{
+	return ItemType;
+}
+
+int32 UItem::GetItemPrice()
+{
+	return ItemPrice;
+}
+
+bool UItem::IsStackable()
+{
+	return bIsStackable;
+}
+
+void UItem::Use()
 {
 
 }
