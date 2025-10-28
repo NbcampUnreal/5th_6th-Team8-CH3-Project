@@ -18,6 +18,10 @@ class SPARTA_TPROJECT_02_API AAIC_Monster : public AAIController
 public:
     AAIC_Monster();
 
+    virtual void Tick(float DeltaSeconds) override;
+    
+    FRotator AttackStartRotation;
+
 protected:
     virtual void OnPossess(APawn* InPawn) override;
 
