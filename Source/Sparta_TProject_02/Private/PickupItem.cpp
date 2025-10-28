@@ -61,7 +61,7 @@ void APickupItem::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 				{
 					if (Item)
 					{
-						Player->Inven->AddItem(Item);
+						//Player->Inven->AddItem(Item);
 						Destroy();
 						GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("BasicPistol"));
 					}
