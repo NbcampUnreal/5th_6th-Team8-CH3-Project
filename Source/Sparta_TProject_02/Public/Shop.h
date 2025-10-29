@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Inventory.h"
 #include "Item.h"
+#include "ShopItemData.h"
 #include "Shop.generated.h"
 
 class Item;
@@ -60,4 +61,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void AddItemToInventory(UItem* SelectedItem, ACharacter* PlayerCharacter);*/
 
+private:
+	UPROPERTY(EditAnywhere, Category = "Shop Data")
+	TArray<FShopItemData> AvailableItems;
 };

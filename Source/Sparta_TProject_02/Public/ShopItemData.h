@@ -17,7 +17,7 @@ struct FRecipeIngredient
 };
 
 USTRUCT(BlueprintType)
-struct FItemData
+struct FShopItemData
 {
 	GENERATED_BODY()
 

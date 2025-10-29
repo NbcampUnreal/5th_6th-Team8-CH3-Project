@@ -4,6 +4,7 @@
 #include "Shop.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "ShopUserWidget.h"
 
 // Sets default values
 AShop::AShop()
@@ -56,6 +57,13 @@ void AShop::OpenShop()
 	{
 		ShopWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 		ShopVisible = true;
+
+		UShopUserWidget* ShopWidget = Cast<UShopUserWidget>(ShopWidgetInstance);
+		if (ShopWidget)
+		{
+			ShopWidget->PopulateItemList(AvailableItems);
+		}
+
 		if (PC)
 		{
 			PC->bShowMouseCursor = true;
