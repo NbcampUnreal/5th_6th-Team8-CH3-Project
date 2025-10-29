@@ -25,7 +25,9 @@ private:
     UPROPERTY(meta = (BindWidget))
     UButton* ExitButton;
 
-    UFUNCTION()
+
+
+    UFUNCTION(BlueprintCallable)
     void HandleStartClicked();
 
     UFUNCTION()
