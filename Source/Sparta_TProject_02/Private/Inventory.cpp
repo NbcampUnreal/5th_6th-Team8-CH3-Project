@@ -1,9 +1,11 @@
 #include "Inventory.h"
 #include "Item.h"
+#include "MyGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 UInventory::UInventory()
 {
-	MaxSize = 5;
+	MaxSize = 16;
 }
 
 TArray<UItem*> UInventory::GetInventory() const
@@ -40,15 +42,18 @@ bool UInventory::SetMaxSize(int32 NewMaxSize)
 bool UInventory::AddItem(UItem* Item)
 {
 	int32 Size = ItemArray.Num();
-	if (Size >= MaxSize)
-	{
-		return false;
-	}
+	if (Size >= MaxSize) return false;
+
+	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
+	
+	if (!GameInstance) return false;
+	
+	GameInstance->AddItemButton();
+
 	ItemArray.Add(Item);
 	++Size;
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, 
 		FString::Printf(TEXT("%d / %d"), Size, MaxSize));
-	
 	return true;
 }
 

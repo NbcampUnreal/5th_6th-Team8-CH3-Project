@@ -1,8 +1,9 @@
 #include "PickupItem.h"
 #include "Components/SphereComponent.h"
-#include "../Sparta_TProject_02Character.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+#include "Inventory.h"
+#include "MyGameInstance.h"
 
 APickupItem::APickupItem()
 {
@@ -51,22 +52,19 @@ void APickupItem::Bobbing()
 
 void APickupItem::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor)
-	{
-		if (APawn* PawnActor = Cast<APawn>(OtherActor))
-		{
-			if (ACharacter* Character = Cast<ACharacter>(PawnActor))
-			{
-				if (ASparta_TProject_02Character* Player = Cast<ASparta_TProject_02Character>(Character))
-				{
-					if (Item)
-					{
-						//Player->Inven->AddItem(Item);
-						Destroy();
-						GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("BasicPistol"));
-					}
-				}
-			}
-		}
-	}
+	if (!OtherActor) return;
+
+	APawn* PawnActor = Cast<APawn>(OtherActor);
+	if (!PawnActor) return;
+
+	//ACharacter* Character = Cast<ACharacter>(PawnActor);
+	//if (!Character) return;
+
+	if (!Item) return;
+
+	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
+	if (!GameInstance) return;
+	GameInstance->Inventory->AddItem(Item);
+	Destroy();
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("BasicPistol"));
 }
