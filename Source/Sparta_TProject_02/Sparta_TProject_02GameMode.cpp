@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "Sparta_TProject_02GameMode.h"
 #include "Sparta_TProject_02Character.h"
 #include "UObject/ConstructorHelpers.h"
