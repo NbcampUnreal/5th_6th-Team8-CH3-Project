@@ -1,4 +1,4 @@
-#include "PlayerCharacter.h"
+ï»¿#include "PlayerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,6 +11,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Actor.h"
+
+//ìƒì UI
+#include "Kismet/GameplayStatics.h"
+#include "Shop.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -57,14 +61,14 @@ APlayerCharacter::APlayerCharacter()
 	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 60);
 
 	CurrentWeaponIndex = 0;
-	CurrentWeapon = nullptr; // º¯°æ: CurrentGun -> CurrentWeapon
+	CurrentWeapon = nullptr; // ë³€ê²½: CurrentGun -> CurrentWeapon
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// º¯°æ: ´ÜÀÏ ÃÑ±â ½ºÆù¿¡¼­ ¹è¿­ ¼øÈ¸ ½ºÆùÀ¸·Î º¯°æ
+	// ë³€ê²½: ë‹¨ì¼ ì´ê¸° ìŠ¤í°ì—ì„œ ë°°ì—´ ìˆœíšŒ ìŠ¤í°ìœ¼ë¡œ ë³€ê²½
 	if (StartWeaponClasses.Num() > 0)
 	{
 		FActorSpawnParameters SpawnParams;
@@ -85,13 +89,46 @@ void APlayerCharacter::BeginPlay()
 					);
 
 					Weapons.Add(NewWeapon);
-					// GunBase¿¡ Ãß°¡µÈ ÇÔ¼ö: ½ÃÀÛ ½Ã ¸ğµç ¹«±â´Â ¼û±è
+					// GunBaseì— ì¶”ê°€ëœ í•¨ìˆ˜: ì‹œì‘ ì‹œ ëª¨ë“  ë¬´ê¸°ëŠ” ìˆ¨ê¹€
 					NewWeapon->SetWeaponHidden(true);
 				}
 			}
 		}
 
 		EquipWeapon(0);
+	}
+
+	//ìƒì UI
+	//ìºë¦­í„°ê°€ ì›”ë“œì— ìŠ¤í°ë˜ì–´ ìˆëŠ” AShop í´ë˜ìŠ¤ì˜ ê°ì²´ë¥¼ ì°¾ì•„ì„œ ì €ì¥ (Shop ì•¡í„°ëŠ” 1ê°œë§Œ ì¡´ì¬ í•  ê±°ë¼ì„œ í•´ë‹¹ ë°©ë²•ì„ ì±„íƒí•¨)
+	if (!ShopActor)
+	{
+		TArray<AActor*> FoundShops;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShop::StaticClass(), FoundShops);
+		if (FoundShops.Num() > 0)
+		{
+			ShopActor = Cast<AShop>(FoundShops[0]);
+			if (APlayerController* MyPlayerController = Cast<APlayerController>(Controller))
+			{
+				ShopActor->SetShopPlayerController(MyPlayerController);
+			}
+		}
+	}
+}
+
+//Open Shop UI
+void APlayerCharacter::OpenShop()
+{
+	if (ShopActor)
+	{
+		ShopActor->OpenShop();
+	}
+}
+//Close Shop UI
+void APlayerCharacter::CloseShop()
+{
+	if (ShopActor)
+	{
+		ShopActor->CloseShop();
 	}
 }
 
@@ -139,7 +176,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			EnhancedInput->BindAction(ReloadAction, ETriggerEvent::Started, this, &APlayerCharacter::StartReload);
 		}
 
-		// Ãß°¡: ¹«±â ±³Ã¼ ÀÎÇ² ¹ÙÀÎµù
+		// ì¶”ê°€: ë¬´ê¸° êµì²´ ì¸í’‹ ë°”ì¸ë”©
 		if (NextWeaponAction)
 		{
 			EnhancedInput->BindAction(NextWeaponAction, ETriggerEvent::Started, this, &APlayerCharacter::NextWeapon);
@@ -219,7 +256,7 @@ void APlayerCharacter::StopCrouch(const FInputActionValue& value)
 
 void APlayerCharacter::StartShoot(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // º¯°æ: CurrentGun -> CurrentWeapon
+	if (CurrentWeapon) // ë³€ê²½: CurrentGun -> CurrentWeapon
 	{
 		CurrentWeapon->StartFire();
 	}
@@ -227,7 +264,7 @@ void APlayerCharacter::StartShoot(const FInputActionValue& value)
 
 void APlayerCharacter::StopShoot(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // º¯°æ: CurrentGun -> CurrentWeapon
+	if (CurrentWeapon) // ë³€ê²½: CurrentGun -> CurrentWeapon
 	{
 		CurrentWeapon->StopFire();
 	}
@@ -235,25 +272,25 @@ void APlayerCharacter::StopShoot(const FInputActionValue& value)
 
 void APlayerCharacter::StartReload(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // º¯°æ: CurrentGun -> CurrentWeapon
+	if (CurrentWeapon) // ë³€ê²½: CurrentGun -> CurrentWeapon
 	{
 		CurrentWeapon->Reload();
 	}
 }
 
-// Ãß°¡: ´ÙÀ½ ¹«±â ÇÔ¼ö
+// ì¶”ê°€: ë‹¤ìŒ ë¬´ê¸° í•¨ìˆ˜
 void APlayerCharacter::NextWeapon(const FInputActionValue& value)
 {
-	if (Weapons.Num() <= 1) return; // ¹«±â°¡ ÇÏ³ª ÀÌÇÏ¸é ±³Ã¼ ¾È ÇÔ
+	if (Weapons.Num() <= 1) return; // ë¬´ê¸°ê°€ í•˜ë‚˜ ì´í•˜ë©´ êµì²´ ì•ˆ í•¨
 
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
 	EquipWeapon(CurrentWeaponIndex);
 }
 
-// Ãß°¡: ÀÌÀü ¹«±â ÇÔ¼ö
+// ì¶”ê°€: ì´ì „ ë¬´ê¸° í•¨ìˆ˜
 void APlayerCharacter::PrevWeapon(const FInputActionValue& value)
 {
-	if (Weapons.Num() <= 1) return; // ¹«±â°¡ ÇÏ³ª ÀÌÇÏ¸é ±³Ã¼ ¾È ÇÔ
+	if (Weapons.Num() <= 1) return; // ë¬´ê¸°ê°€ í•˜ë‚˜ ì´í•˜ë©´ êµì²´ ì•ˆ í•¨
 
 	CurrentWeaponIndex--;
 	if (CurrentWeaponIndex < 0)
@@ -263,18 +300,18 @@ void APlayerCharacter::PrevWeapon(const FInputActionValue& value)
 	EquipWeapon(CurrentWeaponIndex);
 }
 
-// Ãß°¡: ¹«±â ÀåÂø ÇÔ¼ö
+// ì¶”ê°€: ë¬´ê¸° ì¥ì°© í•¨ìˆ˜
 void APlayerCharacter::EquipWeapon(int32 Index)
 {
 	if (!Weapons.IsValidIndex(Index)) return;
 
-	// ±âÁ¸ ¹«±â ¼û±è
+	// ê¸°ì¡´ ë¬´ê¸° ìˆ¨ê¹€
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->SetWeaponHidden(true);
 	}
 
-	// »õ ¹«±â ÀåÂø ¹× Ç¥½Ã
+	// ìƒˆ ë¬´ê¸° ì¥ì°© ë° í‘œì‹œ
 	CurrentWeapon = Weapons[Index];
 	CurrentWeapon->SetWeaponHidden(false);
 	CurrentWeaponIndex = Index;

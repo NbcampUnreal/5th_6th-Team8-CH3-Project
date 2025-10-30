@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -13,6 +13,8 @@ class UInputMappingContext;
 struct FInputActionValue;
 class AGunBase;
 enum class EWeaponType : uint8; 
+
+class AShop;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
@@ -73,18 +75,18 @@ protected:
 
 	float SprintSpeed;
 
-	// º¯°æ: ´ÜÀÏ ÃÑ±â Å¬·¡½º¿¡¼­ ½ÃÀÛ ¹«±â Å¬·¡½º ¹è¿­·Î º¯°æ
+	// ë³€ê²½: ë‹¨ì¼ ì´ê¸° í´ë˜ìŠ¤ì—ì„œ ì‹œì‘ ë¬´ê¸° í´ë˜ìŠ¤ ë°°ì—´ë¡œ ë³€ê²½
 	UPROPERTY(EditDefaultsOnly, Category = "Gun")
 	TArray<TSubclassOf<AGunBase>> StartWeaponClasses;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Gun")
 	AGunBase* CurrentWeapon;
 
-	// Ãß°¡: ½ºÆùµÈ ¸ğµç ¹«±â¸¦ º¸°üÇÒ ¹è¿­
+	// ì¶”ê°€: ìŠ¤í°ëœ ëª¨ë“  ë¬´ê¸°ë¥¼ ë³´ê´€í•  ë°°ì—´
 	UPROPERTY(VisibleInstanceOnly, Category = "Gun")
 	TArray<AGunBase*> Weapons;
 
-	// Ãß°¡: ÇöÀç µé°í ÀÖ´Â ¹«±âÀÇ ÀÎµ¦½º
+	// ì¶”ê°€: í˜„ì¬ ë“¤ê³  ìˆëŠ” ë¬´ê¸°ì˜ ì¸ë±ìŠ¤
 	int32 CurrentWeaponIndex;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
@@ -93,19 +95,30 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
 	TMap<EWeaponType, int32> MaxCarryAmmo;
 
-	// ¼öÁ¤: AGunBase¿¡¼­ Á¢±ÙÇØ¾ß ÇÏ¹Ç·Î protected¿¡¼­ publicÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.
+	// ìˆ˜ì •: AGunBaseì—ì„œ ì ‘ê·¼í•´ì•¼ í•˜ë¯€ë¡œ protectedì—ì„œ publicìœ¼ë¡œ ì´ë™í•©ë‹ˆë‹¤.
 public:
-	// Åº¾à Ãß°¡ (¾ÆÀÌÅÛ È¹µæ, »óÁ¡ ±¸¸Å µî)
+	// íƒ„ì•½ ì¶”ê°€ (ì•„ì´í…œ íšë“, ìƒì  êµ¬ë§¤ ë“±)
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void AddAmmo(EWeaponType WeaponType, int32 Amount);
 
-	// Åº¾à »ç¿ë (ÀçÀåÀü ½Ã)
+	// íƒ„ì•½ ì‚¬ìš© (ì¬ì¥ì „ ì‹œ)
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	int32 ConsumeAmmoForReload(EWeaponType WeaponType, int32 RequestedAmount);
 
-	// ÇöÀç ¿¹ºñÅº¾à °¡Á®¿À±â
+	// í˜„ì¬ ì˜ˆë¹„íƒ„ì•½ ê°€ì ¸ì˜¤ê¸°
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	int32 GetReserveAmmo(EWeaponType WeaponType) const;
+
+
+	//ìƒì UI
+	//ShopUI Properties
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+	AShop* ShopActor;
+
+	UFUNCTION(BlueprintCallable, Category = "Shop")
+	void OpenShop();
+	UFUNCTION(BlueprintCallable, Category = "Shop")
+	void CloseShop();
 
 protected: 
 	void Move(const FInputActionValue& value);
@@ -124,7 +137,7 @@ protected:
 	void StopShoot(const FInputActionValue& value);
 	void StartReload(const FInputActionValue& value);
 
-	// Ãß°¡: ¹«±â ±³Ã¼ ÇÔ¼ö
+	// ì¶”ê°€: ë¬´ê¸° êµì²´ í•¨ìˆ˜
 	void NextWeapon(const FInputActionValue& value);
 	void PrevWeapon(const FInputActionValue& value);
 	void EquipWeapon(int32 Index);

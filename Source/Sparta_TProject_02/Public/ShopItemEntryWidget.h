@@ -10,9 +10,8 @@
 #include "ShopItemData.h"
 #include "ShopItemEntryWidget.generated.h"
 
-/**
- * 
- */
+class UButton;
+
 UCLASS()
 class SPARTA_TPROJECT_02_API UShopItemEntryWidget : public UUserWidget
 {
@@ -27,14 +26,24 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnItemHoveredSignature OnItemHovered;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemCraftedSignature, const FShopItemData&, ItemInfo);
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnItemCraftedSignature OnItemCrafted;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UButton* ItemButton; // WBP_ShopItemEntry에서 버튼의 이름과 일치해야 함
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* CraftButton;
 
 	virtual void NativeConstruct() override;
 
 	UFUNCTION()
 	void HandleItemButtonHovered();
+
+	UFUNCTION()
+	void HandleCraftButtonClicked();
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "ShopUI")

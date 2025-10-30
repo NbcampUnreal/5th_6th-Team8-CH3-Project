@@ -1,8 +1,7 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "ItemRecipe.h"
 #include "ShopItemData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -33,4 +32,10 @@ struct FShopItemData
 	class UTexture2D* IconTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShopItemData")
 	TArray<FRecipeIngredient> Recipe;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsCraftable = false;	//Buy 아이템인지, Craft 아이템인지 분별용 bool
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRecipe CraftingRecipe;		//제작에 필요한 재료 목록
 };
