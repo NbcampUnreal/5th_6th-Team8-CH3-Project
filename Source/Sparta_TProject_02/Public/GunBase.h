@@ -111,6 +111,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Animation")
 	UAnimMontage* ReloadMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|Effects")
+	USoundBase* ReloadSound;
+
 	// Timer handles
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ReloadTimerHandle;

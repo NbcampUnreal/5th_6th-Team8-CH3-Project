@@ -88,10 +88,33 @@ void AGunBase::Reload()
     StopFire();
     OnStartReload.Broadcast();
 
+    // 1. 리로드 시작 사운드 재생
+    if (ReloadSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, GetActorLocation());
+    }
+
     float ReloadTime = 3.0f;
+
+    // 2. 리로드 몽타주 재생 및 재생 시간으로 타이머 설정
+    if (ReloadMontage && OwningPlayer && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
+    {
+        // 1인칭 메시의 애니메이션 인스턴스를 가져와 몽타주를 재생
+        UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
+        FPAnimInstance->Montage_Play(ReloadMontage, 1.0f);
+
+        // 몽타주의 길이로 ReloadTime을 설정하여 애니메이션과 타이머를 동기화
+        ReloadTime = ReloadMontage->GetPlayLength();
+    }
+
     // << [수정 4] OwningPlayer->GetFPMesh() 호출을 통해 FP_Mesh에 접근합니다.
     if (ReloadMontage && OwningPlayer && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
     {
+        // 1인칭 메시의 애니메이션 인스턴스를 가져옵니다.
+        UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
+
+        // 몽타주를 재생하고, 그 재생 시간으로 ReloadTime을 설정합니다.
+        FPAnimInstance->Montage_Play(ReloadMontage, 1.0f); // 1.0f는 재생 속도
         ReloadTime = ReloadMontage->GetPlayLength();
     }
 
@@ -154,8 +177,12 @@ void AGunBase::TraceFire()
 
     if (FireMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
     {
-        // Optionally play via character delegate; but keep here for safety if not bound
-        //OwningPlayer->GetFPMesh()->GetAnimInstance()->Montage_Play(FireMontage);
+        // 1인칭 메시의 애니메이션 인스턴스를 가져옵니다.
+        UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
+
+        // 몽타주를 재생합니다.
+        // GetPlayLength()는 몽타주의 재생 시간을 반환합니다. 
+        FPAnimInstance->Montage_Play(FireMontage, 1.0f);
     }
 
     FVector StartLocation;

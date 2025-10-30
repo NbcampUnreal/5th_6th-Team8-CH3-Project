@@ -74,10 +74,31 @@ void APlayerCharacter::BeginPlay()
 				AGunBase* NewWeapon = GetWorld()->SpawnActor<AGunBase>(WeaponClass, SpawnParams);
 				if (NewWeapon)
 				{
+					// --- 이 부분을 수정 ---
+					FName AttachSocketName = TEXT("GripPoint"); // 기본값
+
+					// 1. 무기의 타입을 가져와서
+					EWeaponType Type = NewWeapon->GetWeaponType(); // AGunBase에 GetWeaponType() 함수가 있다고 가정
+
+					// 2. 타입에 따라 소켓 이름을 결정
+					if (Type == EWeaponType::WT_Rifle)
+					{
+						AttachSocketName = TEXT("GripPoint_Rifle");
+					}
+					else if (Type == EWeaponType::WT_Shotgun)
+					{
+						AttachSocketName = TEXT("GripPoint_Shotgun");
+					}
+					else if (Type == EWeaponType::WT_Pistol)
+					{
+						AttachSocketName = TEXT("GripPoint_Pistol");
+					}
+
+					// 3. 결정된 소켓 이름으로 부착
 					NewWeapon->AttachToComponent(
 						FP_Mesh,
 						FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-						FName("GripPoint")
+						AttachSocketName // <-- 수정된 소켓 이름 사용
 					);
 
 					NewWeapon->SetWeaponHidden(true);
