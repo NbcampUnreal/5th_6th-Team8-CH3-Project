@@ -13,6 +13,11 @@ TArray<UItem*> UInventory::GetInventory() const
 	return ItemArray;
 }
 
+UItem* UInventory::GetItem(int32 index) const
+{
+	return ItemArray[index];
+}
+
 int32 UInventory::GetCurrentSize() const
 {
 	return ItemArray.Num();
@@ -48,7 +53,7 @@ bool UInventory::AddItem(UItem* Item)
 	
 	if (!GameInstance) return false;
 	
-	GameInstance->AddItemButton();
+	GameInstance->AddItemButton(Item);
 
 	ItemArray.Add(Item);
 	++Size;
