@@ -1,6 +1,8 @@
 #include "Inventory.h"
 #include "Item.h"
+#include "MaterialItem.h"
 #include "MyGameInstance.h"
+#include "InventoryWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 UInventory::UInventory()
@@ -47,18 +49,45 @@ bool UInventory::SetMaxSize(int32 NewMaxSize)
 bool UInventory::AddItem(UItem* Item)
 {
 	int32 Size = ItemArray.Num();
-	if (Size >= MaxSize) return false;
 
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
-	
 	if (!GameInstance) return false;
-	
-	GameInstance->AddItemButton(Item);
+
+	if (UMaterialItem* StackableItem = Cast<UMaterialItem>(Item))
+	{
+		if (StackableItem->IsStackable() && StackableItem->GetItemMaxStack() > 1)
+		{
+			FName ItemName = Item->GetItemName();
+			bool bSuccess = false;
+			for (UItem* Element : ItemArray)
+			{
+				if (Element->GetItemName() == ItemName)
+				{
+					if (UMaterialItem* MTElement = Cast<UMaterialItem>(Element))
+					{
+						if (MTElement->SetItemStack(MTElement->GetItemCurrentStack() + 1)) 
+						{
+							bSuccess = true;
+							break;
+						}
+					}
+				}
+			}
+			if (bSuccess)
+			{
+				GameInstance->GetInventoryWidget()->RefreshWidget();
+				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
+				return true;
+			}
+		}
+	}
+	if (Size >= MaxSize) return false;
 
 	ItemArray.Add(Item);
 	++Size;
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, 
-		FString::Printf(TEXT("%d / %d"), Size, MaxSize));
+	GameInstance->GetInventoryWidget()->RefreshWidget();
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 	return true;
 }
 

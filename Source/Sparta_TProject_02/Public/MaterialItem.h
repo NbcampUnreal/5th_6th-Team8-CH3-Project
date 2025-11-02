@@ -13,6 +13,7 @@ protected:
 	int32 MaxStack;
 public:
 	UMaterialItem();
-	virtual int32 GetCurrentStack();
+	virtual int32 GetItemCurrentStack();
 	virtual int32 GetItemMaxStack();
+	bool SetItemStack(int32 Value);
 };

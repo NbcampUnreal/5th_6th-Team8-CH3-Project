@@ -31,7 +31,7 @@ void APlayerCharacterController::BeginPlay()
 	UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance());
 	if (MyGameInstance)
 	{
-		MyGameInstance->WidgetInstall();
+		MyGameInstance->SetupInventoryWidget(this);
 	}
 }
 

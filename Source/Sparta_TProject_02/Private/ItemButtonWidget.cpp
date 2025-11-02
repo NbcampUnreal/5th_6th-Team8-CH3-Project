@@ -7,6 +7,16 @@ void UItemButtonWidget::NativeConstruct()
    Super::NativeConstruct();
 }
 
+void UItemButtonWidget::HandleButtonHovered()
+{
+   OnHovered.Broadcast(ButtonData);
+}
+
+void UItemButtonWidget::HandleButtonClicked()
+{
+   OnClicked.Broadcast(ButtonData);
+}
+
 UButton* UItemButtonWidget::GetButton() const
 {
    return Button;
@@ -27,14 +37,17 @@ void UItemButtonWidget::SetButtonData(FItemButtonData NewButtonData)
    ButtonData = NewButtonData;
 }
 
-void UItemButtonWidget::ButtonBinding()
+void UItemButtonWidget::SetupHoverBinding()
 {
    if (Button)
    {
       Button->OnHovered.AddDynamic(this, &UItemButtonWidget::HandleButtonHovered);
    }
 }
-void UItemButtonWidget::HandleButtonHovered()
+void UItemButtonWidget::SetupClickBinding()
 {
-   OnHovered.Broadcast(ButtonData);
+   if (Button)
+   {
+      Button->OnClicked.AddDynamic(this, &UItemButtonWidget::HandleButtonClicked);
+   }
 }
