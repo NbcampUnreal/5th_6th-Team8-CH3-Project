@@ -44,9 +44,17 @@ void AGunBase::StartFire()
 {
     if (bIsReloading) return;
 
-    // if already firing via timer, ignore
+    // [해결책 2: 빈 탄창 발사]
+    // 발사 로직을 시작하기 전, 총알이 있는지 가장 먼저 확인합니다.
+    if (CurrentAmmo <= 0)
+    {
+        return;
+    }
+    // ------------------------------------
+
     if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle)) return;
 
+    // (이제 이 코드는 총알이 1발 이상 있을 때만 실행됩니다)
     OnStartFire.Broadcast();
 
     if (FireRate <= 0.f)
@@ -156,6 +164,7 @@ void AGunBase::TraceFire()
 
     CurrentAmmo--;
 
+
     if (!OwningPlayer)
     {
         OwningPlayer = Cast<APlayerCharacter>(GetOwner());
@@ -182,6 +191,12 @@ void AGunBase::TraceFire()
 
         // 몽타주를 재생합니다.
         // GetPlayLength()는 몽타주의 재생 시간을 반환합니다. 
+        FPAnimInstance->Montage_Play(FireMontage, 1.0f);
+    }
+
+    if (FireMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
+    {
+        UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
         FPAnimInstance->Montage_Play(FireMontage, 1.0f);
     }
 

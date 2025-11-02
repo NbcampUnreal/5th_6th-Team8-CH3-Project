@@ -39,6 +39,7 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsAiming = Player->IsAiming();
 	bIsFiring = Player->IsFiring(); // << [수정 1] PlayerCharacter에서 가져온 bIsFiring 상태를 업데이트합니다.
 
+
 	if (Player->GetCurrentWeapon())
 	{
 		bIsReloading = Player->GetCurrentWeapon()->IsReloading();

@@ -40,6 +40,12 @@ void AShotgun::TraceFire()
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
+	if (FireMontage && Player->GetFPMesh() && Player->GetFPMesh()->GetAnimInstance())
+	{
+		UAnimInstance* FPAnimInstance = Player->GetFPMesh()->GetAnimInstance();
+		FPAnimInstance->Montage_Play(FireMontage, 1.0f);
+	}
+
 	FVector StartLocation;
 	FRotator CameraRotation;
 	OwnerController->GetPlayerViewPoint(StartLocation, CameraRotation);

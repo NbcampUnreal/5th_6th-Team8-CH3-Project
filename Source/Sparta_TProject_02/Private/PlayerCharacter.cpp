@@ -204,7 +204,19 @@ void APlayerCharacter::StopCrouch(const FInputActionValue& value) { UnCrouch(); 
 
 void APlayerCharacter::StartShoot(const FInputActionValue& value)
 {
-	if (CurrentWeapon) CurrentWeapon->StartFire();
+	if (bWantsToSprint)
+	{
+		bWantsToSprint = false;
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+		}
+	}
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->StartFire();
+	}
 }
 void APlayerCharacter::StopShoot(const FInputActionValue& value)
 {
@@ -223,6 +235,12 @@ void APlayerCharacter::EquipPistol(const FInputActionValue& value) { EquipWeapon
 
 void APlayerCharacter::EquipWeaponByType(EWeaponType TypeToEquip)
 {
+	
+	if (CurrentWeapon && CurrentWeapon->IsReloading())
+	{
+		return;
+	}
+
 	if (CurrentWeapon && CurrentWeapon->GetWeaponType() == TypeToEquip) return;
 
 	for (int32 i = 0; i < Weapons.Num(); ++i)
@@ -237,6 +255,10 @@ void APlayerCharacter::EquipWeaponByType(EWeaponType TypeToEquip)
 
 void APlayerCharacter::EquipWeapon(int32 Index)
 {
+	if (CurrentWeapon && CurrentWeapon->IsReloading())
+	{
+		return;
+	}
 	if (!Weapons.IsValidIndex(Index) || Weapons[Index] == CurrentWeapon) return;
 
 	if (CurrentWeapon)
@@ -293,14 +315,6 @@ int32 APlayerCharacter::GetReserveAmmo(EWeaponType WeaponType) const
 void APlayerCharacter::OnWeaponStartFire()
 {
 	bIsFiring = true; // << [수정 1] 발사 상태 업데이트
-	if (!CurrentWeapon) return;
-	if (UAnimInstance* Anim = FP_Mesh->GetAnimInstance())
-	{
-		if (UAnimMontage* M = CurrentWeapon->GetFireMontage())
-		{
-			Anim->Montage_Play(M);
-		}
-	}
 }
 
 void APlayerCharacter::OnWeaponStopFire()
