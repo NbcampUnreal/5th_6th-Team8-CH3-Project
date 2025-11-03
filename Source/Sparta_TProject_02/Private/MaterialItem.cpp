@@ -7,7 +7,7 @@ UMaterialItem::UMaterialItem()
 	ItemType = "Material";
 }
 
-int32 UMaterialItem::GetCurrentStack()
+int32 UMaterialItem::GetItemCurrentStack()
 {
 	return CurrentStack;
 }
@@ -17,7 +17,12 @@ int32 UMaterialItem::GetItemMaxStack()
 	return MaxStack;
 }
 
-void UMaterialItem::SetCurrentStack(int32 NewStackAmount)
+bool UMaterialItem::SetItemStack(int32 Value)
 {
-	CurrentStack = NewStackAmount;
+	if (Value <= MaxStack)
+	{
+		CurrentStack = Value;
+		return true;
+	}
+	return false;
 }

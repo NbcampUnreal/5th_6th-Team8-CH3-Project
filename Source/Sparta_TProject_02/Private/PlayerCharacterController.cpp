@@ -1,4 +1,4 @@
-#include "PlayerCharacterController.h"
+﻿#include "PlayerCharacterController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -31,7 +31,7 @@ void APlayerCharacterController::BeginPlay()
 	UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance());
 	if (MyGameInstance)
 	{
-		MyGameInstance->WidgetInstall();
+		MyGameInstance->SetupInventoryWidget(this);
 	}
 }
 

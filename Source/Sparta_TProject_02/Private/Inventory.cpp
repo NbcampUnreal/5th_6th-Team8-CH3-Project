@@ -1,10 +1,11 @@
 ﻿#include "Inventory.h"
 #include "Item.h"
+#include "MaterialItem.h"
 #include "MyGameInstance.h"
+#include "InventoryWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 //ShopUI
-#include "MaterialItem.h"
 #include "UObject/SoftObjectPtr.h"
 #include "UObject/NoExportTypes.h"
 
@@ -52,18 +53,45 @@ bool UInventory::SetMaxSize(int32 NewMaxSize)
 bool UInventory::AddItem(UItem* Item)
 {
 	int32 Size = ItemArray.Num();
-	if (Size >= MaxSize) return false;
 
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
-	
 	if (!GameInstance) return false;
-	
-	GameInstance->AddItemButton(Item);
+
+	if (UMaterialItem* StackableItem = Cast<UMaterialItem>(Item))
+	{
+		if (StackableItem->IsStackable() && StackableItem->GetItemMaxStack() > 1)
+		{
+			FName ItemName = Item->GetItemName();
+			bool bSuccess = false;
+			for (UItem* Element : ItemArray)
+			{
+				if (Element->GetItemName() == ItemName)
+				{
+					if (UMaterialItem* MTElement = Cast<UMaterialItem>(Element))
+					{
+						if (MTElement->SetItemStack(MTElement->GetItemCurrentStack() + 1)) 
+						{
+							bSuccess = true;
+							break;
+						}
+					}
+				}
+			}
+			if (bSuccess)
+			{
+				GameInstance->GetInventoryWidget()->RefreshWidget();
+				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
+				return true;
+			}
+		}
+	}
+	if (Size >= MaxSize) return false;
 
 	ItemArray.Add(Item);
 	++Size;
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, 
-		FString::Printf(TEXT("%d / %d"), Size, MaxSize));
+	GameInstance->GetInventoryWidget()->RefreshWidget();
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 	return true;
 }
 
@@ -119,12 +147,12 @@ int32 UInventory::GetItemQuantity(FName ItemName) const
 	{
 		if (Item->GetItemName() == ItemName)
 		{
-			// 찾는 아이템 대상이 UMaterialItem 일 시 현재 보유 개수 (Stack)을 가져옴
+			// ã�� ������ ����� UMaterialItem �� �� ���� ���� ���� (Stack)�� ������
 			if (class UMaterialItem* MaterialItem = Cast<UMaterialItem>(Item))
 			{
 				Count += MaterialItem->GetCurrentStack();
 			}
-			// UMaterialItem이 아닐 시, 스택되는 아이템이 아니기에 1개만 리턴함
+			// UMaterialItem�� �ƴ� ��, ���õǴ� �������� �ƴϱ⿡ 1���� ������
 			else
 			{
 				Count += 1;
@@ -148,7 +176,7 @@ bool UInventory::RemoveItemQuantity(FName ItemName, int32 Quantity)
 		UItem* CurrentItem = ItemArray[i];
 		if (CurrentItem && CurrentItem->GetItemName() == ItemName)
 		{
-			// CurrentItem이 UMaterialItem인 경우
+			// CurrentItem�� UMaterialItem�� ���
 			if (UMaterialItem* MaterialItem = Cast<UMaterialItem>(CurrentItem))
 			{
 				int32 CurrentStack = MaterialItem->GetCurrentStack();
@@ -164,7 +192,7 @@ bool UInventory::RemoveItemQuantity(FName ItemName, int32 Quantity)
 					QuantityToRemove = 0;
 				}
 			}
-			// CurrentItem이 UMaterialItem이 아닌 경우
+			// CurrentItem�� UMaterialItem�� �ƴ� ���
 			else
 			{
 				QuantityToRemove -= 1;
@@ -177,28 +205,28 @@ bool UInventory::RemoveItemQuantity(FName ItemName, int32 Quantity)
 
 bool UInventory::TryCraftItem(FName ResultItemName, const FRecipe& Recipe)
 {
-	// 현재 재료가 충분한지 확인
+	// ���� ��ᰡ ������� Ȯ��
 	for (const FRecipeItem& Requirement : Recipe.Requirements)
 	{
 		if (GetItemQuantity(Requirement.ItemName) < Requirement.Quantity)
 		{
-			// 현재 재료의 개수가 필요량 보다 적을 시 false 리턴;
+			// ���� ����� ������ �ʿ䷮ ���� ���� �� false ����;
 			return false;
 		}
 	}
 
-	// 재료가 충분한 경우로 왔으니, 재료를 인벤토리에서 제거
+	// ��ᰡ ����� ���� ������, ��Ḧ �κ��丮���� ����
 	for (const FRecipeItem& Requirement : Recipe.Requirements)
 	{
-		if (!RemoveItemQuantity(Requirement.ItemName, Requirement.Quantity)) // 여기 조건문에서 이미 재료를 제거하는 함수를 실행함
+		if (!RemoveItemQuantity(Requirement.ItemName, Requirement.Quantity)) // ���� ���ǹ����� �̹� ��Ḧ �����ϴ� �Լ��� ������
 		{
-			// 이미 충분한 재료가 인벤토리에 있다는 걸 확인 하고 넘어왔는데, false는 재료 불충분 시 리턴 됨. 즉 크리티컬 에러.
+			// �̹� ����� ��ᰡ �κ��丮�� �ִٴ� �� Ȯ�� �ϰ� �Ѿ�Դµ�, false�� ��� ����� �� ���� ��. �� ũ��Ƽ�� ����.
 			UE_LOG(LogTemp, Error, TEXT("Critical Error: Failed to remove materials during crafting."));
 			return false;
 		}
 	}
 
-	// 제작 완성 아이템 인벤토리에 추가
+	// ���� �ϼ� ������ �κ��丮�� �߰�
 	UItem* CraftedItem = LoadItemByFName(ResultItemName);
 
 	if (CraftedItem)
@@ -222,7 +250,7 @@ UItem* UInventory::LoadItemByFName(FName ItemName)
 
 	if (!OriginalAsset)
 	{
-		//Asset 파일 로드 실패
+		//Asset ���� �ε� ����
 		return nullptr;
 	}
 

@@ -20,10 +20,6 @@ protected:
 
 public:
 	UInventory();
-	//static UInventory* GetInstance() {
-	//	static UInventory* instance;
-	//	return instance;
-	//}
 	TArray<UItem*> GetInventory() const;
 	UItem* GetItem(int32 index) const;
 	int32 GetCurrentSize() const;

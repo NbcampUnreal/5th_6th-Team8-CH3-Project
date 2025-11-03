@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Inventory.h"
@@ -7,6 +7,9 @@
 
 class UUserWidget;
 class UGridPanel;
+struct FItemButtonData;
+class UInventoryWidget;
+class APlayerCharacterController;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API UMyGameInstance : public UGameInstance
@@ -14,28 +17,21 @@ class SPARTA_TPROJECT_02_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
-	TSubclassOf<UUserWidget> InventoryWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
-	UUserWidget* InventoryWidgetInstance;
-
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
-	UGridPanel* GridPanel;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Inventory")
+	UInventoryWidget* InventoryWidgetInstance;
 
 	virtual void Init() override;
 	
 public:
 	UMyGameInstance();
 
+	UInventoryWidget* GetInventoryWidget() const;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	UInventory* Inventory;
-	
-	void WidgetInstall();
-	void AddItemButton(UItem* Item);
 
-	UFUNCTION()
-	void ItemTooltipEnable(int32 Index, FVector2D ButtonPosition);
-	UFUNCTION()
-	void ItemTooltipDisable();
+	void SetupInventoryWidget(APlayerCharacterController* PlayerContorller);
+
 };
