@@ -1,4 +1,4 @@
-#include "MaterialItem.h"
+﻿#include "MaterialItem.h"
 
 UMaterialItem::UMaterialItem()
 {
@@ -17,3 +17,7 @@ int32 UMaterialItem::GetItemMaxStack()
 	return MaxStack;
 }
 
+void UMaterialItem::SetCurrentStack(int32 NewStackAmount)
+{
+	CurrentStack = NewStackAmount;
+}

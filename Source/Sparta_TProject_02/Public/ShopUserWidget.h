@@ -12,6 +12,8 @@
 
 class UUserWidget;
 class AShop;
+struct FShopItemData;
+class UInventory;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API UShopUserWidget : public UUserWidget
@@ -54,5 +56,10 @@ private:
 	// 항목 위젯의 Hover 이벤트를 수신하여 상세 설명을 업데이트하는 함수
 	UFUNCTION()
 	void UpdateDescriptionOnHover(const FShopItemData& ItemInfo);
+
+public:
+	UFUNCTION()
+	void HandleItemCraftRequest(const FShopItemData& ItemInfo);
+	UInventory* GetPlayerInventory() const;
 
 };

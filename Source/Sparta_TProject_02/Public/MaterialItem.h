@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreMinimal.h"
 #include "Item.h"
 #include "MaterialItem.generated.h"
@@ -15,4 +15,5 @@ public:
 	UMaterialItem();
 	virtual int32 GetCurrentStack();
 	virtual int32 GetItemMaxStack();
+	virtual void SetCurrentStack(int32 NewStackAmount);
 };

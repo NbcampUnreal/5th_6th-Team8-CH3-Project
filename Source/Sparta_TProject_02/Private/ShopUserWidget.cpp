@@ -5,6 +5,9 @@
 #include "Shop.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Inventory.h"
+#include "Engine/Engine.h"
+#include "MyGameInstance.h"
 
 void UShopUserWidget::NativeConstruct()
 {
@@ -89,5 +92,41 @@ void UShopUserWidget::UpdateDescriptionOnHover(const FShopItemData& ItemInfo)
 			Desc += FString::Printf(TEXT("- %s x%d\n"), *Ing.ItemID.ToString(), Ing.Quantity);
 		}
 		DescriptionTextBlock->SetText(FText::FromString(Desc));
+	}
+}
+
+UInventory* UShopUserWidget::GetPlayerInventory() const
+{
+	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
+
+	if (GameInstance && GameInstance->Inventory)
+	{
+		return GameInstance->Inventory;
+	}
+	return nullptr;
+}
+
+void UShopUserWidget::HandleItemCraftRequest(const FShopItemData& ItemInfo)
+{
+	UInventory* PlayerInventory = GetPlayerInventory();
+
+	if (!PlayerInventory)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("ERROR: Inventory Not Found/Accessible."));
+		return;
+	}
+
+	if (ItemInfo.bIsCraftable)
+	{
+		bool bSuccess = PlayerInventory->TryCraftItem(ItemInfo.ItemID, ItemInfo.CraftingRecipe);
+
+		if (bSuccess)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("Crafting Successful")));
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString::Printf(TEXT("Crafting Failed")));
 	}
 }
