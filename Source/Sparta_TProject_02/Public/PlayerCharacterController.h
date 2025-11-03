@@ -18,11 +18,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputMappingContext* InputMappingContext;
 
-	//GameMode È£Ãâ
+	//GameMode È£ï¿½ï¿½
 	void TriggerStageReward();
 	void OnGameOver();
 	void OnGameWin();
 
+	UFUNCTION(Exec)
+	void ToggleUIInput();
+
 protected:
 	virtual void BeginPlay() override;
+	bool bIsInUIOnlyMode;
 };
