@@ -5,7 +5,7 @@
 AAIZombie::AAIZombie()
 {
     // 좀비에 맞는 기본 스탯으로 변경
-    MaxHealth = 80.0f;
+    MaxHealth = 100.0f;
     AttackDamage = 15.0f;
     AttackRange = 100.0f; // 근접 공격 범위
 }
