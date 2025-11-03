@@ -93,7 +93,7 @@ void AAIMonsterBase::Attack()
             if (PlayerCharacter)
             {
                 UE_LOG(LogTemp, Warning, TEXT("%s's attack hit %s! Applying %f damage."), *GetName(), *PlayerCharacter->GetName(), AttackDamage);
-                
+
                 UGameplayStatics::ApplyDamage(
                     PlayerCharacter,
                     AttackDamage,
