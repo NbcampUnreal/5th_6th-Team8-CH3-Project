@@ -5,8 +5,8 @@
 AAIBoss::AAIBoss()
 {
     // 보스에 맞는 강력한 스탯으로 변경
-    MaxHealth = 1000.0f;
-    AttackDamage = 50.0f;
+    MaxHealth = 500.0f;
+    AttackDamage = 30.0f;
     AttackRange = 250.0f;
 }
 
