@@ -150,7 +150,7 @@ int32 UInventory::GetItemQuantity(FName ItemName) const
 			// ã�� ������ ����� UMaterialItem �� �� ���� ���� ���� (Stack)�� ������
 			if (class UMaterialItem* MaterialItem = Cast<UMaterialItem>(Item))
 			{
-				Count += MaterialItem->GetCurrentStack();
+				Count += MaterialItem->GetItemCurrentStack();
 			}
 			// UMaterialItem�� �ƴ� ��, ���õǴ� �������� �ƴϱ⿡ 1���� ������
 			else
@@ -179,7 +179,7 @@ bool UInventory::RemoveItemQuantity(FName ItemName, int32 Quantity)
 			// CurrentItem�� UMaterialItem�� ���
 			if (UMaterialItem* MaterialItem = Cast<UMaterialItem>(CurrentItem))
 			{
-				int32 CurrentStack = MaterialItem->GetCurrentStack();
+				int32 CurrentStack = MaterialItem->GetItemCurrentStack();
 
 				if (CurrentStack <= QuantityToRemove)
 				{
@@ -188,7 +188,7 @@ bool UInventory::RemoveItemQuantity(FName ItemName, int32 Quantity)
 				}
 				else
 				{
-					MaterialItem->SetCurrentStack(CurrentStack - QuantityToRemove);
+					MaterialItem->SetItemStack(CurrentStack - QuantityToRemove);
 					QuantityToRemove = 0;
 				}
 			}
