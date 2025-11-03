@@ -10,7 +10,6 @@
 #include "GrenadeActor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "TimerManager.h"
-#include "Kismet/GameplayStatics.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -381,38 +380,31 @@ void APlayerCharacter::ThrowGrenade(const FInputActionValue& Value)
 	AGrenadeActor* Grenade = World->SpawnActor<AGrenadeActor>(GrenadeClass, SpawnLocation, SpawnRotation, SpawnParams);
 	if (Grenade)
 	{
+		// ProjectileMovement 사용 시 velocity 직접 설정
 		if (Grenade->ProjectileMovement)
 		{
-			FVector LaunchVel = CamRot.Vector() * GrenadeThrowStrength + FVector(0.f, 0.f, 200.f);
+			FVector LaunchVel = CamRot.Vector() * GrenadeThrowStrength + FVector(0.f, 0.f, 200.f); // 위쪽 보정
 			Grenade->ProjectileMovement->Velocity = LaunchVel;
 		}
-		else if (Grenade->MeshComp && Grenade->MeshComp->IsSimulatingPhysics())
+		else
 		{
-			FVector Impulse = CamRot.Vector() * GrenadeThrowStrength;
-			Grenade->MeshComp->AddImpulse(Impulse, NAME_None, true);
+			// 만약 physics 기반이라면 mesh에 impulse 주는 식으로 구현 가능
+			if (Grenade->MeshComp && Grenade->MeshComp->IsSimulatingPhysics())
+			{
+				FVector Impulse = CamRot.Vector() * GrenadeThrowStrength;
+				Grenade->MeshComp->AddImpulse(Impulse, NAME_None, true);
+			}
 		}
 	}
 
-	if (ThrowGrenadeMontage)
-	{
-		if (UAnimInstance* AnimInst = FP_Mesh->GetAnimInstance())
-		{
-			AnimInst->Montage_Play(ThrowGrenadeMontage);
-		}
-	}
-
-	// ======= [쿨다운 처리] =======
+	// 쿨다운 시작
 	bCanThrowGrenade = false;
 	GetWorldTimerManager().SetTimer(GrenadeCooldownHandle, [this]()
 		{
 			bCanThrowGrenade = true;
 		}, GrenadeCooldown, false);
 
-	// ======= [사운드 재생] =======
-	if (ThrowGrenadeSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(World, ThrowGrenadeSound, GetActorLocation());
-	}
+	// (선택) HUD 업데이트 / 애니 재생 등 여기서 호출 가능
 }
 
 void APlayerCharacter::OnWeaponFinishReload()

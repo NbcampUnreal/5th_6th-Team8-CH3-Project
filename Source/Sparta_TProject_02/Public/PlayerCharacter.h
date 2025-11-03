@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "WeaponType.h"
+#include "GrenadeActor.h"
 #include "PlayerCharacter.generated.h"
 
 class UInputAction;
@@ -62,6 +63,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* EquipPistolAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* GrenadeAction;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float NormalSpeed;
 
@@ -86,6 +90,27 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
 	TMap<EWeaponType, int32> MaxCarryAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grenade")
+	TSubclassOf<AGrenadeActor> GrenadeClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Grenade")
+	float GrenadeThrowStrength = 1500.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Grenade")
+	float GrenadeCooldown = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grenade")
+	USoundBase* ThrowGrenadeSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grenade")
+	UAnimMontage* ThrowGrenadeMontage;
+
+	bool bCanThrowGrenade = true;
+	FTimerHandle GrenadeCooldownHandle;
+
+	UFUNCTION()
+	void ThrowGrenade(const FInputActionValue& Value);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -141,6 +166,6 @@ private:
 	bool bIsFiring; // << [수정 1] 발사 상태를 추적하기 위해 추가
 
 public:
-		UFUNCTION(BlueprintPure, Category = "Mesh")
-		USkeletalMeshComponent* GetFPMesh() const { return FP_Mesh; } // << [수정 4] FP_Mesh Getter 함수 추가
+	UFUNCTION(BlueprintPure, Category = "Mesh")
+	USkeletalMeshComponent* GetFPMesh() const { return FP_Mesh; } // << [수정 4] FP_Mesh Getter 함수 추가
 };

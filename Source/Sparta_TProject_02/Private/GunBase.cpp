@@ -29,7 +29,7 @@ AGunBase::AGunBase()
 void AGunBase::BeginPlay()
 {
     Super::BeginPlay();
-
+    CurrentAmmo = MaxMagazineAmmo;
     OwningPlayer = Cast<APlayerCharacter>(GetOwner());
 }
 

@@ -104,7 +104,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Effects")
 	USoundBase* FireSound;
 
-	// Animation montages (BP에서 할당)
+	// Animation montages (BP¿¡¼­ ??´?)
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Animation")
 	UAnimMontage* FireMontage;
 
