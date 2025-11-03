@@ -60,4 +60,11 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI Combat")
     class UAnimMontage* DeathMontage;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+    class UWidgetComponent* HealthBarWidgetComponent;
+
+    FTimerHandle HealthBarTimerHandle;
+
+    void HideHealthBar();
 };
