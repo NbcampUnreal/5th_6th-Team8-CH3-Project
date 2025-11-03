@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -13,6 +13,8 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
+
+class AShop;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -48,7 +50,18 @@ class ASparta_TProject_02Character : public ACharacter
 public:
 	ASparta_TProject_02Character();
 
+	//ShopUI Properties
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+	AShop* ShopActor;
+
+	UFUNCTION(BlueprintCallable, Category = "Shop")
+	void OpenShop();
+	UFUNCTION(BlueprintCallable, Category = "Shop")
+	void CloseShop();
+
 protected:
+	void BeginPlay() override;
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 

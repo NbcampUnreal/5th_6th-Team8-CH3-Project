@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Sparta_TProject_02Character.h"
 #include "Sparta_TProject_02Projectile.h"
@@ -10,6 +10,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "Shop.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -35,6 +38,43 @@ ASparta_TProject_02Character::ASparta_TProject_02Character()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+}
+
+void ASparta_TProject_02Character::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//캐릭터가 월드에 스폰되어 있는 AShop 클래스의 객체를 찾아서 저장 (Shop 액터는 1개만 존재 할 거라서 해당 방법을 채택함)
+	if (!ShopActor)
+	{
+		TArray<AActor*> FoundShops;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShop::StaticClass(), FoundShops);
+		if (FoundShops.Num() > 0)
+		{
+			ShopActor = Cast<AShop>(FoundShops[0]);
+			if (APlayerController* MyPlayerController = Cast<APlayerController>(Controller))
+			{
+				ShopActor->SetShopPlayerController(MyPlayerController);
+			}
+		}
+	}
+}
+
+//Open Shop UI
+void ASparta_TProject_02Character::OpenShop()
+{
+	if (ShopActor)
+	{
+		ShopActor->OpenShop();
+	}
+}
+//Close Shop UI
+void ASparta_TProject_02Character::CloseShop()
+{
+	if (ShopActor)
+	{
+		ShopActor->CloseShop();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
