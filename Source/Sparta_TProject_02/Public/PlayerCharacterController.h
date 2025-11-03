@@ -18,6 +18,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputMappingContext* InputMappingContext;
 
+	UFUNCTION(Exec)
+	void ToggleUIInput();
 protected:
 	virtual void BeginPlay() override;
+	bool bIsInUIOnlyMode;
 };

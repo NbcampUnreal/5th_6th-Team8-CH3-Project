@@ -16,8 +16,8 @@ protected:
 
 public:
 	UInventory();
-
 	TArray<UItem*> GetInventory() const;
+	UItem* GetItem(int32 index) const;
 	int32 GetCurrentSize() const;
 	int32 GetMaxSize() const;
 
