@@ -18,6 +18,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputMappingContext* InputMappingContext;
 
+	//GameMode »£√‚
+	void TriggerStageReward();
+	void OnGameOver();
+	void OnGameWin();
+
 protected:
 	virtual void BeginPlay() override;
 };

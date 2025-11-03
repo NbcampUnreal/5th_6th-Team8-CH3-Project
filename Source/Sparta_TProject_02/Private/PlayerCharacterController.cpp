@@ -10,6 +10,24 @@ APlayerCharacterController::APlayerCharacterController()
 {
 }
 
+void APlayerCharacterController::TriggerStageReward()
+{
+	//À§Á¬ °»½Å
+	UE_LOG(LogTemp, Log, TEXT("TriggerStageReward Called"));
+}
+
+void APlayerCharacterController::OnGameOver()
+{
+	//À§Á¬ °»½Å
+	UE_LOG(LogTemp, Log, TEXT("OnGameOver_Implementation Called"));
+}
+
+void APlayerCharacterController::OnGameWin()
+{
+	//À§Á¬ °»½Å
+	UE_LOG(LogTemp, Log, TEXT("OnGameWin_Implementation Called"));
+}
+
 void APlayerCharacterController::BeginPlay()
 {
 	Super::BeginPlay();

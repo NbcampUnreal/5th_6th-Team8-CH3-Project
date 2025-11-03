@@ -58,6 +58,19 @@ APlayerCharacter::APlayerCharacter()
 
 	CurrentWeaponIndex = 0;
 	CurrentWeapon = nullptr; // 변경: CurrentGun -> CurrentWeapon
+
+	MaxHealth = 100.0f;
+	Health = MaxHealth;
+}
+
+void APlayerCharacter::HealOnWaveClear(float HealAmount)
+{
+	if (HealAmount <= 0.0f)
+	{
+		return;
+	}
+	// 최대 체력(MaxHealth)을 넘지 않도록 안전하게 더합니다.
+	Health = FMath::Clamp(Health + HealAmount, 0.f, MaxHealth);
 }
 
 void APlayerCharacter::BeginPlay()

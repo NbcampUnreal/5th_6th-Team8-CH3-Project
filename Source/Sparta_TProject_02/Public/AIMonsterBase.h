@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "AIMonsterBase.generated.h"
 
+class ASTGameMode;
+
 UCLASS()
 class SPARTA_TPROJECT_02_API AAIMonsterBase : public ACharacter
 {
@@ -23,6 +25,10 @@ public:
     virtual void Tick(float DeltaTime) override;
 
     // --- 몬스터 공통 스탯 ---
+    //기본 체력 추가
+    UPROPERTY(EditAnywhere, BluePrintReadOnly, Category = "AI Stats")
+    float BaseHealth;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Stats")
     float MaxHealth;
 
@@ -48,6 +54,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AI Behavior")
     void Die();
 
+    //체력 배율 반환
+    void ApplyHealthMultiplier(float Multiplier);
+
 protected:
     // 죽었는지 확인하는 플래그
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI State")
@@ -58,4 +67,10 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI Combat")
     class UAnimMontage* DeathMontage;
+
+    //GameMode에 알리기
+    /*
+    UPROPERTY()
+    ASTGameMode* STGameMode;
+    */
 };
