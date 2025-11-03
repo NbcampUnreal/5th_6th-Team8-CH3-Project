@@ -10,7 +10,7 @@ UMyGameInstance::UMyGameInstance()
    InventoryWidgetClass = nullptr;
    InventoryWidgetInstance = nullptr;
 	static ConstructorHelpers::FClassFinder<UInventoryWidget> InvenHUDFInder(
-		TEXT("/Game/Blueprints/BP_InventoryWidget.BP_InventoryWidget_C"));
+		TEXT("/Game/Blueprints/WBP_InventoryWidget.WBP_InventoryWidget_C"));
    if (InvenHUDFInder.Succeeded())
    {
       InventoryWidgetClass = InvenHUDFInder.Class;

@@ -22,16 +22,35 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "MyGameInstance.h"
 
+UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+   GridMaxColumn = 4;
+}
+
 void UInventoryWidget::NativeConstruct()
 {
    Super::NativeConstruct();
    PlayerContlloer = GetOwningPlayer();
-   
    InventoryGrid = Cast<UGridPanel>(GetWidgetFromName("GridPanel"));
-   GridMaxColumn = 4;
 
-   ItemContextMenuData = { 0, FVector2D::ZeroVector };
+   UBorder* Border = Cast<UBorder>(GetWidgetFromName(TEXT("ItemContextMenuBorder")));
+   if (!Border) return;
+
+   UseItemButtonWidget = Cast<UItemButtonWidget>(GetWidgetFromName("UseButton"));
+   if (!UseItemButtonWidget) return;
+
+   UseItemButtonWidget->SetupClickBinding();
+   //UseItemButtonWidget->OnClicked.AddDynamic(this, &UInventoryWidget::ItemTooltipShow);
+   UseItemButtonWidget->SetButtonData({ 0, FVector2D::ZeroVector });
+
+   DestroyItemButtonWidget = Cast<UItemButtonWidget>(GetWidgetFromName("DestroyButton"));
+   if (!DestroyItemButtonWidget) return;
+
+   DestroyItemButtonWidget->SetupClickBinding();
+   DestroyItemButtonWidget->OnClicked.AddDynamic(this, &UInventoryWidget::ItemDestory);
+   DestroyItemButtonWidget->SetButtonData({ 0, FVector2D::ZeroVector });
 }
+
 void UInventoryWidget::SetupWidget()
 {
    UMyGameInstance* GameInstance = Cast<UMyGameInstance>(PlayerContlloer->GetGameInstance());
@@ -44,22 +63,6 @@ void UInventoryWidget::SetupWidget()
       GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("InventorySet Fail"));
    }
 
-   UItemButtonWidget* UseItemButtonWidget = CreateWidget<UItemButtonWidget>(PlayerContlloer, UItemButtonWidget::StaticClass());
-   UButton* UseButton = Cast<UButton>(GetWidgetFromName("UseButton"));
-   if (!UseButton) return;
-   UseItemButtonWidget->SetButton(UseButton);   
-   UseItemButtonWidget->SetupClickBinding();
-   //UseItemButtonWidget->OnClicked.AddDynamic(this, &UInventoryWidget::ItemTooltipShow);
-   UseItemButtonWidget->SetButtonData(ItemContextMenuData);
-
-   UItemButtonWidget* DestroyItemButtonWidget = CreateWidget<UItemButtonWidget>(PlayerContlloer, UItemButtonWidget::StaticClass());
-   UButton* DestoryButton = Cast<UButton>(GetWidgetFromName("DestroyButton"));
-   if (!DestoryButton) return;
-
-   DestroyItemButtonWidget->SetButton(DestoryButton);
-   DestroyItemButtonWidget->SetupClickBinding();
-   DestroyItemButtonWidget->OnClicked.AddDynamic(this, &UInventoryWidget::ItemDestory);
-   DestroyItemButtonWidget->SetButtonData(ItemContextMenuData);
 }
 bool UInventoryWidget::RefreshWidget()
 {
@@ -67,6 +70,7 @@ bool UInventoryWidget::RefreshWidget()
    for (int32 i = InventoryGrid->GetChildrenCount(); i > 0; --i)
    {
       InventoryGrid->RemoveChildAt(0);
+      GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("InventoryGrid Remove"));
    }
 
    int32 ItemSize = Inventory->GetCurrentSize();
@@ -120,13 +124,13 @@ UOverlay* UInventoryWidget::CreateItemOverlay(UItem* Item, const FVector2D& Item
    UOverlay* ItemOverlay = NewObject<UOverlay>(PlayerContlloer);
    if (!ItemOverlay) return nullptr;
 
-   UItemButtonWidget* ItemButtonWidget = CreateItemButton(Item, ItemOverlaySize, ButtonData);
+   UItemButtonWidget* ItemButtonWidget = CreateItemButton(Item, ItemOverlay, ItemOverlaySize, ButtonData);
    if (!ItemButtonWidget) return nullptr;
-   ItemOverlay->AddChild(Cast<UWidget>(ItemButtonWidget->GetButton()));
+   ItemOverlay->AddChild(Cast<UWidget>(ItemButtonWidget));
 
    if (UMaterialItem* MaterialItem = Cast<UMaterialItem>(Item))
    {
-      UTextBlock* ItemStackTextBlock = CreateItemStackTextBlock(Item);
+      UTextBlock* ItemStackTextBlock = CreateItemStackTextBlock(Item, ItemOverlay);
       if (!ItemStackTextBlock) return nullptr;
       ItemOverlay->AddChild(Cast<UWidget>(ItemStackTextBlock));
 
@@ -138,15 +142,16 @@ UOverlay* UInventoryWidget::CreateItemOverlay(UItem* Item, const FVector2D& Item
    return ItemOverlay;
 }
 
-UItemButtonWidget* UInventoryWidget::CreateItemButton(UItem* Item, const FVector2D ItemButtonSize, FItemButtonData ButtonData)
+UItemButtonWidget* UInventoryWidget::CreateItemButton(UItem* Item, UOverlay* Overlay, const FVector2D ItemButtonSize, FItemButtonData ButtonData)
 {
-   UItemButtonWidget* ItemButtonWidget = CreateWidget<UItemButtonWidget>(PlayerContlloer, UItemButtonWidget::StaticClass());
-   ItemButtonWidget->SetButton(NewObject<UButton>(PlayerContlloer));
+   if (!DynamicButtonClass) return nullptr;
+   UItemButtonWidget* ItemButtonWidget = CreateWidget<UItemButtonWidget>(PlayerContlloer, DynamicButtonClass);
+   UButton* InnerButton = ItemButtonWidget->GetButton();
    ItemButtonWidget->SetupHoverBinding();
    ItemButtonWidget->SetupClickBinding();
 
    FDeprecateSlateVector2D ButtonSize = FDeprecateSlateVector2D(ItemButtonSize.X, ItemButtonSize.Y);
-   FButtonStyle ButtonStyle = ItemButtonWidget->GetButton()->GetStyle();
+   FButtonStyle ButtonStyle = InnerButton->GetStyle();
 
    FSlateBrush NormalSB = ButtonStyle.Normal;
    NormalSB.SetImageSize(ButtonSize);
@@ -160,18 +165,17 @@ UItemButtonWidget* UInventoryWidget::CreateItemButton(UItem* Item, const FVector
    PressedSB.SetImageSize(ButtonSize);
    ButtonStyle.SetPressed(PressedSB);
 
-   ItemButtonWidget->GetButton()->SetStyle(ButtonStyle);
+   InnerButton->SetStyle(ButtonStyle);
    ItemButtonWidget->OnHovered.AddDynamic(this, &UInventoryWidget::ItemTooltipShow);
-   ItemButtonWidget->GetButton()->OnUnhovered.AddDynamic(this, &UInventoryWidget::ItemTooltipHide);
+   InnerButton->OnUnhovered.AddDynamic(this, &UInventoryWidget::ItemTooltipHide);
    ItemButtonWidget->OnClicked.AddDynamic(this, &UInventoryWidget::ItemContextMenuShow);
    ItemButtonWidget->SetButtonData(ButtonData);
-
    return ItemButtonWidget;
 }
 
-UTextBlock* UInventoryWidget::CreateItemStackTextBlock(UItem* Item)
+UTextBlock* UInventoryWidget::CreateItemStackTextBlock(UItem* Item, UOverlay* Overlay)
 {
-   UTextBlock* TextBlock = NewObject<UTextBlock>(PlayerContlloer);
+   UTextBlock* TextBlock = NewObject<UTextBlock>(Overlay);
    if (UMaterialItem* MaterialItem = Cast<UMaterialItem>(Item))
    {
       //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("MaterialItem"));
@@ -179,7 +183,7 @@ UTextBlock* UInventoryWidget::CreateItemStackTextBlock(UItem* Item)
    }
    else
    {
-      TextBlock->SetText(FText::FromString(TEXT("0")));
+      TextBlock->SetText(FText::FromString(TEXT("1")));
    }
    return TextBlock;
 }
@@ -214,10 +218,12 @@ void UInventoryWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
    {
       ItemStack->SetText(FText::FromString(TEXT("1 / 1")));
    }
+   
+
    UGridPanel* ItemTooltipGrid = Cast<UGridPanel>(GetWidgetFromName(TEXT("ItemTooltipGrid")));
+   ItemTooltipGrid->ForceLayoutPrepass();
    FVector2D NewBorderSize = Cast<UWidget>(ItemTooltipGrid)->GetDesiredSize();
    NewBorderSize.X += 5;
-   ForceLayoutPrepass();
 
    UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Cast<UWidget>(Border)->Slot);
    if (!CanvasPanelSlot) return;
@@ -237,7 +243,6 @@ void UInventoryWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
    CanvasPanelSlot->SetPosition(ItemTooltipPos);
    
    Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::HitTestInvisible);
-   //ForceLayoutPrepass();
 }
 
 void UInventoryWidget::ItemTooltipHide()
@@ -257,6 +262,7 @@ void UInventoryWidget::ItemContextMenuShow(const FItemButtonData& ItemButtonData
    UBorder* Border = Cast<UBorder>(GetWidgetFromName(TEXT("ItemContextMenuBorder")));
    if (!Border) return;
    Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::Hidden);
+   Border->ForceLayoutPrepass();
 
    FGeometry WidgetGeometry = Cast<UWidget>(Border)->GetCachedGeometry();
    FVector2D BorderSize = WidgetGeometry.GetLocalSize();
@@ -269,9 +275,10 @@ void UInventoryWidget::ItemContextMenuShow(const FItemButtonData& ItemButtonData
    if (!CanvasPanelSlot) return;
    CanvasPanelSlot->SetPosition(MenuPos);
 
+   UseItemButtonWidget->SetButtonData(ItemButtonData);
+   DestroyItemButtonWidget->SetButtonData(ItemButtonData);
+
    Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::Visible);
-   ForceLayoutPrepass();
-   ItemContextMenuData = ItemButtonData;
 }
 
 void UInventoryWidget::ItemContextMenuHide()
@@ -284,5 +291,9 @@ void UInventoryWidget::ItemContextMenuHide()
 
 void UInventoryWidget::ItemDestory(const FItemButtonData& ItemButtonData)
 {
-   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("DestoryIndex = " + ItemButtonData.Index));
+   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(
+      TEXT("DestoryIndex: %d"), ItemButtonData.Index));
+   Inventory->RemoveItemIndex(ItemButtonData.Index);
+   ItemContextMenuHide();
+   RefreshWidget();
 }

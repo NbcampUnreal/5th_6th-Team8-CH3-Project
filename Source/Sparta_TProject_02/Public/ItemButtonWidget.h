@@ -27,13 +27,16 @@ private:
 	UFUNCTION()
 	void HandleButtonClicked();
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
-	UButton* Button;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+	UPROPERTY(meta = (BindWidget))
+	UButton* MainButton;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
 	FItemButtonData ButtonData;
 
 	virtual void NativeConstruct() override;
 public:
+	UItemButtonWidget(const FObjectInitializer& ObjectInitializer);
+	virtual void BeginDestroy() override;
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHoveredSignature OnHovered;
 	UPROPERTY(BlueprintAssignable, Category = "Events")
