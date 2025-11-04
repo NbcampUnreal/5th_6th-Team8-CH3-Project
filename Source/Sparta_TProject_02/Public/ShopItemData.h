@@ -38,4 +38,9 @@ struct FShopItemData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRecipe CraftingRecipe;		//제작에 필요한 재료 목록
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	TSubclassOf<class UItem> ItemClass;		// 제작/판매 아이템의 BP 클래스 참조
+
+
 };

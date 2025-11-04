@@ -34,4 +34,8 @@ public:
 
 	void SetupInventoryWidget(APlayerCharacterController* PlayerContorller);
 
+
+	//Shop 연동용
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<UInventory> InventoryBlueprintClass;
 };

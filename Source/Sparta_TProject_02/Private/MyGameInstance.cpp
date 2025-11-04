@@ -9,6 +9,14 @@ UMyGameInstance::UMyGameInstance()
    Inventory = nullptr;
    InventoryWidgetClass = nullptr;
    InventoryWidgetInstance = nullptr;
+
+   static ConstructorHelpers::FClassFinder<UInventory> InventoryClassFinder(
+	   TEXT("/Game/Blueprints/BPC_Inventory.BPC_Inventory_C"));
+   if (InventoryClassFinder.Succeeded())
+   {
+	   InventoryBlueprintClass = InventoryClassFinder.Class;
+   }
+
 	static ConstructorHelpers::FClassFinder<UInventoryWidget> InvenHUDFInder(
 		TEXT("/Game/Blueprints/WBP_InventoryWidget.WBP_InventoryWidget_C"));
    if (InvenHUDFInder.Succeeded())
@@ -30,14 +38,21 @@ void UMyGameInstance::Init()
 
 void UMyGameInstance::SetupInventoryWidget(APlayerCharacterController* PlayerContorller)
 {
-   if (!PlayerContorller) return;
-   Inventory = NewObject<UInventory>(PlayerContorller);
+	if (!PlayerContorller) return;
 
-   if (!InventoryWidgetClass) return;
-   InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
+	UClass* ClassToSpawn = InventoryBlueprintClass.Get() ? InventoryBlueprintClass.Get() : UInventory::StaticClass();
+	Inventory = NewObject<UInventory>(PlayerContorller, ClassToSpawn);
 
-   InventoryWidgetInstance->AddToViewport();
-   InventoryWidgetInstance->SetupWidget();
-   InventoryWidgetInstance->ItemTooltipHide();
-   InventoryWidgetInstance->ItemContextMenuHide();
+	//Inventory = NewObject<UInventory>(PlayerContorller);
+
+	if (!InventoryWidgetClass) return;
+	InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
+
+	InventoryWidgetInstance->AddToViewport();
+	InventoryWidgetInstance->SetupWidget();
+
+	InventoryWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+
+	InventoryWidgetInstance->ItemTooltipHide();
+	InventoryWidgetInstance->ItemContextMenuHide();
 }

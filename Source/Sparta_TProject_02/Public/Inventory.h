@@ -8,7 +8,7 @@
 #include "Inventory.generated.h"
 class UItem;
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class SPARTA_TPROJECT_02_API UInventory : public UObject
 {
 	GENERATED_BODY()

@@ -77,6 +77,8 @@ void UShopUserWidget::PopulateItemList(const TArray<FShopItemData>& ItemList)
 			// Hover 델리게이트에 상위 위젯의 함수 바인딩
 			ItemEntry->OnItemHovered.AddDynamic(this, &UShopUserWidget::UpdateDescriptionOnHover);
 
+			ItemEntry->OnItemCrafted.AddDynamic(this, &UShopUserWidget::HandleItemCraftRequest);
+
 			ItemListScrollBox->AddChild(ItemEntry);
 		}
 	}
@@ -84,14 +86,51 @@ void UShopUserWidget::PopulateItemList(const TArray<FShopItemData>& ItemList)
 
 void UShopUserWidget::UpdateDescriptionOnHover(const FShopItemData& ItemInfo)
 {
+	UInventory* PlayerInventory = GetPlayerInventory();
+
 	if (DescriptionTextBlock)
 	{
-		// 텍스트 포맷팅 및 설정 로직
-		FString Desc = FString::Printf(TEXT("DESCRIPTION\n- %s\n\nRecipe:\n"), *ItemInfo.FullDescription.ToString());
-		for (const FRecipeIngredient& Ing : ItemInfo.Recipe)
+		// 1. 아이템 이름 및 설명/효과 섹션 구성
+		FString Desc = FString::Printf(
+			TEXT("아이템 이름: %s\n아이템 효과: %s\n\n레시피:\n"),
+			*ItemInfo.ItemName.ToString(),
+			*ItemInfo.FullDescription.ToString()
+		);
+
+		// 2. 레시피 및 재료 정보 섹션 구성
+		if (ItemInfo.bIsCraftable)
 		{
-			Desc += FString::Printf(TEXT("- %s x%d\n"), *Ing.ItemID.ToString(), Ing.Quantity);
+			// FRecipeIngredient 구조체를 순회하며 재료 정보를 가져옴.
+			for (const FRecipeIngredient& Ing : ItemInfo.Recipe)
+			{
+				// 3. 재료 이름과 필요 개수 설정
+				FString IngredientName = Ing.ItemID.ToString(); // 재료의 ItemID를 이름으로 사용
+				int32 RequiredQuantity = Ing.Quantity;
+
+				// 4. 인벤토리에서 현재 보유 개수 조회
+				int32 CurrentQuantity = 0;
+				if (PlayerInventory)
+				{
+					// UInventory::GetItemQuantity 함수를 사용하여 현재 보유 개수를 가져옴.
+					CurrentQuantity = PlayerInventory->GetItemQuantity(Ing.ItemID);
+				}
+
+				// 5. 포맷팅 및 추가
+				Desc += FString::Printf(
+					TEXT("- %s (%d/%d)\n"),
+					*IngredientName,
+					CurrentQuantity,
+					RequiredQuantity
+				);
+			}
 		}
+		else
+		{
+			// 제작 불가 아이템일 경우
+			Desc += TEXT("- 제작 불가능한 아이템입니다.");
+		}
+
+		// 6. TextBlock에 최종 텍스트 설정
 		DescriptionTextBlock->SetText(FText::FromString(Desc));
 	}
 }
@@ -134,9 +173,14 @@ void UShopUserWidget::HandleItemCraftRequest(const FShopItemData& ItemInfo)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("Crafting Successful")));
 		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString::Printf(TEXT("Crafting Failed - Check Material or Inven Space.")));
+		}
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString::Printf(TEXT("Crafting Failed")));
+		// 판매 기능 넣는다면.
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString::Printf(TEXT("Buying Yet Made.")));
 	}
 }

@@ -37,7 +37,7 @@ void AShop::BeginPlay()
 		ShopWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), ShopWidgetClass);
 		if (ShopWidgetInstance)
 		{
-			ShopWidgetInstance->AddToViewport();
+			ShopWidgetInstance->AddToViewport(100);
 			ShopWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
