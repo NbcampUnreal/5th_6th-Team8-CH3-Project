@@ -19,75 +19,74 @@ class SPARTA_TPROJECT_02_API ASTGameMode : public AGameModeBase
 public:
 	ASTGameMode();
 
-	//[EnemyCharacter]Àû Ä³¸¯ÅÍ°¡ Á×¾úÀ» ¶§ È£Ãâ
+	//[EnemyCharacter]ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½Í°ï¿½ ï¿½×¾ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½
 	void OnEnemyKilled(AAIMonsterBase* Die);
 
-	//¿þÀÌºê Áõ°¡¿¡ µû¸¥ Àû Ã¼·Â Áõ°¡
+	//ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode|Wave", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
 	float HealthIncreaseMultiplier = 1.15f;
 
 	float GetHealthMultiplierForWave(int32 Wave) const;
 
 protected:
-	//°ÔÀÓ ½ÃÀÛ È£Ãâ
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
 	virtual void BeginPlay() override;
 
-	//[PlayerCharacter] ÇÃ·¹ÀÌ¾î »ç¸Á ½Ã È£Ãâ
+	//[PlayerCharacter] ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½
 	virtual void PawnKilled(APawn* PawnKilled);
 
 	void OnPlayerDeath(APlayerCharacter* DeadPlayer);
 
-	//´ÙÀ½ ¿þÀÌºê ½ÃÀÛ
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½
 	void StartNextWave();
 
-	//ÇöÀç ¿þÀÌºê¿¡ µû¸¥ ½ºÆùÇÒ ÀûÀÇ °³¼ö °è»ê
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºê¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	int32 CalculateEnemiesForWave(int32 Wave) const;
 
-	//ÇöÀç ¿þÀÌºê¿¡ ¸Â´Â Àû ½ºÆù
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºê¿¡ ï¿½Â´ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	void SpawnEnemies();
 
 	void SpawnBoss(TSubclassOf<AAIMonsterBase> BossClassToSpawn);
 
-	//¿þÀÌºê Å¬¸®¾î ¼º°ø½Ã È£Ãâ
+	//ï¿½ï¿½ï¿½Ìºï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
 	void OnWaveCleared();
 
-	//¿þÀÌºê ´ë±â ½Ã°£ ³¡³µÀ» ¶§ È£Ãâ
+	//ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½
 	void HandleWaveDelay();
 
 	void HandleGameOver();
 
 	void HandleGameWin();
 
-	//·¹º§¿¡ ¹èÄ¡µÈ ½ºÆù º¼·ýµéÀÇ ¸ñ·Ï
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 
 	UPROPERTY(VisibleInstanceOnly, Category = "GameMode")
 	TArray<ASTSpawnVolume*> SpawnVolumes;
 
-	//-------ÇïÆÛ-------
+	//-------ï¿½ï¿½ï¿½ï¿½-------
 	bool GetRandomSpawnLocation(FVector& OutSpawnLocation);
 	void AddScore(int32 ScoreToAdd);
 	void HealPlayer(float HealAmount);
 
 protected:
-	//----------------------¿þÀÌºê ¼³Á¤ (ºí·çÇÁ¸°Æ®)------------------------
 
-	//---¿¡µðÅÍ¿¡¼­ ¸ó½ºÅÍ ¼±ÅÃ
+	//---ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode|Spawning")
 	TSubclassOf<AAIMonsterBase> EnemyClass;
 
-	//----Á»ºñ ¼±ÅÃ
+	//----ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode|Spawning")
 	TSubclassOf<AAIMonsterBase> SecondEnemyClass;
 
-	//----º¸½º ¼±ÅÃ
+	//----ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode|Spawning")
 	TSubclassOf<AAIMonsterBase> FinalEnemyClass;
 
-	//Ã¹ ¿þÀÌºê¿¡ ½ºÆùÇÒ ±âº» ÀûÀÇ ¼ö
+	//Ã¹ ï¿½ï¿½ï¿½Ìºê¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½âº» ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode|Wave", meta = (AllowPrivateAccess = "true", ClampMin = "1"))
 	int32 MonsterPerWave = 50;
 
-	//¸ó½ºÅÍ Áõ°¡
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode|Wave", meta = (AllowPrivateAccess = "true", ClampMin = "0"))
 	int32 MonsterIncreasePerWave = 50;
 
@@ -100,26 +99,26 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode|Wave", meta = (AllowPrivateAccess = "true", ClampMin = "3"))
 	int32 FinalBossWave = 3;
 
-	//¿þÀÌºê Å¬¸®¾î ½Ã È¸º¹·®
+	//ï¿½ï¿½ï¿½Ìºï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode|Wave",
 		meta = (ClampMin = "0.0", ClampMax = "100.0"))
 	float HealAmountOnWaveClear = 25.0f;
 
 
 
-	//¿þÀÌºê »çÀÌÀÇ ´ë±â ½Ã°£
+	//ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode|Wave", meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
 	float DelayBetweenWaves = 5.f;
 
-	//Àû Ã³Ä¡ ½Ã È¹µæÇÒ ±âº» Á¡¼ö
+	//ï¿½ï¿½ Ã³Ä¡ ï¿½ï¿½ È¹ï¿½ï¿½ï¿½ï¿½ ï¿½âº» ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode|Scoring", meta = (AllowPrivateAccess = "true", ClampMin = "1"))
 	int32 ScorePerKill = 100;
 
-	//º¸½º Ã³Ä¡ ½Ã È¹µæ Á¡¼ö
+	//ï¿½ï¿½ï¿½ï¿½ Ã³Ä¡ ï¿½ï¿½ È¹ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode|Scoring", meta = (AllowPrivateAccess = "true", ClampMin = "1"))
 	int32 BossKillScore = 500;
 
-	//¿þÀÌºê Å¬¸®¾î ½Ã º¸³Ê½º
+	//ï¿½ï¿½ï¿½Ìºï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ê½ï¿½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode|Scoring", meta = (AllowPrivateAccess = "true", ClampMin = "0"))
 	int32 WaveClearBonus = 500;
 
@@ -127,19 +126,17 @@ protected:
 	TObjectPtr<ASTGameState> STGameState;
 
 protected:
-	//ÇöÀç ¿þÀÌºê ¹øÈ£
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½È£
 	int32 CurrentWave = 0;
 
-	//ÇöÀç ¸Ê¿¡ »ì¾ÆÀÖ´Â ÀûÀÇ ¼ö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 	int EnemiesAlive = 0;;
 
 	int32 TotalEnemiesSpawned = 0;
 
-	//´ÙÀ½ ¿þÀÌºê ½ÃÀÛÀ» À§ÇÑ Å¸ÀÌ¸Ó ÇÚµé
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ì¸ï¿½ ï¿½Úµï¿½
 	FTimerHandle TimerHandleWaveDelay;
 
 	bool bIsGameOver = false;
 
 	bool bIsBossWave = false;
-
-};

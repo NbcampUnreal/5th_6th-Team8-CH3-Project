@@ -6,18 +6,18 @@ void UGameHUDWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    /* --- GameState µ¨¸®°ÔÀÌÆ® ±¸µ¶ ---
+    /* --- GameState ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ---
     if (ASTGameState* GS = GetWorld()->GetGameState<ASTGameState>())
     {
-        // Á¡¼ö/¿þÀÌºê µ¨¸®°ÔÀÌÆ® µî·Ï
+        // ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½
         GS->OnScoreChanged.AddDynamic(this, &UGameHUDWidget::OnScoreChanged);
         GS->OnCurrentWaveChanged.AddDynamic(this, &UGameHUDWidget::OnWaveChanged);
     }
 
-    // --- PlayerCharacter µ¨¸®°ÔÀÌÆ® ±¸µ¶ ---
+    // --- PlayerCharacter ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ---
     if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetOwningPlayerPawn()))
     {
-        // Ã¼·Â, Åº¾à, ÇÇ°Ý ÀÌº¥Æ® µ¨¸®°ÔÀÌÆ® µî·Ï
+        // Ã¼ï¿½ï¿½, Åºï¿½ï¿½, ï¿½Ç°ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½
         PC->OnHealthChanged.AddDynamic(this, &UGameHUDWidget::OnHealthChanged);
         PC->OnAmmoChanged.AddDynamic(this, &UGameHUDWidget::OnAmmoChanged);
         PC->OnEnemyHit.AddDynamic(this, &UGameHUDWidget::OnEnemyHit);
@@ -25,33 +25,33 @@ void UGameHUDWidget::NativeConstruct()
     */
 }
 
-// Ã¼·Â º¯°æ ½Ã È£ÃâµÊ ¡æ BP¿¡¼­ ProgressBar, »ö»ó µî °»½Å
+// Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½ï¿½ ï¿½ï¿½ BPï¿½ï¿½ï¿½ï¿½ ProgressBar, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 void UGameHUDWidget::OnHealthChanged(int32 NewHP, int32 MaxHP)
 {
     float Ratio = FMath::Clamp((float)NewHP / MaxHP, 0.f, 1.f);
-    UpdateHealthVisual(Ratio); // BP ÀÌº¥Æ® È£Ãâ
+    UpdateHealthVisual(Ratio); // BP ï¿½Ìºï¿½Æ® È£ï¿½ï¿½
 }
 
-// Åº¾à º¯°æ ½Ã È£ÃâµÊ ¡æ BP¿¡¼­ ÅØ½ºÆ® º¯°æ Ã³¸®
+// Åºï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½ï¿½ ï¿½ï¿½ BPï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
 void UGameHUDWidget::OnAmmoChanged(int32 CurrentAmmo, int32 MaxAmmo)
 {
-    UpdateAmmoVisual(CurrentAmmo, MaxAmmo); // BP ÀÌº¥Æ® È£Ãâ
+    UpdateAmmoVisual(CurrentAmmo, MaxAmmo); // BP ï¿½Ìºï¿½Æ® È£ï¿½ï¿½
 }
 
-// Á¡¼ö º¯°æ ½Ã È£ÃâµÊ ¡æ BP¿¡¼­ Á¡¼ö ÅØ½ºÆ® °»½Å
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½ï¿½ ï¿½ï¿½ BPï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 void UGameHUDWidget::OnScoreChanged(int32 NewScore)
 {
-    UpdateScoreVisual(NewScore); // BP ÀÌº¥Æ® È£Ãâ
+    UpdateScoreVisual(NewScore); // BP ï¿½Ìºï¿½Æ® È£ï¿½ï¿½
 }
 
-// ¿þÀÌºê º¯°æ ½Ã È£ÃâµÊ ¡æ BP¿¡¼­ ¡°Wave : n¡± Ç¥½Ã
+// ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½ï¿½ ï¿½ï¿½ BPï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Wave : nï¿½ï¿½ Ç¥ï¿½ï¿½
 void UGameHUDWidget::OnWaveChanged(int32 NewWave)
 {
-    UpdateWaveVisual(NewWave); // BP ÀÌº¥Æ® È£Ãâ
+    UpdateWaveVisual(NewWave); // BP ï¿½Ìºï¿½Æ® È£ï¿½ï¿½
 }
 
-// Àû ÇÇ°Ý ½Ã È£ÃâµÊ ¡æ BP¿¡¼­ È÷Æ®¸¶Ä¿ ¿¬Ãâ ½ÇÇà
+// ï¿½ï¿½ ï¿½Ç°ï¿½ ï¿½ï¿½ È£ï¿½ï¿½ï¿½ ï¿½ï¿½ BPï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½Ä¿ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 void UGameHUDWidget::OnEnemyHit()
 {
-    PlayHitMarkerVisual(); // BP ÀÌº¥Æ® È£Ãâ
+    PlayHitMarkerVisual(); // BP ï¿½Ìºï¿½Æ® È£ï¿½ï¿½
 }

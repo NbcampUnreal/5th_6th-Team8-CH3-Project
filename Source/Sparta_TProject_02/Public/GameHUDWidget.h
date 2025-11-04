@@ -11,10 +11,10 @@ class SPARTA_TPROJECT_02_API UGameHUDWidget : public UUserWidget
     GENERATED_BODY()
 
 protected:
-    // À§Á¬ÀÌ »ý¼ºµÉ ¶§(Construct) È£ÃâµÇ´Â ÇÔ¼ö
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½(Construct) È£ï¿½ï¿½Ç´ï¿½ ï¿½Ô¼ï¿½
     virtual void NativeConstruct() override;
 
-    // --- [µ¨¸®°ÔÀÌÆ® ¼ö½Å¿ë ÇÔ¼öµé] ---
+    // --- [ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Å¿ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½] ---
     UFUNCTION()
     void OnHealthChanged(int32 NewHP, int32 MaxHP);
 
@@ -30,8 +30,8 @@ protected:
     UFUNCTION()
     void OnEnemyHit();
 
-    // --- [BP¿¡¼­ ±¸ÇöÇÒ ºñÁÖ¾ó ÀÌº¥Æ®µé] ---
-    // µðÀÚÀÌ³Ê°¡ ºí·çÇÁ¸°Æ®¿¡¼­ ½Ã°¢Àû Ã³¸®¸¦ ±¸ÇöÇÔ
+    // --- [BPï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ö¾ï¿½ ï¿½Ìºï¿½Æ®ï¿½ï¿½] ---
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ì³Ê°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     UFUNCTION(BlueprintImplementableEvent, Category = "Visuals")
     void UpdateHealthVisual(float Ratio);
 

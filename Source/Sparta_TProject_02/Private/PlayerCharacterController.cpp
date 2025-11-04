@@ -5,6 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MyGameInstance.h"
+#include "Engine/LocalPlayer.h"
 
 APlayerCharacterController::APlayerCharacterController()
 	: InputMappingContext(nullptr)
@@ -14,30 +15,29 @@ APlayerCharacterController::APlayerCharacterController()
 
 void APlayerCharacterController::TriggerStageReward()
 {
-	//À§Á¬ °»½Å
 	UE_LOG(LogTemp, Log, TEXT("TriggerStageReward Called"));
 }
 
 void APlayerCharacterController::OnGameOver()
 {
-	//À§Á¬ °»½Å
 	UE_LOG(LogTemp, Log, TEXT("OnGameOver_Implementation Called"));
 }
 
 void APlayerCharacterController::OnGameWin()
 {
-	//À§Á¬ °»½Å
 	UE_LOG(LogTemp, Log, TEXT("OnGameWin_Implementation Called"));
+	bShowMouseCursor = false;
+	bEnableClickEvents = false;
+	bEnableMouseOverEvents = false;
 }
 
 void APlayerCharacterController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(GetLocalPlayer()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
-			LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
 			if (InputMappingContext)
 			{
