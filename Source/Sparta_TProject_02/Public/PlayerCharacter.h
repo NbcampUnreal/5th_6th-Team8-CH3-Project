@@ -24,6 +24,9 @@ class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
 public:
 	APlayerCharacter();
 
+	//GameMode »£√‚
+	void HealOnWaveClear(float HealAmount);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -141,6 +144,12 @@ protected:
 	void NextWeapon(const FInputActionValue& value);
 	void PrevWeapon(const FInputActionValue& value);
 	void EquipWeapon(int32 Index);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+	float MaxHealth;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	float Health;
 
 public:
 	USkeletalMeshComponent* GetPlayerMesh() const { return PlayerMesh; }
