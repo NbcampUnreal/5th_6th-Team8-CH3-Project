@@ -104,7 +104,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Effects")
 	USoundBase* FireSound;
 
-	// Animation montages (BP¢¯¢®¨ù¡© ??¢¥?)
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Animation")
 	UAnimMontage* FireMontage;
 
@@ -113,6 +112,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Effects")
 	USoundBase* ReloadSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|Impact")
+	UParticleSystem* ImpactFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|Impact")
+	UMaterialInterface* ImpactDecal;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|Impact")
+	USoundBase* ImpactSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|Impact")
+	float ImpactDecalSize = 6.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|Impact")
+	float ImpactDecalLifeSpan = 10.0f;
 
 	// Timer handles
 	FTimerHandle FireTimerHandle;

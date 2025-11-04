@@ -3,7 +3,6 @@
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Controller.h"
-#include "Components/DecalComponent.h"
 
 AShotgun::AShotgun()
 {
@@ -75,35 +74,6 @@ void AShotgun::TraceFire()
 				this,
 				nullptr
 			);
-
-			if (ImpactFX)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
-			}
-
-			if (ImpactDecal && Hit.GetComponent())
-			{
-				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(
-					ImpactDecal,
-					FVector(ImpactDecalSize),
-					Hit.GetComponent(),
-					Hit.BoneName,
-					Hit.ImpactPoint,
-					Hit.ImpactNormal.Rotation(),
-					EAttachLocation::KeepWorldPosition,
-					ImpactDecalLifeSpan
-				);
-
-				if (DecalComp)
-				{
-					DecalComp->SetWorldLocation(Hit.ImpactPoint + Hit.ImpactNormal * 0.5f);
-				}
-			}
-
-			if (ImpactSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.ImpactPoint);
-			}
 		}
 	}
 }

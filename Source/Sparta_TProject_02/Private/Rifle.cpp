@@ -1,4 +1,6 @@
 #include "Rifle.h"
+#include "Animation/AnimMontage.h"
+
 
 ARifle::ARifle()
 {
@@ -8,3 +10,4 @@ ARifle::ARifle()
 	FireRate = 600.0f;
 	WeaponType = EWeaponType::WT_Rifle;
 }
+

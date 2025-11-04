@@ -8,6 +8,7 @@
 #include "GameFramework/Controller.h"
 #include "PlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/DecalComponent.h"
 
 AGunBase::AGunBase()
 {
@@ -186,16 +187,6 @@ void AGunBase::TraceFire()
 
     if (FireMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
     {
-        // 1인칭 메시의 애니메이션 인스턴스를 가져옵니다.
-        UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
-
-        // 몽타주를 재생합니다.
-        // GetPlayLength()는 몽타주의 재생 시간을 반환합니다. 
-        FPAnimInstance->Montage_Play(FireMontage, 1.0f);
-    }
-
-    if (FireMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
-    {
         UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
         FPAnimInstance->Montage_Play(FireMontage, 1.0f);
     }
@@ -221,5 +212,42 @@ void AGunBase::TraceFire()
             this,
             nullptr
         );
+
+        if (ImpactFX)
+        {
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+        }
+
+        if (ImpactDecal && Hit.GetComponent())
+        {
+            UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(
+                ImpactDecal,
+                FVector(ImpactDecalSize),
+                Hit.GetComponent(),
+                Hit.BoneName,
+                Hit.ImpactPoint,
+                Hit.ImpactNormal.Rotation(),
+                EAttachLocation::KeepWorldPosition,
+                ImpactDecalLifeSpan
+            );
+
+            if (DecalComp)
+            {
+                DecalComp->SetWorldLocation(Hit.ImpactPoint + Hit.ImpactNormal * 0.5f);
+            }
+        }
+
+        if (ImpactSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.ImpactPoint);
+        }
+
+        if (UPrimitiveComponent* HitComp = Hit.GetComponent())
+        {
+            if (HitComp->IsSimulatingPhysics())
+            {
+                HitComp->AddImpulseAtLocation(CameraRotation.Vector() * 50000.0f, Hit.ImpactPoint);
+            }
+        }
     }
 }
