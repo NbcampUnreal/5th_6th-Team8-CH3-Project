@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Inventory.h"
+#include "InventoryWidget.h"
 #include "Engine/Engine.h"
 #include "MyGameInstance.h"
 
@@ -99,10 +100,19 @@ UInventory* UShopUserWidget::GetPlayerInventory() const
 {
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
 
-	if (GameInstance && GameInstance->Inventory)
+	if (GameInstance)
 	{
-		return GameInstance->Inventory;
+		UInventoryWidget* InventoryWidget = GameInstance->GetInventoryWidget();
+
+		if (InventoryWidget)
+		{
+			if (InventoryWidget->GetInventory())
+			{
+				return InventoryWidget->GetInventory();
+			}
+		}
 	}
+
 	return nullptr;
 }
 

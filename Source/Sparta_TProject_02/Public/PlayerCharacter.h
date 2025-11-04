@@ -24,7 +24,7 @@ class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
 public:
 	APlayerCharacter();
 
-	//GameMode È£Ãâ
+	//GameMode È£ï¿½ï¿½
 	void HealOnWaveClear(float HealAmount);
 
 protected:

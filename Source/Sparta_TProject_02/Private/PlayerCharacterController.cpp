@@ -14,19 +14,19 @@ APlayerCharacterController::APlayerCharacterController()
 
 void APlayerCharacterController::TriggerStageReward()
 {
-	//À§Á¬ °»½Å
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UE_LOG(LogTemp, Log, TEXT("TriggerStageReward Called"));
 }
 
 void APlayerCharacterController::OnGameOver()
 {
-	//À§Á¬ °»½Å
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UE_LOG(LogTemp, Log, TEXT("OnGameOver_Implementation Called"));
 }
 
 void APlayerCharacterController::OnGameWin()
 {
-	//À§Á¬ °»½Å
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UE_LOG(LogTemp, Log, TEXT("OnGameWin_Implementation Called"));
 }
 

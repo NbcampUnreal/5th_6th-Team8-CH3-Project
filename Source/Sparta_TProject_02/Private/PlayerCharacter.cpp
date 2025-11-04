@@ -12,7 +12,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Actor.h"
 
-//����UI
+//상점UI
 #include "Kismet/GameplayStatics.h"
 #include "Shop.h"
 
@@ -61,7 +61,8 @@ APlayerCharacter::APlayerCharacter()
 	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 60);
 
 	CurrentWeaponIndex = 0;
-	CurrentWeapon = nullptr; // ����: CurrentGun -> CurrentWeapon
+
+	CurrentWeapon = nullptr; // 변경: CurrentGun -> CurrentWeapon
 
 	MaxHealth = 100.0f;
 	Health = MaxHealth;
@@ -81,7 +82,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ����: ���� �ѱ� �������� �迭 ��ȸ �������� ����
+	// 변경: 단일 총기 스폰에서 배열 순회 스폰으로 변경
 	if (StartWeaponClasses.Num() > 0)
 	{
 		FActorSpawnParameters SpawnParams;
@@ -102,7 +103,7 @@ void APlayerCharacter::BeginPlay()
 					);
 
 					Weapons.Add(NewWeapon);
-					// GunBase�� �߰��� �Լ�: ���� �� ��� ����� ����
+					// GunBase에 추가된 함수: 시작 시 모든 무기는 숨김
 					NewWeapon->SetWeaponHidden(true);
 				}
 			}
@@ -111,8 +112,8 @@ void APlayerCharacter::BeginPlay()
 		EquipWeapon(0);
 	}
 
-	//����UI
-	//ĳ���Ͱ� ���忡 �����Ǿ� �ִ� AShop Ŭ������ ��ü�� ã�Ƽ� ���� (Shop ���ʹ� 1���� ���� �� �Ŷ� �ش� ����� ä����)
+	//상점UI
+	//캐릭터가 월드에 스폰되어 있는 AShop 클래스의 객체를 찾아서 저장 (Shop 액터는 1개만 존재 할 거라서 해당 방법을 채택함)
 	if (!ShopActor)
 	{
 		TArray<AActor*> FoundShops;
@@ -189,7 +190,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			EnhancedInput->BindAction(ReloadAction, ETriggerEvent::Started, this, &APlayerCharacter::StartReload);
 		}
 
-		// �߰�: ���� ��ü ��ǲ ���ε�
+		// 추가: 무기 교체 인풋 바인딩
 		if (NextWeaponAction)
 		{
 			EnhancedInput->BindAction(NextWeaponAction, ETriggerEvent::Started, this, &APlayerCharacter::NextWeapon);
@@ -269,7 +270,7 @@ void APlayerCharacter::StopCrouch(const FInputActionValue& value)
 
 void APlayerCharacter::StartShoot(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // ����: CurrentGun -> CurrentWeapon
+	if (CurrentWeapon) // 변경: CurrentGun -> CurrentWeapon
 	{
 		CurrentWeapon->StartFire();
 	}
@@ -277,7 +278,7 @@ void APlayerCharacter::StartShoot(const FInputActionValue& value)
 
 void APlayerCharacter::StopShoot(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // ����: CurrentGun -> CurrentWeapon
+	if (CurrentWeapon) // 변경: CurrentGun -> CurrentWeapon
 	{
 		CurrentWeapon->StopFire();
 	}
@@ -285,25 +286,25 @@ void APlayerCharacter::StopShoot(const FInputActionValue& value)
 
 void APlayerCharacter::StartReload(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // ����: CurrentGun -> CurrentWeapon
+	if (CurrentWeapon) // 변경: CurrentGun -> CurrentWeapon
 	{
 		CurrentWeapon->Reload();
 	}
 }
 
-// �߰�: ���� ���� �Լ�
+// 추가: 다음 무기 함수
 void APlayerCharacter::NextWeapon(const FInputActionValue& value)
 {
-	if (Weapons.Num() <= 1) return; // ���Ⱑ �ϳ� ���ϸ� ��ü �� ��
+	if (Weapons.Num() <= 1) return; // 무기가 하나 이하면 교체 안 함
 
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
 	EquipWeapon(CurrentWeaponIndex);
 }
 
-// �߰�: ���� ���� �Լ�
+// 추가: 이전 무기 함수
 void APlayerCharacter::PrevWeapon(const FInputActionValue& value)
 {
-	if (Weapons.Num() <= 1) return; // ���Ⱑ �ϳ� ���ϸ� ��ü �� ��
+	if (Weapons.Num() <= 1) return; // 무기가 하나 이하면 교체 안 함
 
 	CurrentWeaponIndex--;
 	if (CurrentWeaponIndex < 0)
@@ -313,18 +314,18 @@ void APlayerCharacter::PrevWeapon(const FInputActionValue& value)
 	EquipWeapon(CurrentWeaponIndex);
 }
 
-// �߰�: ���� ���� �Լ�
+// 추가: 무기 장착 함수
 void APlayerCharacter::EquipWeapon(int32 Index)
 {
 	if (!Weapons.IsValidIndex(Index)) return;
 
-	// ���� ���� ����
+	// 기존 무기 숨김
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->SetWeaponHidden(true);
 	}
 
-	// �� ���� ���� �� ǥ��
+	// 새 무기 장착 및 표시
 	CurrentWeapon = Weapons[Index];
 	CurrentWeapon->SetWeaponHidden(false);
 	CurrentWeaponIndex = Index;

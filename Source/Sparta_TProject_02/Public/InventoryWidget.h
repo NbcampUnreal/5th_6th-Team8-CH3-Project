@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "ItemButtonWidget.h"
@@ -61,6 +61,11 @@ public:
 	void ItemContextMenuHide();
 	UFUNCTION()
 	void ItemDestory(const FItemButtonData& ItemButtonData);
+
+	UInventory* GetInventory() const
+	{
+		return Inventory;
+	}
 
 	
 };
