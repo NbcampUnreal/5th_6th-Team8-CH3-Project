@@ -12,6 +12,8 @@
 				"UMG",
 				"CoreUObject",
 				"Engine"
+				"Engine",
+				"UMG"
 			]
 		}
 	],

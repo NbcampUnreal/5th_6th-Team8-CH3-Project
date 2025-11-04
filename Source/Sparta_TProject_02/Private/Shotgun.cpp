@@ -1,20 +1,19 @@
 #include "Shotgun.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h" 
 #include "GameFramework/Controller.h"
-#include "GameFramework/Pawn.h"
-#include "PlayerCharacter.h" // 추가: OwningPlayer 사용을 위해
+#include "Components/DecalComponent.h"
 
 AShotgun::AShotgun()
 {
 	Damage = 15.0f;
 	MaxMagazineAmmo = 8;
+	CurrentAmmo = MaxMagazineAmmo;
 	FireRate = 0.0f;
-
 	PelletsPerShot = 8;
 	SpreadAngle = 5.0f;
-
-	WeaponType = EWeaponType::WT_Shotgun; // 추가: 샷건 타입 명시
+	WeaponType = EWeaponType::WT_Shotgun;
 }
 
 void AShotgun::TraceFire()
@@ -27,13 +26,13 @@ void AShotgun::TraceFire()
 
 	CurrentAmmo--;
 
-	// 변경: OwnerPawn 대신 캐시해둔 OwningPlayer 사용
-	if (!OwningPlayer) return;
-	AController* OwnerController = OwningPlayer->GetController();
+	APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner());
+	if (!Player) return;
+
+	AController* OwnerController = Player->GetController();
 	if (!OwnerController) return;
 
-	// --- 추가: 샷건 이펙트 재생 (TraceFire가 한 번만 호출되므로 여기에 둬야 함) ---
-	if (MuzzleFlash)
+	if (MuzzleFlash && GunMesh)
 	{
 		UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GunMesh, FName("Muzzle"));
 	}
@@ -41,12 +40,12 @@ void AShotgun::TraceFire()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
-	if (FireMontage && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
-	{
-		OwningPlayer->GetFPMesh()->GetAnimInstance()->Montage_Play(FireMontage);
-	}
-	// --- 이펙트 재생 끝 ---
 
+	if (FireMontage && Player->GetFPMesh() && Player->GetFPMesh()->GetAnimInstance())
+	{
+		UAnimInstance* FPAnimInstance = Player->GetFPMesh()->GetAnimInstance();
+		FPAnimInstance->Montage_Play(FireMontage, 1.0f);
+	}
 
 	FVector StartLocation;
 	FRotator CameraRotation;
@@ -55,7 +54,7 @@ void AShotgun::TraceFire()
 	FVector ShootDir = CameraRotation.Vector();
 	float ConeHalfAngleRad = FMath::DegreesToRadians(SpreadAngle * 0.5f);
 
-	for (int32 i = 0; i < PelletsPerShot; i++)
+	for (int32 i = 0; i < PelletsPerShot; ++i)
 	{
 		FVector SpreadVector = UKismetMathLibrary::RandomUnitVectorInConeInRadians(ShootDir, ConeHalfAngleRad);
 		FVector TraceEnd = StartLocation + (SpreadVector * 10000.f);
@@ -76,6 +75,35 @@ void AShotgun::TraceFire()
 				this,
 				nullptr
 			);
+
+			if (ImpactFX)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+			}
+
+			if (ImpactDecal && Hit.GetComponent())
+			{
+				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(
+					ImpactDecal,
+					FVector(ImpactDecalSize),
+					Hit.GetComponent(),
+					Hit.BoneName,
+					Hit.ImpactPoint,
+					Hit.ImpactNormal.Rotation(),
+					EAttachLocation::KeepWorldPosition,
+					ImpactDecalLifeSpan
+				);
+
+				if (DecalComp)
+				{
+					DecalComp->SetWorldLocation(Hit.ImpactPoint + Hit.ImpactNormal * 0.5f);
+				}
+			}
+
+			if (ImpactSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.ImpactPoint);
+			}
 		}
 	}
 }

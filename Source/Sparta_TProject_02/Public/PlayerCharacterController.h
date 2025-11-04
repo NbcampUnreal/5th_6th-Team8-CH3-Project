@@ -5,7 +5,6 @@
 #include "PlayerCharacterController.generated.h"
 
 class UInputMappingContext;
-class UInputAction;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacterController : public APlayerController

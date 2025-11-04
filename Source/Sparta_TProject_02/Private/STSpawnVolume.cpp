@@ -10,10 +10,10 @@ ASTSpawnVolume::ASTSpawnVolume()
 
 	SpawnBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnBox"));
 	SpawnBox->SetupAttachment(RootComponent);
-	SpawnBox->SetBoxExtent(FVector(500.0f, 500.0f, 200.0f)); // ±âº» Å©±â
-	SpawnBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // Ãæµ¹ ºñÈ°¼ºÈ­
+	SpawnBox->SetBoxExtent(FVector(500.0f, 500.0f, 200.0f)); // ï¿½âº» Å©ï¿½ï¿½
+	SpawnBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // ï¿½æµ¹ ï¿½ï¿½È°ï¿½ï¿½È­
 
-	// ¿¡µðÅÍ¿¡¼­ º¸ÀÌµµ·Ï ¼³Á¤
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	SpawnBox->SetHiddenInGame(true);
 	SpawnBox->bVisualizeComponent = true;
 
@@ -23,7 +23,7 @@ void ASTSpawnVolume::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// °ÔÀÓ ½ÃÀÛ ½Ã ·Î±×
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Î±ï¿½
 	UE_LOG(LogTemp, Log, TEXT("[SpawnVolume] '%s' Finished Initialized (transform: %s, scale: %s)"),
 		*GetName(),
 		*GetActorLocation().ToString(),
@@ -34,19 +34,19 @@ FVector ASTSpawnVolume::GetRandomPointInVolume() const
 {
 	if (!SpawnBox)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[SpawnVolume] SpawnBox°¡ À¯È¿ÇÏÁö ¾Ê½À´Ï´Ù!"));
+		UE_LOG(LogTemp, Warning, TEXT("[SpawnVolume] SpawnBoxï¿½ï¿½ ï¿½ï¿½È¿ï¿½ï¿½ï¿½ï¿½ ï¿½Ê½ï¿½ï¿½Ï´ï¿½!"));
 		return GetActorLocation();
 	}
 
-	// ¹Ú½ºÀÇ ¿ùµå À§Ä¡, Å©±â
+	// ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡, Å©ï¿½ï¿½
 	FVector Origin = SpawnBox->GetComponentLocation();
 	FVector BoxExtent = SpawnBox->GetScaledBoxExtent();
 
-	// ¹Ú½º ³»ºÎÀÇ ·£´ý À§Ä¡ °è»ê
+	// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½
 	FVector RandomPoint;
 	RandomPoint.X = Origin.X + FMath::RandRange(-BoxExtent.X, BoxExtent.X);
 	RandomPoint.Y = Origin.Y + FMath::RandRange(-BoxExtent.Y, BoxExtent.Y);
-	RandomPoint.Z = Origin.Z + ZOffset; // ZÃàÀº °íÁ¤ (Áö¸é À§)
+	RandomPoint.Z = Origin.Z + ZOffset; // Zï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
 
 	return RandomPoint;
 
@@ -59,7 +59,7 @@ bool ASTSpawnVolume::IsPointInVolume(const FVector& Point) const
 		return false;
 	}
 
-	// ¹Ú½º ¿µ¿ª ³»¿¡ ÀÖ´ÂÁö È®ÀÎ
+	// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 	FBox BoundingBox = SpawnBox->Bounds.GetBox();
 	return BoundingBox.IsInside(Point);
 }
@@ -69,12 +69,12 @@ void ASTSpawnVolume::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	// ¿¡µðÅÍ¿¡¼­ ÇÁ·ÎÆÛÆ¼ º¯°æ ½Ã ·Î±×
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Î±ï¿½
 	FName PropertyName = PropertyChangedEvent.GetPropertyName();
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(ASTSpawnVolume, bShowDebugBox) ||
 		PropertyName == GET_MEMBER_NAME_CHECKED(ASTSpawnVolume, DebugBoxColor))
 	{
-		UE_LOG(LogTemp, Log, TEXT("[SpawnVolume] '%s' µð¹ö±× ¼³Á¤ º¯°æµÊ"), *GetName());
+		UE_LOG(LogTemp, Log, TEXT("[SpawnVolume] '%s' ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½"), *GetName());
 	}
 }
 #endif
