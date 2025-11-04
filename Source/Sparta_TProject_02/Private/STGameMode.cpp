@@ -65,6 +65,26 @@ void ASTGameMode::BeginPlay()
 
 }
 
+
+void ASTGameMode::PawnKilled(APawn* PawnKilled)
+{
+
+	if (bIsGameOver || !PawnKilled)
+	{
+		return;
+	}
+
+	APlayerCharacter* DeadPlayer = Cast<APlayerCharacter>(PawnKilled);
+	if (DeadPlayer)
+	{
+		HandleGameOver();
+	}
+	else
+	{
+
+	}
+}
+
 void ASTGameMode::OnPlayerDeath(APlayerCharacter* DeadPlayer)
 {
 	if (!DeadPlayer || bIsGameOver)

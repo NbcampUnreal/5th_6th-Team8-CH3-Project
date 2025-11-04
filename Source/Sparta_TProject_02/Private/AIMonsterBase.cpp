@@ -137,3 +137,9 @@ void AAIMonsterBase::Die()
 
     SetLifeSpan(5.0f);
 }
+
+void AAIMonsterBase::ApplyHealthMultiplier(float Multiplier)
+{
+    MaxHealth *= Multiplier;
+    CurrentHealth = MaxHealth;
+}

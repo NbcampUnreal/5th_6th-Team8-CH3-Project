@@ -19,11 +19,16 @@ void ASTPlayerState::BeginPlay()
 
 }
 
+void ASTPlayerState::SetPlayerName(const FString& NewName)
+{
+	PlayerName = NewName;
+}
+
 void ASTPlayerState::SetHealth(float NewHealth)
 {
 	float OldHealth = CurrentHealth;
 	CurrentHealth = FMath::Clamp(NewHealth, 0.f, MaxHealth);
-
+	
 	if(OldHealth != CurrentHealth)
 	{
 		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
