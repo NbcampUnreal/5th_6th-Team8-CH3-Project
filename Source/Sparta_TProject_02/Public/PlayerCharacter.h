@@ -175,6 +175,6 @@ private:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Mesh")
-	USkeletalMeshComponent* GetFPMesh() const { return FP_Mesh; } 
+	USkeletalMeshComponent* GetFPMesh() const { return FP_Mesh; };
 
-}
+};

@@ -88,3 +88,6 @@ public:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Game State")
 	bool bIsGameWin;
+
+
+};
