@@ -20,11 +20,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	UInventoryWidget* InventoryWidgetInstance;
 
 	virtual void Init() override;
-	
+
 public:
 	UMyGameInstance();
 	// ===== ���� �帧 ���� =====
@@ -54,20 +54,20 @@ public:
 
 	void SetupInventoryWidget(APlayerCharacterController* PlayerContorller);
 
+	//Shop 연동용
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<UInventory> InventoryBlueprintClass;
+
 protected:
-	// ===== 레벨 관련 =====
+	// ===== ���� ���� =====
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Levels")
 	FName MainMenuLevelName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Levels")
 	FName GameLevelName;
 
-	// ===== 점수 관련 =====
+	// ===== ���� ���� =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Score")
 	int32 HighScore;
 
-
-	//Shop 연동용
-	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-	TSubclassOf<UInventory> InventoryBlueprintClass;
 };

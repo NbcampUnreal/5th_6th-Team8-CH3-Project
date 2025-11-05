@@ -8,11 +8,11 @@
 
 UMyGameInstance::UMyGameInstance()
 {
-    // ·¹º§ ÀÌ¸§
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½
     MainMenuLevelName = FName("MainMenu_Map");
     GameLevelName = FName("Game_Map");
 
-    // Á¡¼ö ÃÊ±âÈ­
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     HighScore = 0;
 
    Inventory = nullptr;
@@ -45,7 +45,7 @@ void UMyGameInstance::Init()
    Super::Init();
 }
 
-// ===== °ÔÀÓ Èå¸§ ÇÔ¼öµé =====
+// ===== ï¿½ï¿½ï¿½ï¿½ ï¿½å¸§ ï¿½Ô¼ï¿½ï¿½ï¿½ =====
 void UMyGameInstance::LoadMainMenu()
 {
     if (MainMenuLevelName == NAME_None)
@@ -83,7 +83,7 @@ void UMyGameInstance::QuitGame()
     );
 }
 
-// ===== Á¡¼ö ÇÔ¼öµé =====
+// ===== ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ =====
 void UMyGameInstance::SetNewHighScore(int32 NewScore)
 {
     if (NewScore > HighScore)
