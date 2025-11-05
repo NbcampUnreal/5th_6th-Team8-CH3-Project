@@ -1,24 +1,22 @@
 #include "PlayerCharacter.h"
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "InputActionValue.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "InputAction.h"
-#include "Engine/LocalPlayer.h"
+#include "InputActionValue.h"
 #include "GunBase.h"
-#include "EnhancedInputSubsystems.h"
-#include "GameFramework/Pawn.h"
-#include "GameFramework/Actor.h"
-
+#include "GrenadeActor.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
-
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(GetCapsuleComponent());
@@ -27,8 +25,7 @@ APlayerCharacter::APlayerCharacter()
 
 	PlayerMesh = GetMesh();
 	PlayerMesh->SetupAttachment(GetCapsuleComponent());
-
-	PlayerMesh->SetOwnerNoSee(true); 
+	PlayerMesh->SetOwnerNoSee(true);
 	PlayerMesh->SetRelativeLocation(FVector(0.f, 0.f, -90.0f));
 
 	FP_Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Mesh"));
@@ -57,8 +54,7 @@ APlayerCharacter::APlayerCharacter()
 	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 60);
 
 	CurrentWeaponIndex = 0;
-	CurrentWeapon = nullptr; // º¯°æ: CurrentGun -> CurrentWeapon
-
+	CurrentWeapon = nullptr; 
 	MaxHealth = 100.0f;
 	Health = MaxHealth;
 }
@@ -69,20 +65,25 @@ void APlayerCharacter::HealOnWaveClear(float HealAmount)
 	{
 		return;
 	}
-	// ÃÖ´ë Ã¼·Â(MaxHealth)À» ³ÑÁö ¾Êµµ·Ï ¾ÈÀüÇÏ°Ô ´õÇÕ´Ï´Ù.
+
 	Health = FMath::Clamp(Health + HealAmount, 0.f, MaxHealth);
+	CurrentWeaponIndex = -1;
+	CurrentWeapon = nullptr;
+
+	bWantsToSprint = false;
+	bIsAiming = false;
+	bIsFiring = false; // 
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// º¯°æ: ´ÜÀÏ ÃÑ±â ½ºÆù¿¡¼­ ¹è¿­ ¼øÈ¸ ½ºÆùÀ¸·Î º¯°æ
 	if (StartWeaponClasses.Num() > 0)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
-		SpawnParams.Instigator = this;
+		SpawnParams.Instigator = GetInstigator();
 
 		for (TSubclassOf<AGunBase> WeaponClass : StartWeaponClasses)
 		{
@@ -91,20 +92,50 @@ void APlayerCharacter::BeginPlay()
 				AGunBase* NewWeapon = GetWorld()->SpawnActor<AGunBase>(WeaponClass, SpawnParams);
 				if (NewWeapon)
 				{
+					// --- ï¿½ï¿½ ï¿½Îºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ---
+					FName AttachSocketName = TEXT("GripPoint"); // ï¿½âº»ï¿½ï¿½
+
+					// 1. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½
+					EWeaponType Type = NewWeapon->GetWeaponType(); // AGunBaseï¿½ï¿½ GetWeaponType() ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½Ö´Ù°ï¿½ ï¿½ï¿½ï¿½ï¿½
+
+					// 2. Å¸ï¿½Ô¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+					if (Type == EWeaponType::WT_Rifle)
+					{
+						AttachSocketName = TEXT("GripPoint_Rifle");
+					}
+					else if (Type == EWeaponType::WT_Shotgun)
+					{
+						AttachSocketName = TEXT("GripPoint_Shotgun");
+					}
+					else if (Type == EWeaponType::WT_Pistol)
+					{
+						AttachSocketName = TEXT("GripPoint_Pistol");
+					}
+
+					// 3. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 					NewWeapon->AttachToComponent(
 						FP_Mesh,
 						FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-						FName("GripPoint")
+						AttachSocketName // <-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½
 					);
 
-					Weapons.Add(NewWeapon);
-					// GunBase¿¡ Ãß°¡µÈ ÇÔ¼ö: ½ÃÀÛ ½Ã ¸ðµç ¹«±â´Â ¼û±è
 					NewWeapon->SetWeaponHidden(true);
+
+					Weapons.Add(NewWeapon);
+
+					NewWeapon->OnStartFire.AddDynamic(this, &APlayerCharacter::OnWeaponStartFire);
+					NewWeapon->OnStopFire.AddDynamic(this, &APlayerCharacter::OnWeaponStopFire);
+					NewWeapon->OnStartReload.AddDynamic(this, &APlayerCharacter::OnWeaponStartReload);
+					NewWeapon->OnFinishReload.AddDynamic(this, &APlayerCharacter::OnWeaponFinishReload);
 				}
 			}
 		}
 
-		EquipWeapon(0);
+		EquipWeaponByType(EWeaponType::WT_Rifle);
+		if (!CurrentWeapon && Weapons.Num() > 0)
+		{
+			EquipWeapon(0);
+		}
 	}
 }
 
@@ -114,15 +145,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		if (MoveAction)
-		{
-			EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-		}
-
-		if (LookAction)
-		{
-			EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-		}
+		if (MoveAction) EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		if (LookAction) EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 
 		if (JumpAction)
 		{
@@ -135,6 +159,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			EnhancedInput->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerCharacter::StartSprint);
 			EnhancedInput->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopSprint);
 		}
+
 		if (CrouchAction)
 		{
 			EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::StartCrouch);
@@ -152,162 +177,136 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			EnhancedInput->BindAction(ReloadAction, ETriggerEvent::Started, this, &APlayerCharacter::StartReload);
 		}
 
-		// Ãß°¡: ¹«±â ±³Ã¼ ÀÎÇ² ¹ÙÀÎµù
-		if (NextWeaponAction)
+		if (GrenadeAction)
 		{
-			EnhancedInput->BindAction(NextWeaponAction, ETriggerEvent::Started, this, &APlayerCharacter::NextWeapon);
+			EnhancedInput->BindAction(GrenadeAction, ETriggerEvent::Started, this, &APlayerCharacter::ThrowGrenade);
 		}
-		if (PrevWeaponAction)
-		{
-			EnhancedInput->BindAction(PrevWeaponAction, ETriggerEvent::Started, this, &APlayerCharacter::PrevWeapon);
-		}
+
+		if (EquipShotgunAction) EnhancedInput->BindAction(EquipShotgunAction, ETriggerEvent::Started, this, &APlayerCharacter::EquipShotgun);
+		if (EquipRifleAction) EnhancedInput->BindAction(EquipRifleAction, ETriggerEvent::Started, this, &APlayerCharacter::EquipRifle);
+		if (EquipPistolAction) EnhancedInput->BindAction(EquipPistolAction, ETriggerEvent::Started, this, &APlayerCharacter::EquipPistol);
 	}
 }
-
 
 void APlayerCharacter::Move(const FInputActionValue& value)
 {
 	if (!Controller) return;
 
 	const FVector2D MoveInput = value.Get<FVector2D>();
-
 	const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
 	const FVector ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	if (!FMath::IsNearlyZero(MoveInput.Y))
-	{
-		AddMovementInput(ForwardDir, MoveInput.Y);
-	}
-
-	if (!FMath::IsNearlyZero(MoveInput.X))
-	{
-		AddMovementInput(RightDir, MoveInput.X);
-	}
-}
-
-void APlayerCharacter::StartJump(const FInputActionValue& value)
-{
-	Jump();
-}
-
-void APlayerCharacter::StopJump(const FInputActionValue& value)
-{
-	StopJumping();
+	if (!FMath::IsNearlyZero(MoveInput.Y)) AddMovementInput(ForwardDir, MoveInput.Y);
+	if (!FMath::IsNearlyZero(MoveInput.X)) AddMovementInput(RightDir, MoveInput.X);
 }
 
 void APlayerCharacter::Look(const FInputActionValue& value)
 {
 	FVector2D LookInput = value.Get<FVector2D>();
-
 	AddControllerYawInput(LookInput.X * -1.0f);
 	AddControllerPitchInput(LookInput.Y);
 }
 
+void APlayerCharacter::StartJump(const FInputActionValue& value) { Jump(); }
+void APlayerCharacter::StopJump(const FInputActionValue& value) { StopJumping(); }
+
 void APlayerCharacter::StartSprint(const FInputActionValue& value)
 {
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-	}
+	bWantsToSprint = true;
+	if (GetCharacterMovement()) GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 }
-
 void APlayerCharacter::StopSprint(const FInputActionValue& value)
 {
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
-	}
+	bWantsToSprint = false;
+	if (GetCharacterMovement()) GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 }
 
-void APlayerCharacter::StartCrouch(const FInputActionValue& value)
-{
-	Crouch();
-}
-
-void APlayerCharacter::StopCrouch(const FInputActionValue& value)
-{
-	UnCrouch();
-}
+void APlayerCharacter::StartCrouch(const FInputActionValue& value) { Crouch(); }
+void APlayerCharacter::StopCrouch(const FInputActionValue& value) { UnCrouch(); }
 
 void APlayerCharacter::StartShoot(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // º¯°æ: CurrentGun -> CurrentWeapon
+	if (bWantsToSprint)
+	{
+		bWantsToSprint = false;
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+		}
+	}
+
+	if (CurrentWeapon)
 	{
 		CurrentWeapon->StartFire();
 	}
 }
-
 void APlayerCharacter::StopShoot(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // º¯°æ: CurrentGun -> CurrentWeapon
-	{
-		CurrentWeapon->StopFire();
-	}
+	if (CurrentWeapon) CurrentWeapon->StopFire();
 }
 
 void APlayerCharacter::StartReload(const FInputActionValue& value)
 {
-	if (CurrentWeapon) // º¯°æ: CurrentGun -> CurrentWeapon
+	if (CurrentWeapon) CurrentWeapon->Reload();
+}
+
+// Equip helpers
+void APlayerCharacter::EquipShotgun(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Shotgun); }
+void APlayerCharacter::EquipRifle(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Rifle); }
+void APlayerCharacter::EquipPistol(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Pistol); }
+
+void APlayerCharacter::EquipWeaponByType(EWeaponType TypeToEquip)
+{
+
+	if (CurrentWeapon && CurrentWeapon->IsReloading())
 	{
-		CurrentWeapon->Reload();
+		return;
+	}
+
+	if (CurrentWeapon && CurrentWeapon->GetWeaponType() == TypeToEquip) return;
+
+	for (int32 i = 0; i < Weapons.Num(); ++i)
+	{
+		if (Weapons[i] && Weapons[i]->GetWeaponType() == TypeToEquip)
+		{
+			EquipWeapon(i);
+			return;
+		}
 	}
 }
 
-// Ãß°¡: ´ÙÀ½ ¹«±â ÇÔ¼ö
-void APlayerCharacter::NextWeapon(const FInputActionValue& value)
-{
-	if (Weapons.Num() <= 1) return; // ¹«±â°¡ ÇÏ³ª ÀÌÇÏ¸é ±³Ã¼ ¾È ÇÔ
-
-	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
-	EquipWeapon(CurrentWeaponIndex);
-}
-
-// Ãß°¡: ÀÌÀü ¹«±â ÇÔ¼ö
-void APlayerCharacter::PrevWeapon(const FInputActionValue& value)
-{
-	if (Weapons.Num() <= 1) return; // ¹«±â°¡ ÇÏ³ª ÀÌÇÏ¸é ±³Ã¼ ¾È ÇÔ
-
-	CurrentWeaponIndex--;
-	if (CurrentWeaponIndex < 0)
-	{
-		CurrentWeaponIndex = Weapons.Num() - 1;
-	}
-	EquipWeapon(CurrentWeaponIndex);
-}
-
-// Ãß°¡: ¹«±â ÀåÂø ÇÔ¼ö
 void APlayerCharacter::EquipWeapon(int32 Index)
 {
-	if (!Weapons.IsValidIndex(Index)) return;
+	if (CurrentWeapon && CurrentWeapon->IsReloading())
+	{
+		return;
+	}
+	if (!Weapons.IsValidIndex(Index) || Weapons[Index] == CurrentWeapon) return;
 
-	// ±âÁ¸ ¹«±â ¼û±è
 	if (CurrentWeapon)
 	{
+		CurrentWeapon->StopFire(); // << [ï¿½ï¿½ï¿½ï¿½ 3] ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½/Å¸ï¿½Ì¸ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 		CurrentWeapon->SetWeaponHidden(true);
 	}
 
-	// »õ ¹«±â ÀåÂø ¹× Ç¥½Ã
+	bIsFiring = false; // << [ï¿½ï¿½ï¿½ï¿½ 3] ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ ï¿½ß»ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
+
 	CurrentWeapon = Weapons[Index];
 	CurrentWeapon->SetWeaponHidden(false);
 	CurrentWeaponIndex = Index;
 }
 
-
 void APlayerCharacter::AddAmmo(EWeaponType WeaponType, int32 Amount)
 {
 	if (Amount <= 0) return;
-	if (WeaponType == EWeaponType::WT_Pistol)
-		return;
+	if (WeaponType == EWeaponType::WT_Pistol) return;
 
 	int32* Current = AmmoReserve.Find(WeaponType);
 	int32 CurrentVal = Current ? *Current : 0;
 
 	int32 MaxCarry = 999;
-	if (int32* FoundMax = MaxCarryAmmo.Find(WeaponType))
-	{
-		MaxCarry = *FoundMax;
-	}
+	if (int32* FoundMax = MaxCarryAmmo.Find(WeaponType)) MaxCarry = *FoundMax;
 
 	int32 NewVal = FMath::Clamp(CurrentVal + Amount, 0, MaxCarry);
 	AmmoReserve.Add(WeaponType, NewVal);
@@ -317,8 +316,7 @@ void APlayerCharacter::AddAmmo(EWeaponType WeaponType, int32 Amount)
 
 int32 APlayerCharacter::ConsumeAmmoForReload(EWeaponType WeaponType, int32 RequestedAmount)
 {
-	if (WeaponType == EWeaponType::WT_Pistol)
-		return RequestedAmount;
+	if (WeaponType == EWeaponType::WT_Pistol) return RequestedAmount;
 
 	int32* Current = AmmoReserve.Find(WeaponType);
 	int32 CurrentVal = Current ? *Current : 0;
@@ -335,4 +333,103 @@ int32 APlayerCharacter::GetReserveAmmo(EWeaponType WeaponType) const
 {
 	const int32* Found = AmmoReserve.Find(WeaponType);
 	return Found ? *Found : 0;
+}
+
+void APlayerCharacter::OnWeaponStartFire()
+{
+	bIsFiring = true; // << [ï¿½ï¿½ï¿½ï¿½ 1] ï¿½ß»ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+}
+
+void APlayerCharacter::OnWeaponStopFire()
+{
+	bIsFiring = false; // << [ï¿½ï¿½ï¿½ï¿½ 1] ï¿½ß»ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+}
+
+void APlayerCharacter::OnWeaponStartReload()
+{
+	if (!CurrentWeapon) return;
+	if (UAnimInstance* Anim = FP_Mesh->GetAnimInstance())
+	{
+		if (UAnimMontage* M = CurrentWeapon->GetReloadMontage())
+		{
+			Anim->Montage_Play(M);
+		}
+	}
+}
+
+void APlayerCharacter::ThrowGrenade(const FInputActionValue& Value)
+{
+	if (!bCanThrowGrenade) return;
+	if (!GrenadeClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GrenadeClass not set on PlayerCharacter"));
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	// 1ï¿½ï¿½Äª Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½
+	FVector CamLoc;
+	FRotator CamRot;
+	if (AController* C = GetController())
+	{
+		// GetPlayerViewPoint ï¿½ï¿½ï¿½ (Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½)
+		C->GetPlayerViewPoint(CamLoc, CamRot);
+	}
+	else
+	{
+		CamLoc = CameraComp ? CameraComp->GetComponentLocation() : GetActorLocation();
+		CamRot = CameraComp ? CameraComp->GetComponentRotation() : GetActorRotation();
+	}
+
+	// Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½à°£ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Ú±ï¿½ ï¿½Ú½Å°ï¿½ ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½)
+	const float SpawnForwardOffset = 100.f;
+	FVector SpawnLocation = CamLoc + CamRot.Vector() * SpawnForwardOffset;
+	FRotator SpawnRotation = CamRot;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+
+	AGrenadeActor* Grenade = World->SpawnActor<AGrenadeActor>(GrenadeClass, SpawnLocation, SpawnRotation, SpawnParams);
+	if (Grenade)
+	{
+		if (Grenade->ProjectileMovement)
+		{
+			FVector LaunchVel = CamRot.Vector() * GrenadeThrowStrength + FVector(0.f, 0.f, 200.f);
+			Grenade->ProjectileMovement->Velocity = LaunchVel;
+		}
+		else if (Grenade->MeshComp && Grenade->MeshComp->IsSimulatingPhysics())
+		{
+			FVector Impulse = CamRot.Vector() * GrenadeThrowStrength;
+			Grenade->MeshComp->AddImpulse(Impulse, NAME_None, true);
+		}
+	}
+
+	if (ThrowGrenadeMontage)
+	{
+		if (UAnimInstance* AnimInst = FP_Mesh->GetAnimInstance())
+		{
+			AnimInst->Montage_Play(ThrowGrenadeMontage);
+		}
+	}
+
+	// ======= [ï¿½ï¿½Ù¿ï¿½ Ã³ï¿½ï¿½] =======
+	bCanThrowGrenade = false;
+	GetWorldTimerManager().SetTimer(GrenadeCooldownHandle, [this]()
+		{
+			bCanThrowGrenade = true;
+		}, GrenadeCooldown, false);
+
+	// ======= [ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½] =======
+	if (ThrowGrenadeSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(World, ThrowGrenadeSound, GetActorLocation());
+	}
+}
+
+void APlayerCharacter::OnWeaponFinishReload()
+{
+	// HUD ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½
 }

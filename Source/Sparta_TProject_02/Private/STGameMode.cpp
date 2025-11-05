@@ -1,5 +1,4 @@
 #include "STGameMode.h"
-
 #include "STGameState.h"
 #include "STSpawnVolume.h"
 #include "AIMonsterBase.h"
@@ -52,7 +51,6 @@ void ASTGameMode::BeginPlay()
 		UE_LOG(LogTemp, Log, TEXT("[GameMode] FoundOut SpawnVolume %d !"), SpawnVolumes.Num());
 	}
 
-	//Ã¹ ¿þÀÌºê ½ÃÀÛ 3ÃÊ ÈÄ
 	FTimerHandle InitialDelayTimer;
 	GetWorldTimerManager().SetTimer(
 		InitialDelayTimer,
@@ -102,9 +100,9 @@ void ASTGameMode::StartNextWave()
 	{
 		return;
 	}
-	//¿þÀÌºê +
+	//ï¿½ï¿½ï¿½Ìºï¿½ +
 	CurrentWave++;
-	//º¸½º ¿þÀÌºêÀÎÁö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ï¿½ï¿½
 	bIsBossWave = (CurrentWave == FinalBossWave);
 
 	UE_LOG(LogTemp, Log, TEXT("Start Wave !"), CurrentWave);
@@ -114,7 +112,7 @@ void ASTGameMode::StartNextWave()
 		STGameState->SetCurrentWave(CurrentWave);
 		STGameState->SetIsBossWave(bIsBossWave);
 	}
-	//º¸½º ¿þÀÌºêÀÏ °æ¿ì
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	if (bIsBossWave)
 	{
 		if (FinalEnemyClass)
@@ -140,42 +138,42 @@ int32 ASTGameMode::CalculateEnemiesForWave(int32 Wave) const
 	return BaseMonsters * (1 << (Wave - 1));
 }
 
-//¿þÀÌºê¿¡ µû¸¥ Ã¼·Â ¹èÀ²..Èì...
+//ï¿½ï¿½ï¿½Ìºê¿¡ ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½..ï¿½ï¿½...
 float ASTGameMode::GetHealthMultiplierForWave(int32 Wave) const
 {
 	return FMath::Pow(HealthIncreaseMultiplier, Wave - 1);
 }
 
-// Àû ½ºÆù ·ÎÁ÷
+// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 void ASTGameMode::SpawnEnemies()
 {
 	if (SpawnVolumes.Num() == 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[GameMode] SpawnVolumeÀÌ ¾ø¾î¼­ ÀûÀ» ½ºÆùÇÒ ¼ö ¾ø½À´Ï´Ù!"));
+		UE_LOG(LogTemp, Error, TEXT("[GameMode] SpawnVolumeï¿½ï¿½ ï¿½ï¿½ï¿½î¼­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½!"));
 		return;
 	}
 
 	if (!EnemyClass)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[GameMode] EnemyClass°¡ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù!"));
+		UE_LOG(LogTemp, Error, TEXT("[GameMode] EnemyClassï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò½ï¿½ï¿½Ï´ï¿½!"));
 		return;
 	}
 
-	// ½ºÆùÇÒ Àû ¼ö °è»ê
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
 	int32 EnemiesToSpawn = CalculateEnemiesForWave(CurrentWave);
 	int32 ZombiesToSpawn = 0;
 
-	// Á»ºñ µîÀå ¿þÀÌºê ÀÌ»óÀÌ¸é Á»ºñ Ãß°¡
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½Ì»ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
 	if (CurrentWave >= ZombieStartWave && SecondEnemyClass)
 	{
 		ZombiesToSpawn = ZombiePerWave;
-		EnemiesToSpawn -= ZombiesToSpawn; // ÀÏ¹Ý ¸ó½ºÅÍ ¼ö Á¶Á¤
+		EnemiesToSpawn -= ZombiesToSpawn; // ï¿½Ï¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	}
 
-	// ÇöÀç ¿þÀÌºêÀÇ Ã¼·Â ¹èÀ²
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	float HealthMultiplier = GetHealthMultiplierForWave(CurrentWave);
 
-	// ÀÏ¹Ý ¸ó½ºÅÍ ½ºÆù
+	// ï¿½Ï¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	for (int32 i = 0; i < EnemiesToSpawn; i++)
 	{
 		FVector SpawnLocation;
@@ -196,7 +194,7 @@ void ASTGameMode::SpawnEnemies()
 
 			if (SpawnedEnemy)
 			{
-				// Ã¼·Â ¹èÀ² 
+				// Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
 				SpawnedEnemy->ApplyHealthMultiplier(HealthMultiplier);
 				EnemiesAlive++;
 				TotalEnemiesSpawned++;
@@ -208,7 +206,7 @@ void ASTGameMode::SpawnEnemies()
 		}
 	}
 
-	// Á»ºñ ½ºÆù
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	for (int32 i = 0; i < ZombiesToSpawn; i++)
 	{
 		FVector SpawnLocation;
@@ -241,7 +239,7 @@ void ASTGameMode::SpawnEnemies()
 		}
 	}
 
-	// GameState ¾÷µ¥ÀÌÆ®
+	// GameState ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	if (STGameState)
 	{
 		STGameState->SetEnemiesRemaining(EnemiesAlive);
@@ -294,17 +292,17 @@ void ASTGameMode::SpawnBoss(TSubclassOf<AAIMonsterBase> BossClassToSpawn)
 	}
 }
 
-// ·£´ý ½ºÆù À§Ä¡ ¼±ÅÃ
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
 bool ASTGameMode::GetRandomSpawnLocation(FVector& OutSpawnLocation)
 {
 	if (SpawnVolumes.Num() == 0)
 	{
-		// ±âº» À§Ä¡ ¹ÝÈ¯
+		// ï¿½âº» ï¿½ï¿½Ä¡ ï¿½ï¿½È¯
 		OutSpawnLocation = FVector(0.f, 0.f, 100.f);
 		return false;
 	}
 
-	// ·£´ý SpawnVolume ¼±ÅÃ
+	// ï¿½ï¿½ï¿½ï¿½ SpawnVolume ï¿½ï¿½ï¿½ï¿½
 	const int32 RandomIndex = FMath::RandRange(0, SpawnVolumes.Num() - 1);
 
 	if (!SpawnVolumes.IsValidIndex(RandomIndex))
@@ -326,15 +324,15 @@ bool ASTGameMode::GetRandomSpawnLocation(FVector& OutSpawnLocation)
 	}
 }
 
-//[EnemyCharacter]Àû Ä³¸¯ÅÍ°¡ Á×¾úÀ» ¶§ È£Ãâ
+//[EnemyCharacter]ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½Í°ï¿½ ï¿½×¾ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½
 void ASTGameMode::OnEnemyKilled(AAIMonsterBase* KilledEnemy)
 {
 	if (bIsGameOver) return;
-	//»ì¾ÆÀÖ´Â Àû ¼ö -1
+	//ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ ï¿½ï¿½ -1
 	EnemiesAlive = FMath::Max(0, EnemiesAlive - 1);
-	//Á¡¼ö Ãß°¡
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
 	int32 ScoreToAdd = bIsBossWave ? BossKillScore : ScorePerKill;
-	//GameState¿¡ ³²Àº Àû ¼ö ¾÷µ¥ÀÌÆ®
+	//GameStateï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 
 	if (STGameState)
 	{
@@ -346,7 +344,7 @@ void ASTGameMode::OnEnemyKilled(AAIMonsterBase* KilledEnemy)
 		ASTPlayerState* PS = PC->GetPlayerState<ASTPlayerState>();
 	}
 	UE_LOG(LogGameMode, Log, TEXT("SUCCESSED KILL! remained enemies: %d"), EnemiesAlive, TotalEnemiesSpawned, ScoreToAdd);
-	//³²Àº ÀûÀÌ 0ÀÌ¸é ¿þÀÌºê Å¬¸®¾î Ã³¸®
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 0ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
 	if (EnemiesAlive <= 0)
 	{
 		if (bIsBossWave)
@@ -379,7 +377,7 @@ void ASTGameMode::OnWaveCleared()
 			PlayerController->TriggerStageReward();
 		}
 	}
-	//´ÙÀ½ ¿þÀÌºê
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½
 	GetWorldTimerManager().SetTimer(
 		TimerHandleWaveDelay,
 		this,
@@ -396,7 +394,6 @@ void ASTGameMode::HandleWaveDelay()
 	StartNextWave();
 }
 
-//°ÔÀÓ Á¾·á ÈÄ
 void ASTGameMode::HandleGameOver()
 {
 	if (bIsGameOver)
@@ -433,7 +430,6 @@ void ASTGameMode::HandleGameWin()
 
 	UE_LOG(LogTemp, Warning, TEXT("YOU WIN!"));
 
-	// ½Â¸® º¸³Ê½º Á¡¼ö
 	AddScore(BossKillScore * 2);
 
 	if (STGameState)
@@ -452,7 +448,6 @@ void ASTGameMode::HandleGameWin()
 	}
 }
 
-//-----ÇïÆÛ-------
 
 void ASTGameMode::AddScore(int32 ScoreToAdd)
 {

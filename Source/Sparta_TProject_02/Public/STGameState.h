@@ -15,7 +15,7 @@ class SPARTA_TPROJECT_02_API ASTGameState : public AGameStateBase
 public:
 	ASTGameState();
 
-	// --- GameMode°¡ È£ÃâÇÒ ÇÔ¼öµé ---
+	// --- GameModeï¿½ï¿½ È£ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ---
 	void SetCurrentWave(int32 NewWave);
 	void SetEnemiesRemaining(int32 NewCount);
 	void SetTotalEnemiesInWave(int32 NewTotal);
@@ -30,7 +30,7 @@ public:
 
 	void SetTimeRemaining(int32 NewTime);
 
-	// --- UI¿¡¼­ ¹ÙÀÎµù(±¸µ¶)ÇÒ ÀÌº¥Æ® ---
+	// --- UIï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½(ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ ï¿½Ìºï¿½Æ® ---
 	UPROPERTY(BlueprintAssignable, Category = "Game Events")
 	FOnIntChangedSignature OnCurrentWaveChanged;
 
@@ -58,7 +58,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Game Events")
 	FOnBoolChangedSignature OnIsGameWinChanged;
 
-	// --- ÇöÀç »óÅÂ º¯¼öµé ---
+	// --- ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ---
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Game State")
 	int32 CurrentWave;
 
@@ -88,4 +88,6 @@ public:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Game State")
 	bool bIsGameWin;
+
+
 };

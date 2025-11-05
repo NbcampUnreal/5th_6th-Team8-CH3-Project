@@ -8,7 +8,7 @@ UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacterGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+
 public:
 	APlayerCharacterGameMode();
 };

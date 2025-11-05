@@ -3,7 +3,6 @@
 
 ASTGameState::ASTGameState()
 {
-	// 기본값 설정
 	CurrentWave = 0;
 	EnemiesRemaining = 0;
 	TotalEnemiesInWave = 0;
@@ -15,8 +14,6 @@ ASTGameState::ASTGameState()
 	bIsGameWin = false;
 }
 
-// --- GameMode가 호출하는 Set 함수
-//-UI
 void ASTGameState::SetCurrentWave(int32 NewWave)
 {
 	if (CurrentWave == NewWave) return;
@@ -52,7 +49,6 @@ void ASTGameState::AddScore(int32 ScoreDelta)
 	OnCurrentScoreChanged.Broadcast(CurrentScore);
 }
 
-//-GameState
 
 void ASTGameState::SetIsBossWave(bool bIsBoss)
 {

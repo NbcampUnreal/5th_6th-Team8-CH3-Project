@@ -15,17 +15,17 @@ class SPARTA_TPROJECT_02_API ASTSpawnVolume : public AActor
 public:
 	ASTSpawnVolume();
 
-	//¹Ú½º º¼·ý ³» ·£´ý À§Ä¡ ¹ÝÈ¯
+	//ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½È¯
 	UFUNCTION(BlueprintCallable, Category = "Spawn Volume")
 	FVector GetRandomPointInVolume() const;
-	//Æ¯Á¤ À§Ä¡°¡ º¼·ý ³» ÀÖ´ÂÁö
+	//Æ¯ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = "Spawn Volume")
 	bool IsPointInVolume(const FVector& Point) const;
 
 	virtual void BeginPlay() override;
 
 #if WITH_EDITOR
-	//¿¡µðÅÍ¿¡¼­ ÇÁ·ÎÆÛÆ¼ º¯°æ ½Ã È£Ãâ 
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½ 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
@@ -33,15 +33,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn Volume")
 	TObjectPtr<UBoxComponent> SpawnBox;
 
-	//ÀÓ½Ã µð¹ö±ë ¹Ú½º ½Ã°¢È­
+	//ï¿½Ó½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ú½ï¿½ ï¿½Ã°ï¿½È­
 	UPROPERTY(EditAnywhere, Category = "Spawn Volume|Debug")
 	bool bShowDebugBox = true;
 	UPROPERTY(EditAnywhere, Category = "Spawn Volume|Debug")
 	FColor DebugBoxColor = FColor::Red;
 
-	//zÃà ¿ÀÇÁ¼Â
+	//zï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, Category = "Spawn Volume")
 	float ZOffset = 50.0f;
 
 };
-
