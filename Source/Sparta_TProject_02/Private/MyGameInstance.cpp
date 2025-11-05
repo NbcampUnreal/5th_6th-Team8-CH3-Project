@@ -20,12 +20,12 @@ UMyGameInstance::UMyGameInstance()
    InventoryWidgetClass = nullptr;
    InventoryWidgetInstance = nullptr;
 
-   /*static ConstructorHelpers::FClassFinder<UInventory> InventoryClassFinder(
+   static ConstructorHelpers::FClassFinder<UInventory> InventoryClassFinder(
 	   TEXT("/Game/Blueprints/BPC_Inventory.BPC_Inventory_C"));
    if (InventoryClassFinder.Succeeded())
    {
 	   InventoryBlueprintClass = InventoryClassFinder.Class;
-   }*/
+   }
 
 	static ConstructorHelpers::FClassFinder<UInventoryWidget> InvenHUDFInder(
 		TEXT("/Game/Blueprints/WBP_InventoryWidget.WBP_InventoryWidget_C"));
@@ -111,9 +111,9 @@ int32 UMyGameInstance::GetHighScore() const
 void UMyGameInstance::SetupInventoryWidget(APlayerCharacterController* PlayerContorller)
 {
    if (!PlayerContorller) return;
-   /*UClass* ClassToSpawn = InventoryBlueprintClass.Get() ? InventoryBlueprintClass.Get() : UInventory::StaticClass();
-   Inventory = NewObject<UInventory>(PlayerContorller, ClassToSpawn);*/
-   Inventory = NewObject<UInventory>(PlayerContorller);
+   UClass* ClassToSpawn = InventoryBlueprintClass.Get() ? InventoryBlueprintClass.Get() : UInventory::StaticClass();
+   Inventory = NewObject<UInventory>(PlayerContorller, ClassToSpawn);
+   //Inventory = NewObject<UInventory>(PlayerContorller);
    if (!InventoryWidgetClass) return;
    InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
 
