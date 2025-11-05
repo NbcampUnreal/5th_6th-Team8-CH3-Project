@@ -18,6 +18,7 @@
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "ItemButtonWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "MyGameInstance.h"
@@ -139,6 +140,14 @@ UOverlay* UInventoryWidget::CreateItemOverlay(UItem* Item, const FVector2D& Item
       OverlaySlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
       OverlaySlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Bottom);
    }
+
+   UImage* Image = CreateItemImage(Item, ItemOverlay);
+   if (Image)
+   {
+      UOverlaySlot* OverlaySlot = ItemOverlay->AddChildToOverlay(Image);
+      OverlaySlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
+      OverlaySlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
+   }
    return ItemOverlay;
 }
 
@@ -186,6 +195,17 @@ UTextBlock* UInventoryWidget::CreateItemStackTextBlock(UItem* Item, UOverlay* Ov
       TextBlock->SetText(FText::FromString(TEXT("1")));
    }
    return TextBlock;
+}
+
+UImage* UInventoryWidget::CreateItemImage(UItem* Item, UOverlay* Overlay)
+{
+   UImage* Image = NewObject<UImage>(Overlay);
+   UTexture2D* ItemIcon = Item->GetItemIcon();
+   if (!ItemIcon) return nullptr;
+
+   Image->SetBrushFromTexture(ItemIcon, true);
+   Image->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+   return Image;
 }
 
 void UInventoryWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
@@ -261,24 +281,22 @@ void UInventoryWidget::ItemContextMenuShow(const FItemButtonData& ItemButtonData
 
    UBorder* Border = Cast<UBorder>(GetWidgetFromName(TEXT("ItemContextMenuBorder")));
    if (!Border) return;
-   Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::Hidden);
+   Border->SetVisibility(ESlateVisibility::Hidden);
    Border->ForceLayoutPrepass();
 
-   FGeometry WidgetGeometry = Cast<UWidget>(Border)->GetCachedGeometry();
-   FVector2D BorderSize = WidgetGeometry.GetLocalSize();
+   FVector2D BorderSize = Border->GetCachedGeometry().GetLocalSize();
    FVector2D MenuPos = { ButtonPosition.X, ButtonPosition.Y };
-
-   MenuPos.X -= BorderSize.X;
    MenuPos.Y -= 5;
 
-   UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Cast<UWidget>(Border)->Slot);
+   UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Border->Slot);
    if (!CanvasPanelSlot) return;
+   CanvasPanelSlot->SetAlignment(FVector2D(1.0f, 0.0f));
    CanvasPanelSlot->SetPosition(MenuPos);
 
    UseItemButtonWidget->SetButtonData(ItemButtonData);
    DestroyItemButtonWidget->SetButtonData(ItemButtonData);
 
-   Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::Visible);
+   Border->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UInventoryWidget::ItemContextMenuHide()
@@ -286,7 +304,7 @@ void UInventoryWidget::ItemContextMenuHide()
    UBorder* ItemContextMenuBorder = Cast<UBorder>(GetWidgetFromName(TEXT("ItemContextMenuBorder")));
    if (!ItemContextMenuBorder) return;
 
-   Cast<UWidget>(ItemContextMenuBorder)->SetVisibility(ESlateVisibility::Collapsed);
+   ItemContextMenuBorder->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UInventoryWidget::ItemDestory(const FItemButtonData& ItemButtonData)
