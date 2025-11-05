@@ -9,6 +9,7 @@ class UUserWidget;
 class UGridPanel;
 struct FItemButtonData;
 class UInventoryWidget;
+class UEquipmentWidget;
 class APlayerCharacterController;
 
 UCLASS()
@@ -19,9 +20,13 @@ class SPARTA_TPROJECT_02_API UMyGameInstance : public UGameInstance
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Inventory")
 	UInventoryWidget* InventoryWidgetInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	TSubclassOf<UEquipmentWidget> EquipmentWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	UEquipmentWidget* EquipmentWidgetInstance;
 
 	virtual void Init() override;
 	
@@ -51,8 +56,11 @@ public:
 	UInventoryWidget* GetInventoryWidget() const;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	UInventory* Inventory;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment")
+	UInventory* GemSlots;
 
 	void SetupInventoryWidget(APlayerCharacterController* PlayerContorller);
+	void SetupEquipmentWidget(APlayerCharacterController* PlayerContorller);
 
 protected:
 	// ===== 레벨 관련 =====

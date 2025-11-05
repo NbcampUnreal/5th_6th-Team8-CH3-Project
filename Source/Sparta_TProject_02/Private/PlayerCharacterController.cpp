@@ -50,6 +50,7 @@ void APlayerCharacterController::BeginPlay()
 	if (MyGameInstance)
 	{
 		MyGameInstance->SetupInventoryWidget(this);
+		MyGameInstance->SetupEquipmentWidget(this);
 	}
 }
 

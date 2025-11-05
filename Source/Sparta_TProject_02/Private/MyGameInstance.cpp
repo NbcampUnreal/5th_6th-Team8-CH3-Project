@@ -1,7 +1,11 @@
 #include "MyGameInstance.h"
 #include "InventoryWidget.h"
+<<<<<<< HEAD
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+=======
+#include "EquipmentWidget.h"
+>>>>>>> feature/ItemJKH
 #include "Components/Widget.h"
 #include "Blueprint/UserWidget.h"
 #include "PlayerCharacterController.h"
@@ -23,6 +27,16 @@ UMyGameInstance::UMyGameInstance()
    if (InvenHUDFInder.Succeeded())
    {
       InventoryWidgetClass = InvenHUDFInder.Class;
+   }
+
+   GemSlots = nullptr;
+   EquipmentWidgetClass = nullptr;
+   EquipmentWidgetInstance = nullptr;
+   static ConstructorHelpers::FClassFinder<UEquipmentWidget> EquipHUDFInder(
+      TEXT("/Game/Blueprints/WBP_EquipmentWidget.WBP_EquipmentWidget_C"));
+   if (EquipHUDFInder.Succeeded())
+   {
+      EquipmentWidgetClass = EquipHUDFInder.Class;
    }
 }
 
@@ -93,7 +107,6 @@ void UMyGameInstance::SetupInventoryWidget(APlayerCharacterController* PlayerCon
 {
    if (!PlayerContorller) return;
    Inventory = NewObject<UInventory>(PlayerContorller);
-
    if (!InventoryWidgetClass) return;
    InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
 
@@ -101,4 +114,19 @@ void UMyGameInstance::SetupInventoryWidget(APlayerCharacterController* PlayerCon
    InventoryWidgetInstance->SetupWidget();
    InventoryWidgetInstance->ItemTooltipHide();
    InventoryWidgetInstance->ItemContextMenuHide();
+}
+
+void UMyGameInstance::SetupEquipmentWidget(APlayerCharacterController* PlayerContorller)
+{
+   if (!PlayerContorller) return;
+   GemSlots = NewObject<UInventory>(PlayerContorller);
+
+   if (!EquipmentWidgetClass) return;
+   EquipmentWidgetInstance = CreateWidget<UEquipmentWidget>(PlayerContorller, EquipmentWidgetClass);
+   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("EquipmentWidgetClass Success"));
+
+   EquipmentWidgetInstance->AddToViewport();
+   EquipmentWidgetInstance->SetupWidget();
+   EquipmentWidgetInstance->ItemTooltipHide();
+   EquipmentWidgetInstance->EquipmentSelectHide();
 }
