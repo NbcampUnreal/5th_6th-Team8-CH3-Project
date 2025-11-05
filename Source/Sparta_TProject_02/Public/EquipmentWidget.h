@@ -10,6 +10,7 @@ class UGridPanel;
 class UOverlay;
 class UItemButtonWidget;
 class UTextBlock;
+class UImage;
 class USizeBox;
 struct FItemButtonData;
 
@@ -60,6 +61,7 @@ public:
 	UOverlay* CreateItemOverlay(UItem* Item, const FVector2D& ItemOverlaySize, FItemButtonData ButtonData);
 	UFUNCTION()
 	UItemButtonWidget* CreateItemButton(UItem* Item, const FVector2D ItemButtonSize, FItemButtonData ButtonData);
+	UImage* CreateItemImage(UItem* Item, UOverlay* Overlay);
 	UFUNCTION()
 	void ItemTooltipShow(const FItemButtonData& ItemButtonData);
 	UFUNCTION()

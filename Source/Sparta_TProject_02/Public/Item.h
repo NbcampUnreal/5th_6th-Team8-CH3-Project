@@ -29,6 +29,7 @@ public:
 	virtual FName GetItemName();
 	virtual FName GetItemType();
 	virtual int32 GetItemPrice();
+	virtual UTexture2D* GetItemIcon();
 	virtual bool IsStackable();
 	virtual void Use();
 };
