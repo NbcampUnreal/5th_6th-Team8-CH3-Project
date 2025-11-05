@@ -5,52 +5,71 @@
 void UGameHUDWidget::NativeConstruct()
 {
     Super::NativeConstruct();
-
-    if (ASTGameState* GS = GetWorld()->GetGameState<ASTGameState>())
-    {
-        // ����/���̺� ��������Ʈ ���
-        GS->OnCurrentScoreChanged.AddDynamic(this, &UGameHUDWidget::OnScoreChanged);
-        GS->OnCurrentWaveChanged.AddDynamic(this, &UGameHUDWidget::OnWaveChanged);
-    }
-
-    // --- PlayerCharacter ��������Ʈ ���� ---
-    if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetOwningPlayerPawn()))
-    {
-        // ü��, ź��, �ǰ� �̺�Ʈ ��������Ʈ ���
-        PC->OnHealthChanged.AddDynamic(this, &UGameHUDWidget::OnHealthChanged);
-        PC->OnAmmoChanged.AddDynamic(this, &UGameHUDWidget::OnAmmoChanged);
-        PC->OnEnemyHit.AddDynamic(this, &UGameHUDWidget::OnEnemyHit);
-    }
-    
+    BindToDelegates();  // 연결 부분을 함수로 분리해 호출
 }
 
-// ü�� ���� �� ȣ��� �� BP���� ProgressBar, ���� �� ����
+void UGameHUDWidget::BindToDelegates()
+{
+    if (UWorld* World = GetWorld())
+    {
+        // --- GameState 델리게이트 연결 ---
+        if (ASTGameState* GS = World->GetGameState<ASTGameState>())
+        {
+            if (!GS->OnCurrentScoreChanged.IsAlreadyBound(this, &UGameHUDWidget::OnScoreChanged))
+            {
+                GS->OnCurrentScoreChanged.AddDynamic(this, &UGameHUDWidget::OnScoreChanged);
+            }
+
+            if (!GS->OnCurrentWaveChanged.IsAlreadyBound(this, &UGameHUDWidget::OnWaveChanged))
+            {
+                GS->OnCurrentWaveChanged.AddDynamic(this, &UGameHUDWidget::OnWaveChanged);
+            }
+        }
+
+        // --- PlayerCharacter 델리게이트 연결 ---
+        if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetOwningPlayerPawn()))
+        {
+            if (!PC->OnHealthChanged.IsAlreadyBound(this, &UGameHUDWidget::OnHealthChanged))
+            {
+                PC->OnHealthChanged.AddDynamic(this, &UGameHUDWidget::OnHealthChanged);
+            }
+
+            if (!PC->OnAmmoChanged.IsAlreadyBound(this, &UGameHUDWidget::OnAmmoChanged))
+            {
+                PC->OnAmmoChanged.AddDynamic(this, &UGameHUDWidget::OnAmmoChanged);
+            }
+
+            if (!PC->OnEnemyHit.IsAlreadyBound(this, &UGameHUDWidget::OnEnemyHit))
+            {
+                PC->OnEnemyHit.AddDynamic(this, &UGameHUDWidget::OnEnemyHit);
+            }
+        }
+    }
+}
+
+// --- 델리게이트 콜백들 ---
 void UGameHUDWidget::OnHealthChanged(float NewHP, float MaxHP)
 {
-    float Ratio = FMath::Clamp((float)NewHP / MaxHP, 0.f, 1.f);
-    UpdateHealthVisual(Ratio); // BP �̺�Ʈ ȣ��
+    const float Ratio = (MaxHP > KINDA_SMALL_NUMBER) ? (NewHP / MaxHP) : 0.0f;
+    UpdateHealthVisual(FMath::Clamp(Ratio, 0.f, 1.f));
 }
 
-// ź�� ���� �� ȣ��� �� BP���� �ؽ�Ʈ ���� ó��
 void UGameHUDWidget::OnAmmoChanged(int32 CurrentAmmo, int32 MaxAmmo)
 {
-    UpdateAmmoVisual(CurrentAmmo, MaxAmmo); // BP �̺�Ʈ ȣ��
+    UpdateAmmoVisual(CurrentAmmo, MaxAmmo);
 }
 
-// ���� ���� �� ȣ��� �� BP���� ���� �ؽ�Ʈ ����
 void UGameHUDWidget::OnScoreChanged(int32 NewScore)
 {
-    UpdateScoreVisual(NewScore); // BP �̺�Ʈ ȣ��
+    UpdateScoreVisual(NewScore);
 }
 
-// ���̺� ���� �� ȣ��� �� BP���� ��Wave : n�� ǥ��
 void UGameHUDWidget::OnWaveChanged(int32 NewWave)
 {
-    UpdateWaveVisual(NewWave); // BP �̺�Ʈ ȣ��
+    UpdateWaveVisual(NewWave);
 }
 
-// �� �ǰ� �� ȣ��� �� BP���� ��Ʈ��Ŀ ���� ����
 void UGameHUDWidget::OnEnemyHit()
 {
-    PlayHitMarkerVisual(); // BP �̺�Ʈ ȣ��
+    PlayHitMarkerVisual();
 }
