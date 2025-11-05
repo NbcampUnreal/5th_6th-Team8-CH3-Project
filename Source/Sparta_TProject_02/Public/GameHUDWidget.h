@@ -16,7 +16,7 @@ protected:
 
     // --- [��������Ʈ ���ſ� �Լ���] ---
     UFUNCTION()
-    void OnHealthChanged(int32 NewHP, int32 MaxHP);
+    void OnHealthChanged(float NewHP, float MaxHP);
 
     UFUNCTION()
     void OnAmmoChanged(int32 CurrentAmmo, int32 MaxAmmo);

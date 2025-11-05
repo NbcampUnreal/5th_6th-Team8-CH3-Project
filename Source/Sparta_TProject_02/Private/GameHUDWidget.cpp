@@ -1,16 +1,15 @@
 #include "GameHUDWidget.h"
-//#include "STGameState.h"
+#include "STGameState.h"
 #include "PlayerCharacter.h"
 
 void UGameHUDWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    /* --- GameState ��������Ʈ ���� ---
     if (ASTGameState* GS = GetWorld()->GetGameState<ASTGameState>())
     {
         // ����/���̺� ��������Ʈ ���
-        GS->OnScoreChanged.AddDynamic(this, &UGameHUDWidget::OnScoreChanged);
+        GS->OnCurrentScoreChanged.AddDynamic(this, &UGameHUDWidget::OnScoreChanged);
         GS->OnCurrentWaveChanged.AddDynamic(this, &UGameHUDWidget::OnWaveChanged);
     }
 
@@ -22,11 +21,11 @@ void UGameHUDWidget::NativeConstruct()
         PC->OnAmmoChanged.AddDynamic(this, &UGameHUDWidget::OnAmmoChanged);
         PC->OnEnemyHit.AddDynamic(this, &UGameHUDWidget::OnEnemyHit);
     }
-    */
+    
 }
 
 // ü�� ���� �� ȣ��� �� BP���� ProgressBar, ���� �� ����
-void UGameHUDWidget::OnHealthChanged(int32 NewHP, int32 MaxHP)
+void UGameHUDWidget::OnHealthChanged(float NewHP, float MaxHP)
 {
     float Ratio = FMath::Clamp((float)NewHP / MaxHP, 0.f, 1.f);
     UpdateHealthVisual(Ratio); // BP �̺�Ʈ ȣ��

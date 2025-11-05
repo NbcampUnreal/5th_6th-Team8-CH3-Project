@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "WeaponType.h"
 #include "GrenadeActor.h"
+#include "STPlayerState.h"
+#include "Delegates/Delegate.h"
 #include "PlayerCharacter.generated.h"
 
 class UInputAction;
@@ -11,8 +13,10 @@ class USkeletalMeshComponent;
 class UCameraComponent;
 class AGunBase;
 struct FInputActionValue;
-
 class AShop;
+
+// 🔸 Hit 이벤트용 델리게이트 정의
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyHitSignature);
 
 UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
@@ -22,13 +26,14 @@ class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
 public:
 	APlayerCharacter();
 
-	//GameMode ȣ��
+	// --- GameMode 호출용 ---
 	void HealOnWaveClear(float HealAmount);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// --- Camera & Mesh ---
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
@@ -38,47 +43,38 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
 	USkeletalMeshComponent* PlayerMesh;
 
+	// --- Input Actions ---
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* MoveAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* LookAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* JumpAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* SprintAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* CrouchAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* ShootAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* ReloadAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* EquipShotgunAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* EquipRifleAction;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* EquipPistolAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* GrenadeAction;
 
+	// --- Movement ---
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float NormalSpeed;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SprintSpeedMultiplier;
-
 	float SprintSpeed;
 
+	// --- Weapons ---
 	UPROPERTY(EditDefaultsOnly, Category = "Gun")
 	TArray<TSubclassOf<AGunBase>> StartWeaponClasses;
 
@@ -96,6 +92,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
 	TMap<EWeaponType, int32> MaxCarryAmmo;
 
+	// --- Grenade ---
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grenade")
 	TSubclassOf<AGrenadeActor> GrenadeClass;
 
@@ -118,6 +115,7 @@ protected:
 	void ThrowGrenade(const FInputActionValue& Value);
 
 public:
+	// --- Weapon 관련 함수 ---
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void AddAmmo(EWeaponType WeaponType, int32 Amount);
 
@@ -132,21 +130,21 @@ public:
 
 	bool IsSprinting() const { return bWantsToSprint; }
 	bool IsAiming() const { return bIsAiming; }
-	bool IsFiring() const { return bIsFiring; } 
+	bool IsFiring() const { return bIsFiring; }
 
 protected:
-
-	//상점UI
-	//ShopUI Properties
+	// --- Shop 관련 ---
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
 	AShop* ShopActor;
 
 	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void OpenShop();
+
 	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void CloseShop();
 
-protected: 
+protected:
+	// --- Input 처리 함수 ---
 	void Move(const FInputActionValue& value);
 	void Look(const FInputActionValue& value);
 	void StartJump(const FInputActionValue& value);
@@ -170,15 +168,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	float Health;
+
 	UFUNCTION()
 	void OnWeaponStartFire();
-
 	UFUNCTION()
 	void OnWeaponStopFire();
-
 	UFUNCTION()
 	void OnWeaponStartReload();
-
 	UFUNCTION()
 	void OnWeaponFinishReload();
 
@@ -191,4 +187,32 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Mesh")
 	USkeletalMeshComponent* GetFPMesh() const { return FP_Mesh; };
 
+	// --- HUD 델리게이트 ---
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthChangedSignature OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAmmoChangedSignature OnAmmoChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnEnemyHitSignature OnEnemyHit;
+
+protected:
+	UFUNCTION()
+	void HandleHealthChanged(float Current, float Max)
+	{
+		OnHealthChanged.Broadcast(Current, Max);
+	}
+
+	UFUNCTION()
+	void HandleAmmoChanged(int32 Current, int32 Max)
+	{
+		OnAmmoChanged.Broadcast(Current, Max);
+	}
+
+	UFUNCTION()
+	void HandleKillCountChanged(int32 Kills)
+	{
+		// 필요시 UI용 델리게이트 추가
+	}
 };

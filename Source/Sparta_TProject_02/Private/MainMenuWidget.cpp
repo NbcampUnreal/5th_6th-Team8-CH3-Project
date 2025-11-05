@@ -35,13 +35,14 @@ void UMainMenuWidget::HandleStartClicked()
     //  GameMode 명시적으로 지정 (선택사항이지만 권장)
     FString Options = TEXT("?game=/Game/Blueprints/GameMode/STGameMode.STGameMode_C");
 
-    //  Input 모드 복구 (UIOnly → GameOnly)
+    
     if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
     {
         FInputModeGameOnly InputMode;
         PC->SetInputMode(InputMode);
         PC->bShowMouseCursor = false;
     }
+    
 
     //  맵 전환 실행
     UGameplayStatics::OpenLevel(this, FName(*LevelPath), true, Options);
