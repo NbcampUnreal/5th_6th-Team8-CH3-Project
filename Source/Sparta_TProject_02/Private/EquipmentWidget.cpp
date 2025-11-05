@@ -62,39 +62,30 @@ void UEquipmentWidget::SetupWidget()
       GemSlots->SetMaxSize(GridMaxColumn);
       RefreshWidget();
    }
-   else
-   {
-      GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("Inventory and EquipmentSystem set Fail"));
-   }
    if (!UnEquipButton) return;
    UnEquipButton->OnClicked.AddDynamic(this, &UEquipmentWidget::UnEquip);
    UnEquipButton->SetupClickBinding();
 }
 bool UEquipmentWidget::RefreshWidget()
 {
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("RefreshWidget"));
    EquipmentSelectHide();
    ItemTooltipHide();
    for (int32 i = GemSlotsGrid->GetChildrenCount(); i > 0; --i)
    {
       GemSlotsGrid->RemoveChildAt(0);
-      //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("GemSlotsGrid Remove"));
    }
 
    for (int32 i = SelectGrid->GetChildrenCount(); i > 1; --i)
    {
       SelectGrid->RemoveChildAt(1);
-      //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("GemSlotsGrid Remove"));
    }
 
    int32 GmeSize = GemSlots->GetCurrentSize();
    int32 GmeMAxSize = GemSlots->GetMaxSize();
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, FString::Printf(TEXT("ItemSize: %d"), ItemSize));
    for (int32 i = 0; i < GmeSize; ++i)
    {
       if (!AddGemToGrid(GemSlots->GetItem(i), i))
       {
-         GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("AddItemToGrid Error"));
          return false;
       }
    }
@@ -103,7 +94,6 @@ bool UEquipmentWidget::RefreshWidget()
    {
       if (!AddGemToGrid(nullptr, i))
       {
-         GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("AddItemToGrid Error"));
          return false;
       }
    }
@@ -113,8 +103,6 @@ bool UEquipmentWidget::RefreshWidget()
 
 bool UEquipmentWidget::AddGemToGrid(UItem* Item, int32 Index)
 {
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("AddItemToGrid"));
-   // Index: 0, 1, 2, 3
    int32 Row = 0;
    int32 Column = Index % GridMaxColumn;
    FVector2D ItemOverlaySize = FVector2D(100.0f, 100.0f);
@@ -138,16 +126,11 @@ bool UEquipmentWidget::AddGemToGrid(UItem* Item, int32 Index)
    GridSlot->SetPadding(ItemMargin);
    GridSlot->SetRow(Row);
    GridSlot->SetColumn(Column);
-
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Postion X: %f Y: %f"), ButtonData.ButtonPosition.X, ButtonData.ButtonPosition.Y));
-
    return true;
 }
 
 UOverlay* UEquipmentWidget::CreateItemOverlay(UItem* Item, const FVector2D& ItemOverlaySize, FItemButtonData ButtonData)
 {
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("CreateItemOverlay"));
-   // Index: 0, 1, 2, 3
    UOverlay* ItemOverlay = NewObject<UOverlay>(PlayerContlloer);
    if (!ItemOverlay) return nullptr;
 
@@ -157,7 +140,6 @@ UOverlay* UEquipmentWidget::CreateItemOverlay(UItem* Item, const FVector2D& Item
    {
       ItemButtonWidget->OnHovered.AddDynamic(this, &UEquipmentWidget::ItemTooltipShow);
       ItemButtonWidget->GetButton()->OnUnhovered.AddDynamic(this, &UEquipmentWidget::ItemTooltipHide);
-      //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("ItemAvailable"));
    }
    ItemButtonWidget->OnClicked.AddDynamic(this, &UEquipmentWidget::GemSelectShow);
    ButtonData.Index += 1;
@@ -206,7 +188,6 @@ UItemButtonWidget* UEquipmentWidget::CreateItemButton(UItem* Item, const FVector
 
 void UEquipmentWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
 {
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("EQItemTooltipShow"));
    int32 Index = ItemButtonData.Index;
    FVector2D ButtonPosition = ItemButtonData.ButtonPosition;
 
@@ -293,7 +274,6 @@ void UEquipmentWidget::ItemTooltipHide()
 
 bool UEquipmentWidget::AddGemToSelectGrid(UItem* Item, int32 Index, int32 Column)
 {
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("AddItemToGrid"));
    int32 Row = 0;
    FVector2D ItemOverlaySize = FVector2D(50.0f, 50.0f);
    FMargin ItemMargin = FMargin(5.0f, 5.0f, 0.0f, 0.0f);
@@ -321,7 +301,6 @@ bool UEquipmentWidget::AddGemToSelectGrid(UItem* Item, int32 Index, int32 Column
 
 UOverlay* UEquipmentWidget::CreateSelectItemOverlay(UItem* Item, const FVector2D& ItemOverlaySize, FItemButtonData ButtonData)
 {
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("CreateSelectItemOverlay"));
    UOverlay* ItemOverlay = NewObject<UOverlay>(PlayerContlloer);
    if (!ItemOverlay) return nullptr;
 
@@ -340,12 +319,9 @@ UOverlay* UEquipmentWidget::CreateSelectItemOverlay(UItem* Item, const FVector2D
 
 void UEquipmentWidget::GemSelectShow(const FItemButtonData& ItemButtonData)
 {
-   // Index: 0, 1, 2, 3
-   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("GemSelectShow"));
    for (int32 i = SelectGrid->GetChildrenCount(); i > 1; --i)
    {
       SelectGrid->RemoveChildAt(1);
-      //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("GemSlotsGrid Remove"));
    }
 
    UBorder* Border = Cast<UBorder>(GetWidgetFromName(TEXT("EquipmentSelectBorder")));
@@ -366,7 +342,6 @@ void UEquipmentWidget::GemSelectShow(const FItemButtonData& ItemButtonData)
 
       UnEquipBox->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
       UnEquipButton->SetButtonData({ Index , ButtonPosition });
-      GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("UnEquipBox Visible"));
       ++Column;
    }
    else // 선택한 GemtSlot이 empty
@@ -383,7 +358,7 @@ void UEquipmentWidget::GemSelectShow(const FItemButtonData& ItemButtonData)
       AddGemToSelectGrid(GemItem, GemIndex, Column);
       ++Column;
    }
-   if (GemIndexs.IsEmpty()) return;
+   if (!GemSlots->IsValidIdx(Index) && GemIndexs.IsEmpty()) return;
 
    Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::Visible);
 }
@@ -404,7 +379,6 @@ void UEquipmentWidget::Equip(const FItemButtonData& ItemButtonData)
    UItem* Item = Inventory->GetItem(Index);
    Inventory->RemoveItemIndex(Index);
    GemSlots->AddItem(Item);
-   UE_LOG(LogTemp, Warning, TEXT("%d"), GemSlots->GetCurrentSize());
    EquipmentSelectHide();
    RefreshWidget();
 }
