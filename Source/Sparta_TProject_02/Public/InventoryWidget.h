@@ -35,6 +35,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TSubclassOf<UItemButtonWidget> DynamicButtonClass;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	UItemButtonWidget* UseItemButtonWidget;
 

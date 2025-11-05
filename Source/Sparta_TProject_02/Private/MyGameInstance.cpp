@@ -2,29 +2,30 @@
 #include "InventoryWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "EquipmentWidget.h"
 #include "Components/Widget.h"
 #include "Blueprint/UserWidget.h"
 #include "PlayerCharacterController.h"
 
 UMyGameInstance::UMyGameInstance()
 {
-    // ���� �̸�
+    // 레벨 이름
     MainMenuLevelName = FName("MainMenu_Map");
     GameLevelName = FName("Game_Map");
 
-    // ���� �ʱ�ȭ
+    // 점수 초기화
     HighScore = 0;
 
    Inventory = nullptr;
    InventoryWidgetClass = nullptr;
    InventoryWidgetInstance = nullptr;
 
-   static ConstructorHelpers::FClassFinder<UInventory> InventoryClassFinder(
+   /*static ConstructorHelpers::FClassFinder<UInventory> InventoryClassFinder(
 	   TEXT("/Game/Blueprints/BPC_Inventory.BPC_Inventory_C"));
    if (InventoryClassFinder.Succeeded())
    {
 	   InventoryBlueprintClass = InventoryClassFinder.Class;
-   }
+   }*/
 
 	static ConstructorHelpers::FClassFinder<UInventoryWidget> InvenHUDFInder(
 		TEXT("/Game/Blueprints/WBP_InventoryWidget.WBP_InventoryWidget_C"));
@@ -32,7 +33,16 @@ UMyGameInstance::UMyGameInstance()
    {
       InventoryWidgetClass = InvenHUDFInder.Class;
    }
-   
+
+   GemSlots = nullptr;
+   EquipmentWidgetClass = nullptr;
+   EquipmentWidgetInstance = nullptr;
+   static ConstructorHelpers::FClassFinder<UEquipmentWidget> EquipHUDFInder(
+      TEXT("/Game/Blueprints/WBP_EquipmentWidget.WBP_EquipmentWidget_C"));
+   if (EquipHUDFInder.Succeeded())
+   {
+      EquipmentWidgetClass = EquipHUDFInder.Class;
+   }
 }
 
 UInventoryWidget* UMyGameInstance::GetInventoryWidget() const
@@ -45,7 +55,7 @@ void UMyGameInstance::Init()
    Super::Init();
 }
 
-// ===== ���� �帧 �Լ��� =====
+// ===== 게임 흐름 함수들 =====
 void UMyGameInstance::LoadMainMenu()
 {
     if (MainMenuLevelName == NAME_None)
@@ -83,7 +93,7 @@ void UMyGameInstance::QuitGame()
     );
 }
 
-// ===== ���� �Լ��� =====
+// ===== 점수 함수들 =====
 void UMyGameInstance::SetNewHighScore(int32 NewScore)
 {
     if (NewScore > HighScore)
@@ -100,21 +110,30 @@ int32 UMyGameInstance::GetHighScore() const
 
 void UMyGameInstance::SetupInventoryWidget(APlayerCharacterController* PlayerContorller)
 {
-	if (!PlayerContorller) return;
+   if (!PlayerContorller) return;
+   /*UClass* ClassToSpawn = InventoryBlueprintClass.Get() ? InventoryBlueprintClass.Get() : UInventory::StaticClass();
+   Inventory = NewObject<UInventory>(PlayerContorller, ClassToSpawn);*/
+   Inventory = NewObject<UInventory>(PlayerContorller);
+   if (!InventoryWidgetClass) return;
+   InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
 
-	UClass* ClassToSpawn = InventoryBlueprintClass.Get() ? InventoryBlueprintClass.Get() : UInventory::StaticClass();
-	Inventory = NewObject<UInventory>(PlayerContorller, ClassToSpawn);
+   InventoryWidgetInstance->AddToViewport();
+   InventoryWidgetInstance->SetupWidget();
+   InventoryWidgetInstance->ItemTooltipHide();
+   InventoryWidgetInstance->ItemContextMenuHide();
+}
 
-	//Inventory = NewObject<UInventory>(PlayerContorller);
+void UMyGameInstance::SetupEquipmentWidget(APlayerCharacterController* PlayerContorller)
+{
+   if (!PlayerContorller) return;
+   GemSlots = NewObject<UInventory>(PlayerContorller);
 
-	if (!InventoryWidgetClass) return;
-	InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
+   if (!EquipmentWidgetClass) return;
+   EquipmentWidgetInstance = CreateWidget<UEquipmentWidget>(PlayerContorller, EquipmentWidgetClass);
+   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("EquipmentWidgetClass Success"));
 
-	InventoryWidgetInstance->AddToViewport();
-	InventoryWidgetInstance->SetupWidget();
-
-	InventoryWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-
-	InventoryWidgetInstance->ItemTooltipHide();
-	InventoryWidgetInstance->ItemContextMenuHide();
+   EquipmentWidgetInstance->AddToViewport();
+   EquipmentWidgetInstance->SetupWidget();
+   EquipmentWidgetInstance->ItemTooltipHide();
+   EquipmentWidgetInstance->EquipmentSelectHide();
 }
