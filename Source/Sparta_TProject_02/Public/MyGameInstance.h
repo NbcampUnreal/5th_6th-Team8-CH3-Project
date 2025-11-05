@@ -27,11 +27,43 @@ protected:
 	
 public:
 	UMyGameInstance();
+	// ===== 게임 흐름 관리 =====
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void LoadMainMenu();
 
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void LoadGameLevel();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void RestartCurrentLevel();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void QuitGame();
+
+	// ===== 점수 관리 =====
+	UFUNCTION(BlueprintCallable, Category = "Score")
+	void SetNewHighScore(int32 NewScore);
+
+	UFUNCTION(BlueprintCallable, Category = "Score")
+	int32 GetHighScore() const;
+
+	//아이템
 	UInventoryWidget* GetInventoryWidget() const;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	UInventory* Inventory;
 
 	void SetupInventoryWidget(APlayerCharacterController* PlayerContorller);
+
+protected:
+	// ===== 레벨 관련 =====
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Levels")
+	FName MainMenuLevelName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Levels")
+	FName GameLevelName;
+
+	// ===== 점수 관련 =====
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Score")
+	int32 HighScore;
 
 };
