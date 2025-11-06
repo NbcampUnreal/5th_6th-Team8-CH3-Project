@@ -68,6 +68,8 @@ void UInventoryWidget::SetupWidget()
 bool UInventoryWidget::RefreshWidget()
 {
    //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("RefreshWidget"));
+   if (GetVisibility() == ESlateVisibility::Collapsed) return false;
+
    for (int32 i = InventoryGrid->GetChildrenCount(); i > 0; --i)
    {
       InventoryGrid->RemoveChildAt(0);
@@ -98,7 +100,7 @@ bool UInventoryWidget::AddItemToGrid(UItem* Item, int32 Index)
    UBorder* Border = Cast<UBorder>(Cast<UWidget>(InventoryGrid)->GetParent());
    if (!Border) return false;
 
-   UCanvasPanelSlot* CanvasPanelSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Cast<UWidget>(Border));
+   UCanvasPanelSlot* CanvasPanelSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Border);
    if (!CanvasPanelSlot) return false;
 
    FItemButtonData ButtonData;
@@ -108,7 +110,7 @@ bool UInventoryWidget::AddItemToGrid(UItem* Item, int32 Index)
    ButtonData.ButtonPosition.Y += (Row * ItemOverlaySize.Y) + ((Row + 1) * ItemMargin.Top);
 
    UOverlay* ItemOverlay = CreateItemOverlay(Item, ItemOverlaySize, ButtonData);
-   UGridSlot* GridSlot = InventoryGrid->AddChildToGrid(Cast<UWidget>(ItemOverlay));
+   UGridSlot* GridSlot = InventoryGrid->AddChildToGrid(ItemOverlay);
 
    GridSlot->SetPadding(ItemMargin);
    GridSlot->SetRow(Row);
@@ -216,7 +218,7 @@ void UInventoryWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
 
    UBorder* Border = Cast<UBorder>(GetWidgetFromName(TEXT("ItemTooltipBorder")));
    if (!Border) return;
-   Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::Hidden);
+   Border->SetVisibility(ESlateVisibility::Hidden);
 
    UTextBlock* ItemName = Cast<UTextBlock>(GetWidgetFromName(TEXT("ItemTooltipNameValue")));
    UTextBlock* ItemType = Cast<UTextBlock>(GetWidgetFromName(TEXT("ItemTooltipTypeValue")));
@@ -239,13 +241,12 @@ void UInventoryWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
       ItemStack->SetText(FText::FromString(TEXT("1 / 1")));
    }
    
-
    UGridPanel* ItemTooltipGrid = Cast<UGridPanel>(GetWidgetFromName(TEXT("ItemTooltipGrid")));
    ItemTooltipGrid->ForceLayoutPrepass();
    FVector2D NewBorderSize = Cast<UWidget>(ItemTooltipGrid)->GetDesiredSize();
    NewBorderSize.X += 5;
 
-   UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Cast<UWidget>(Border)->Slot);
+   UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Border->Slot);
    if (!CanvasPanelSlot) return;
    CanvasPanelSlot->SetSize(NewBorderSize);
 
@@ -262,7 +263,7 @@ void UInventoryWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
 
    CanvasPanelSlot->SetPosition(ItemTooltipPos);
    
-   Cast<UWidget>(Border)->SetVisibility(ESlateVisibility::HitTestInvisible);
+   Border->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void UInventoryWidget::ItemTooltipHide()
@@ -270,7 +271,7 @@ void UInventoryWidget::ItemTooltipHide()
    UBorder* ItempTooltipBorder = Cast<UBorder>(GetWidgetFromName(TEXT("ItemTooltipBorder")));
    if (!ItempTooltipBorder) return;
 
-   Cast<UWidget>(ItempTooltipBorder)->SetVisibility(ESlateVisibility::Collapsed);
+   ItempTooltipBorder->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UInventoryWidget::ItemContextMenuShow(const FItemButtonData& ItemButtonData)

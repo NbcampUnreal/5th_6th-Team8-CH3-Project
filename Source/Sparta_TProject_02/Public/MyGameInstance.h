@@ -55,6 +55,7 @@ public:
 
 	//아이템
 	UInventoryWidget* GetInventoryWidget() const;
+	UEquipmentWidget* GetEquipmentWidget() const;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	UInventory* Inventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment")
@@ -62,6 +63,13 @@ public:
 
 	void SetupInventoryWidget(APlayerCharacterController* PlayerContorller);
 	void SetupEquipmentWidget(APlayerCharacterController* PlayerContorller);
+
+	void OpenInventoryWidget();
+	void CloseInventoryWidget();
+	void OpenEquipmentWidget();
+	void CloseEquipmentWidget();
+	UFUNCTION(Exec)
+	void ToggleInventoryWidget();
 
 	//Shop 연동용
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")

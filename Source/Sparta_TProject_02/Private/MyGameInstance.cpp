@@ -50,6 +50,11 @@ UInventoryWidget* UMyGameInstance::GetInventoryWidget() const
    return InventoryWidgetInstance;
 }
 
+UEquipmentWidget* UMyGameInstance::GetEquipmentWidget() const
+{
+   return EquipmentWidgetInstance;
+}
+
 void UMyGameInstance::Init()
 {
    Super::Init();
@@ -113,7 +118,7 @@ void UMyGameInstance::SetupInventoryWidget(APlayerCharacterController* PlayerCon
    if (!PlayerContorller) return;
    UClass* ClassToSpawn = InventoryBlueprintClass.Get() ? InventoryBlueprintClass.Get() : UInventory::StaticClass();
    Inventory = NewObject<UInventory>(PlayerContorller, ClassToSpawn);
-   //Inventory = NewObject<UInventory>(PlayerContorller);
+
    if (!InventoryWidgetClass) return;
    InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
 
@@ -130,10 +135,45 @@ void UMyGameInstance::SetupEquipmentWidget(APlayerCharacterController* PlayerCon
 
    if (!EquipmentWidgetClass) return;
    EquipmentWidgetInstance = CreateWidget<UEquipmentWidget>(PlayerContorller, EquipmentWidgetClass);
-   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("EquipmentWidgetClass Success"));
 
    EquipmentWidgetInstance->AddToViewport();
    EquipmentWidgetInstance->SetupWidget();
    EquipmentWidgetInstance->ItemTooltipHide();
    EquipmentWidgetInstance->EquipmentSelectHide();
+}
+
+void UMyGameInstance::OpenInventoryWidget()
+{
+   InventoryWidgetInstance->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+   InventoryWidgetInstance->RefreshWidget();
+}
+void UMyGameInstance::CloseInventoryWidget()
+{
+   InventoryWidgetInstance->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UMyGameInstance::OpenEquipmentWidget()
+{
+   EquipmentWidgetInstance->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+   EquipmentWidgetInstance->RefreshWidget();
+}
+void UMyGameInstance::CloseEquipmentWidget()
+{
+   EquipmentWidgetInstance->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UMyGameInstance::ToggleInventoryWidget()
+{
+   if (InventoryWidgetInstance->GetVisibility() == ESlateVisibility::Collapsed)
+   {
+      OpenInventoryWidget();
+      OpenEquipmentWidget();
+      GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+   }
+   else
+   {
+      CloseInventoryWidget();
+      CloseEquipmentWidget();
+      GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
+   }
 }
