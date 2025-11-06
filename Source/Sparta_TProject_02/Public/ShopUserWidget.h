@@ -47,9 +47,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widgets")
 	TSubclassOf<UShopItemEntryWidget> ItemEntryWidgetClass;
 
-	UPROPERTY(meta = (BindWidget))
-	class UPanelWidget* InventoryContainer;
-
 private:
 	UFUNCTION()
 	void OnCloseButtonClicked();

@@ -19,38 +19,6 @@ void UShopUserWidget::NativeConstruct()
 		CloseButton_X->OnClicked.AddDynamic(this, &UShopUserWidget::OnCloseButtonClicked);
 	}
 
-	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
-	UInventoryWidget* InventoryWidgetInstance = nullptr;
-	
-	if (GameInstance)
-	{
-		InventoryWidgetInstance = GameInstance->GetInventoryWidget();
-	}
-
-	if (GameInstance && InventoryContainer)
-	{
-		if (InventoryWidgetInstance->GetParent())
-		{
-			InventoryWidgetInstance->RemoveFromParent();
-			UE_LOG(LogTemp, Log, TEXT("Inventory Widget removed from previous parent (Viewport)."));
-		}
-		InventoryContainer->AddChild(InventoryWidgetInstance);
-		InventoryWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-		UE_LOG(LogTemp, Log, TEXT("Inventory Widget successfully inserted into Shop"));
-	}
-	else
-	{
-		// ❌ 실패 메시지 추가 (어느 쪽이 문제인지 재확인용)
-		if (!InventoryWidgetInstance)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("❌ FAIL: UInventoryWidget Instance is NULL. (SetupInventoryWidget 호출 및 생성 확인 요망)"));
-		}
-		if (!InventoryContainer)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("❌ FAIL: InventoryContainer BindWidget failed. (Blueprint 이름 확인 요망)"));
-		}
-	}
-
 	/*if (HoverButton)
 	{
 		HoverButton->OnHovered.AddDynamic(this, &UShopUserWidget::OnItemButtonHovered);
