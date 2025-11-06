@@ -14,9 +14,11 @@ protected:
     // ������ ������ ��(Construct) ȣ��Ǵ� �Լ�
     virtual void NativeConstruct() override;
 
-    // --- [��������Ʈ ���ſ� �Լ���] ---
     UFUNCTION()
-    void OnHealthChanged(int32 NewHP, int32 MaxHP);
+    void BindToDelegates();
+
+    UFUNCTION()
+    void OnHealthChanged(float NewHP, float MaxHP);
 
     UFUNCTION()
     void OnAmmoChanged(int32 CurrentAmmo, int32 MaxAmmo);
@@ -30,8 +32,6 @@ protected:
     UFUNCTION()
     void OnEnemyHit();
 
-    // --- [BP���� ������ ���־� �̺�Ʈ��] ---
-    // �����̳ʰ� ��������Ʈ���� �ð��� ó���� ������
     UFUNCTION(BlueprintImplementableEvent, Category = "Visuals")
     void UpdateHealthVisual(float Ratio);
 

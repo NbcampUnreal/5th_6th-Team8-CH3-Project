@@ -159,6 +159,15 @@ void APlayerCharacter::BeginPlay()
 			}
 		}
 	}
+
+
+	if (ASTPlayerState* PS = GetPlayerState<ASTPlayerState>())
+	{
+		PS->OnHealthChanged.AddDynamic(this, &APlayerCharacter::HandleHealthChanged);
+		PS->OnAmmoChanged.AddDynamic(this, &APlayerCharacter::HandleAmmoChanged);
+		PS->OnKillCountChanged.AddDynamic(this, &APlayerCharacter::HandleKillCountChanged);
+	}
+
 }
 
 //Open Shop UI

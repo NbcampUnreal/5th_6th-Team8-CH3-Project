@@ -22,6 +22,7 @@
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "Components/SizeBox.h"
 #include "ItemButtonWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
@@ -148,6 +149,16 @@ UOverlay* UEquipmentWidget::CreateItemOverlay(UItem* Item, const FVector2D& Item
 
    ItemOverlay->AddChild(Cast<UWidget>(ItemButtonWidget));
 
+   if (Item)
+   {
+      UImage* Image = CreateItemImage(Item, ItemOverlay);
+      if (Image)
+      {
+         UOverlaySlot* OverlaySlot = ItemOverlay->AddChildToOverlay(Image);
+         OverlaySlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
+         OverlaySlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
+      }
+   }
    return ItemOverlay;
 }
 
@@ -184,6 +195,17 @@ UItemButtonWidget* UEquipmentWidget::CreateItemButton(UItem* Item, const FVector
 
    InnerButton->SetStyle(ButtonStyle);
    return ItemButtonWidget;
+}
+
+UImage* UEquipmentWidget::CreateItemImage(UItem* Item, UOverlay* Overlay)
+{
+   UImage* Image = NewObject<UImage>(Overlay);
+   UTexture2D* ItemIcon = Item->GetItemIcon();
+   if (!ItemIcon) return nullptr;
+
+   Image->SetBrushFromTexture(ItemIcon, true);
+   Image->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+   return Image;
 }
 
 void UEquipmentWidget::ItemTooltipShow(const FItemButtonData& ItemButtonData)
@@ -276,7 +298,7 @@ bool UEquipmentWidget::AddGemToSelectGrid(UItem* Item, int32 Index, int32 Column
 {
    int32 Row = 0;
    FVector2D ItemOverlaySize = FVector2D(50.0f, 50.0f);
-   FMargin ItemMargin = FMargin(5.0f, 5.0f, 0.0f, 0.0f);
+   FMargin ItemMargin = FMargin(5.0f);
 
    UBorder* Border = Cast<UBorder>(Cast<UWidget>(SelectGrid)->GetParent());
    if (!Border) return false;
@@ -290,8 +312,16 @@ bool UEquipmentWidget::AddGemToSelectGrid(UItem* Item, int32 Index, int32 Column
    ButtonData.ButtonPosition.X += (Column * ItemOverlaySize.X) + ((Column + 1) * ItemMargin.Left);
    ButtonData.ButtonPosition.Y += (Row * ItemOverlaySize.Y) + ((Row + 1) * ItemMargin.Top);
 
+   USizeBox* SizeBox = NewObject<USizeBox>(PlayerContlloer);
+   if (!SizeBox) return false;
+   SizeBox->SetWidthOverride(ItemOverlaySize.X);
+   SizeBox->SetHeightOverride(ItemOverlaySize.Y);
+
    UOverlay* ItemOverlay = CreateSelectItemOverlay(Item, ItemOverlaySize, ButtonData);
-   UGridSlot* GridSlot = SelectGrid->AddChildToGrid(Cast<UWidget>(ItemOverlay));
+   if (!ItemOverlay) return false;
+   SizeBox->SetContent(ItemOverlay);
+
+   UGridSlot* GridSlot = SelectGrid->AddChildToGrid(Cast<UWidget>(SizeBox));
 
    GridSlot->SetPadding(ItemMargin);
    GridSlot->SetRow(Row);
@@ -313,6 +343,14 @@ UOverlay* UEquipmentWidget::CreateSelectItemOverlay(UItem* Item, const FVector2D
    ItemButtonWidget->SetButtonData(ButtonData);
 
    ItemOverlay->AddChild(Cast<UWidget>(ItemButtonWidget));
+
+   UImage* Image = CreateItemImage(Item, ItemOverlay);
+   if (Image)
+   {
+      UOverlaySlot* OverlaySlot = ItemOverlay->AddChildToOverlay(Image);
+      OverlaySlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
+      OverlaySlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
+   }
 
    return ItemOverlay;
 }
@@ -373,7 +411,7 @@ void UEquipmentWidget::EquipmentSelectHide()
 
 void UEquipmentWidget::Equip(const FItemButtonData& ItemButtonData)
 {
-   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("Equip"));
+   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("Equip"));
    int32 Index = ItemButtonData.Index;
 
    UItem* Item = Inventory->GetItem(Index);
@@ -385,7 +423,7 @@ void UEquipmentWidget::Equip(const FItemButtonData& ItemButtonData)
 
 void UEquipmentWidget::UnEquip(const FItemButtonData& ItemButtonData)
 {
-   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("UnEquip"));
+   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("UnEquip"));
    int32 Index = ItemButtonData.Index;
 
    UItem* Item = GemSlots->GetItem(Index);
