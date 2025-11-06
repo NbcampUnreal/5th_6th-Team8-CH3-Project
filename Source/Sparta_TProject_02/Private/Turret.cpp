@@ -164,10 +164,13 @@ void ATurret::Fire()
 
 	FActorSpawnParameters Params;
 	Params.Owner = this;
-	Params.Instigator = GetInstigator();
-
+	Params.Instigator = Cast<APawn>(this);
 	GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLoc, MuzzleRot, Params);
+
+
 }
+
+
 
 void ATurret::TakeTurretDamage(float Amount)
 {

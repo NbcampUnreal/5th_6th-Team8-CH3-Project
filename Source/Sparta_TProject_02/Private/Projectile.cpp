@@ -24,15 +24,48 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+    if (GetOwner())
+    {
+        CollisionComp->IgnoreActorWhenMoving(GetOwner(), true);
+    }
+
+    AController* InstigatorController = GetInstigatorController();
+
+    if (!InstigatorController && GetOwner())
+    {
+        if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+        {
+            InstigatorController = OwnerPawn->GetController();
+        }
+    }
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+    UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor && OtherActor != this)
-	{
-		AController* InstigatorController = GetInstigatorController();
-		UGameplayStatics::ApplyDamage(OtherActor, Damage, InstigatorController, this, nullptr);
-		Destroy();
-	}
+    if (OtherActor && OtherActor != this)
+    {
+        AController* InstigatorController = GetInstigatorController();
+
+        if (!InstigatorController && GetOwner())
+        {
+            if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+                InstigatorController = OwnerPawn->GetController();
+        }
+
+        UE_LOG(LogTemp, Warning, TEXT("Projectile hit %s (Controller: %s)"),
+            *OtherActor->GetName(),
+            *GetNameSafe(InstigatorController));
+
+        UGameplayStatics::ApplyDamage(
+            OtherActor,
+            Damage,
+            InstigatorController,
+            this,
+            UDamageType::StaticClass()
+        );
+
+        Destroy();
+    }
 }
