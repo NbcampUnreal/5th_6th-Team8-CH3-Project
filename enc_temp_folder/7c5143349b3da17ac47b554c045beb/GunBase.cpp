@@ -6,7 +6,6 @@
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
-#include "GameFramework/DamageType.h"
 #include "PlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/DecalComponent.h"
@@ -222,7 +221,7 @@ void AGunBase::TraceFire()
             Hit,
             OwnerController,
             this,
-            UDamageType::StaticClass()
+            nullptr
         );
 
         if (ImpactFX)

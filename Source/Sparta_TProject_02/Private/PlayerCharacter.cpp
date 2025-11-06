@@ -10,6 +10,7 @@
 #include "GrenadeActor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "TimerManager.h"
+#include "Turret.h"
 #include "Kismet/GameplayStatics.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -180,6 +181,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		if (GrenadeAction)
 		{
 			EnhancedInput->BindAction(GrenadeAction, ETriggerEvent::Started, this, &APlayerCharacter::ThrowGrenade);
+		}
+
+		if (TurretAction)
+		{
+			EnhancedInput->BindAction(TurretAction, ETriggerEvent::Started, this, &APlayerCharacter::SpawnTurret);
 		}
 
 		if (EquipShotgunAction) EnhancedInput->BindAction(EquipShotgunAction, ETriggerEvent::Started, this, &APlayerCharacter::EquipShotgun);
@@ -427,6 +433,42 @@ void APlayerCharacter::ThrowGrenade(const FInputActionValue& Value)
 	{
 		UGameplayStatics::PlaySoundAtLocation(World, ThrowGrenadeSound, GetActorLocation());
 	}
+}
+
+
+void APlayerCharacter::SpawnTurret()
+{
+	if (!bCanUseTurretSkill || !TurretClass) return;
+
+	FVector SpawnLoc = GetActorLocation() + GetActorForwardVector() * 200.f;
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	// 아래 방향으로 1000만큼 트레이스 (지면 감지)
+	FVector TraceStart = SpawnLoc;
+	FVector TraceEnd = SpawnLoc - FVector(0, 0, 1000.f);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, Params))
+	{
+		SpawnLoc = HitResult.Location; // 땅에 맞은 지점으로 위치 보정
+	}
+
+	// 살짝 위로 띄워서 겹침 방지
+	SpawnLoc.Z += 5.f;
+
+	ATurret* NewTurret = GetWorld()->SpawnActor<ATurret>(TurretClass, SpawnLoc, GetActorRotation());
+	bCanUseTurretSkill = false;
+
+	// 30초 쿨타임
+	GetWorldTimerManager().SetTimer(TurretCooldownHandle, this, &APlayerCharacter::ResetTurretCooldown, 30.0f, false);
+	UE_LOG(LogTemp, Log, TEXT("Turret Spawned! Cooldown started."));
+}
+
+void APlayerCharacter::ResetTurretCooldown()
+{
+	bCanUseTurretSkill = true;
+	UE_LOG(LogTemp, Log, TEXT("Turret skill ready again."));
 }
 
 void APlayerCharacter::OnWeaponFinishReload()

@@ -11,6 +11,7 @@ class USkeletalMeshComponent;
 class UCameraComponent;
 class AGunBase;
 struct FInputActionValue;
+class ATurret;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
@@ -114,6 +115,18 @@ protected:
 
 	UFUNCTION()
 	void ThrowGrenade(const FInputActionValue& Value);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	TSubclassOf<class ATurret> TurretClass;
+
+	FTimerHandle TurretCooldownHandle;
+	bool bCanUseTurretSkill = true;
+
+	void SpawnTurret();
+	void ResetTurretCooldown();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* TurretAction;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
