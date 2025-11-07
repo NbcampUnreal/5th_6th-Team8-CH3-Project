@@ -6,7 +6,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
-#include "PlayerCharacter.h"
+#include "Sparta_TProject_02/Sparta_TProject_02Character.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BrainComponent.h"
@@ -146,7 +146,7 @@ void AAIMonsterBase::Attack()
     {
         for (const auto& Hit : HitResults)
         {
-            APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Hit.GetActor());
+            ASparta_TProject_02Character* PlayerCharacter = Cast<ASparta_TProject_02Character>(Hit.GetActor());
             if (PlayerCharacter)
             {
                 UE_LOG(LogTemp, Warning, TEXT("%s's attack hit %s! Applying %f damage."), *GetName(), *PlayerCharacter->GetName(), AttackDamage);
