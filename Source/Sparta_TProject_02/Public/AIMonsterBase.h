@@ -17,6 +17,7 @@ class SPARTA_TPROJECT_02_API AAIMonsterBase : public ACharacter
 public:
     AAIMonsterBase();
 
+    // --- Overrides ---
 protected:
     virtual void BeginPlay() override;
 
@@ -46,6 +47,9 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI State")
     bool bIsDead;
 
+    // 이건 Turret.cpp 에서 쓰는중..
+    bool IsDead() const { return bIsDead; }
+
     // 피격시 재생할 애니메이션 몽타주
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI Combat")
     class UAnimMontage* HitReactMontage;
@@ -55,6 +59,7 @@ public:
     class UAnimMontage* DeathMontage;
 
     // --- AI Combat & Damage (전투 기능) ---
+
     // 데미지를 받는 함수 (언리얼 기본 함수)
     virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
         class AController* EventInstigator, AActor* DamageCauser) override;

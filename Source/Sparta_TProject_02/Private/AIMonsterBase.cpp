@@ -42,10 +42,11 @@ AAIMonsterBase::AAIMonsterBase()
     AggroSphere->OnComponentBeginOverlap.AddDynamic(this, &AAIMonsterBase::OnAggroSphereOverlap); // Overlap 이벤트가 발생했을 때 호출될 함수를 연결(바인딩)합니다.
 }
 
+// --- 게임 시작 시 ---
 void AAIMonsterBase::BeginPlay()
 {
     Super::BeginPlay();
-    CurrentHealth = MaxHealth; // 게임 시작 시 체력 초기화
+    CurrentHealth = MaxHealth; // 체력 초기화
 
     // 위젯 컴포넌트로부터 실제 위젯 객체를 가져와서 C++ 클래스로 캐스팅
     if (HealthBarWidgetComponent)
