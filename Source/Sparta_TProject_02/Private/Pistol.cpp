@@ -3,7 +3,7 @@
 APistol::APistol()
 {
 	Damage = 25.0f;
-	MaxMagazineAmmo = 15;
+	MaxMagazineAmmo = 6;
 	CurrentAmmo = MaxMagazineAmmo;
 	FireRate = 0.0f;
 	WeaponType = EWeaponType::WT_Pistol;

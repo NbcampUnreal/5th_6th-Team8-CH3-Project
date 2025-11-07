@@ -15,8 +15,8 @@ class AGunBase;
 struct FInputActionValue;
 class AShop;
 
-// 🔸 Hit 이벤트용 델리게이트 정의
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyHitSignature);
+class ATurret;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
@@ -66,9 +66,12 @@ protected:
 	UInputAction* EquipPistolAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* GrenadeAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* InventoryAction;
 
 	// --- Movement ---
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float BaseSpeed;
 	float NormalSpeed;
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SprintSpeedMultiplier;
@@ -113,6 +116,18 @@ protected:
 
 	UFUNCTION()
 	void ThrowGrenade(const FInputActionValue& Value);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	TSubclassOf<class ATurret> TurretClass;
+
+	FTimerHandle TurretCooldownHandle;
+	bool bCanUseTurretSkill = true;
+
+	void SpawnTurret();
+	void ResetTurretCooldown();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* TurretAction;
 
 public:
 	// --- Weapon 관련 함수 ---
@@ -163,11 +178,27 @@ protected:
 	void EquipWeaponByType(EWeaponType TypeToEquip);
 	void EquipWeapon(int32 Index);
 
+	void ToggleInventory(const FInputActionValue& value);
+
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
 	float MaxHealth;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	float Health;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+	int32 BaseDefense;
+	int32 Defense;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	int32 Attack_Increase;
+
+	//float GetMaxHealth() const;
+	//float GetHealth() const;
+	//float GetBaseDefense() const;
+	//float GetDefense() const;
+	//float GetAttack_Increase() const;
 
 	UFUNCTION()
 	void OnWeaponStartFire();
@@ -197,6 +228,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnEnemyHitSignature OnEnemyHit;
 
+	// Gem 장착으로 인한 스탯변화를 계산하는 함수
+	bool CalculateStats();
 protected:
 	UFUNCTION()
 	void HandleHealthChanged(float Current, float Max)

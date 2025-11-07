@@ -16,6 +16,12 @@ class SPARTA_TPROJECT_02_API AAIC_Monster : public AAIController
 public:
     AAIC_Monster();
 
+    virtual void Tick(float DeltaSeconds) override;
+
+    // BTTask에서 호출할 함수들 선언
+    void StartRotatingToTarget();
+    void StopRotatingToTarget();
+
 protected:
     virtual void OnPossess(APawn* InPawn) override;
 
@@ -31,4 +37,8 @@ private:
     // 인지 정보가 업데이트될 때 호출될 함수
     UFUNCTION()
     void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+    // 회전 관련 상태 변수 추가
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+    bool bIsRotatingToTarget = false;
 };

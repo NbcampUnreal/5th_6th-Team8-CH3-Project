@@ -1,6 +1,10 @@
 ﻿// AIBoss.cpp
 
 #include "AIBoss.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "AIController.h"
 
 AAIBoss::AAIBoss()
 {
@@ -10,28 +14,14 @@ AAIBoss::AAIBoss()
     AttackRange = 250.0f;
 }
 
+void AAIBoss::BeginPlay()
+{
+    Super::BeginPlay();
+
+}
+
 void AAIBoss::Attack()
 {
     Super::Attack();
-
     if (bIsDead) return;
-
-    //UE_LOG(LogTemp, Warning, TEXT("Boss is performing a normal attack!"));
-
-    //if (NormalAttackMontage)
-    //{
-    //    PlayAnimMontage(NormalAttackMontage);
-    //}
 }
-
-//void AAIBoss::PerformSpecialAttack()
-//{
-//    if (bIsDead) return;
-//
-//    UE_LOG(LogTemp, Warning, TEXT("Boss is performing a SPECIAL attack!"));
-//
-//    if (SpecialAttackMontage)
-//    {
-//        PlayAnimMontage(SpecialAttackMontage);
-//    }
-//}

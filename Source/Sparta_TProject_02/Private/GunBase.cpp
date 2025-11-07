@@ -6,6 +6,7 @@
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/DamageType.h"
 #include "PlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/DecalComponent.h"
@@ -147,10 +148,21 @@ void AGunBase::FinishReload()
         return;
     }
 
-    int32 AmmoConsumed = OwningPlayer->ConsumeAmmoForReload(WeaponType, AmmoToReload);
-    CurrentAmmo += AmmoConsumed;
+    int32 AmmoConsumed = 0;
 
+    // ±ÇÃÑÀº ¿¹ºñÅº °³³ä ¾øÀÌ Ç×»ó ÀåÀü °¡´É
+    if (WeaponType == EWeaponType::WT_Pistol)
+    {
+        AmmoConsumed = AmmoToReload;
+    }
+    else
+    {
+        AmmoConsumed = OwningPlayer->ConsumeAmmoForReload(WeaponType, AmmoToReload);
+    }
+
+    CurrentAmmo += AmmoConsumed;
     bIsReloading = false;
+
     GetWorld()->GetTimerManager().ClearTimer(ReloadTimerHandle);
     OnFinishReload.Broadcast();
 }
@@ -210,7 +222,7 @@ void AGunBase::TraceFire()
             Hit,
             OwnerController,
             this,
-            nullptr
+            UDamageType::StaticClass()
         );
 
         if (ImpactFX)

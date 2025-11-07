@@ -51,6 +51,8 @@ void APlayerCharacterController::BeginPlay()
 	{
 		MyGameInstance->SetupInventoryWidget(this);
 		MyGameInstance->SetupEquipmentWidget(this);
+		MyGameInstance->CloseInventoryWidget();
+		MyGameInstance->CloseEquipmentWidget();
 	}
 }
 

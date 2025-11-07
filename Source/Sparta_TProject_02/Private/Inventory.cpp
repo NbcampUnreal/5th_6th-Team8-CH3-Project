@@ -3,6 +3,7 @@
 #include "MaterialItem.h"
 #include "MyGameInstance.h"
 #include "InventoryWidget.h"
+#include "EquipmentWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 //ShopUI
@@ -80,6 +81,7 @@ bool UInventory::AddItem(UItem* Item)
 			if (bSuccess)
 			{
 				GameInstance->GetInventoryWidget()->RefreshWidget();
+				GameInstance->GetEquipmentWidget()->RefreshWidget();
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 				return true;
 			}
@@ -90,6 +92,7 @@ bool UInventory::AddItem(UItem* Item)
 	ItemArray.Add(Item);
 	++Size;
 	GameInstance->GetInventoryWidget()->RefreshWidget();
+	GameInstance->GetEquipmentWidget()->RefreshWidget();
 
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 	return true;
@@ -100,7 +103,13 @@ bool UInventory::RemoveItemIndex(int32 Index)
 	int32 Size = ItemArray.Num();
 	if (Size <= Index) return false;
 
+	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
+	if (!GameInstance) return false;
+
 	ItemArray.RemoveAt(Index);
+	GameInstance->GetInventoryWidget()->RefreshWidget();
+	GameInstance->GetEquipmentWidget()->RefreshWidget();
+
 	return true;
 }
 

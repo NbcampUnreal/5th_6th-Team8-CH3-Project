@@ -14,15 +14,21 @@ class SPARTA_TPROJECT_02_API AAIBoss : public AAIMonsterBase
 public:
     AAIBoss();
 
+protected:
+    // 게임 시작 시 한 번 호출됩니다.
+    virtual void BeginPlay() override;
+
+public:
     // 부모의 Attack 함수를 재정의
     virtual void Attack() override;
-
-    //UFUNCTION(BlueprintCallable, Category = "AI Combat")
-    //void PerformSpecialAttack();
 
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Combat")
     //class UAnimMontage* NormalAttackMontage;
 
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Combat")
     //class UAnimMontage* SpecialAttackMontage;
+
+private:
+    // (개발 예정) 원래 방어력을 저장할 변수
+    // float OriginalDefense; 
 };

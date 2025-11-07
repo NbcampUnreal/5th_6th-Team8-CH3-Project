@@ -10,7 +10,13 @@
 #include "GrenadeActor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "TimerManager.h"
+#include "Turret.h"
 #include "Kismet/GameplayStatics.h"
+#include "MyGameInstance.h"
+#include "Gem.h"
+#include "AttackGem.h"
+#include "DefenseGem.h"
+#include "SpeedGem.h"
 
 //상점UI
 #include "Kismet/GameplayStatics.h"
@@ -43,7 +49,8 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 
-	NormalSpeed = 600.0f;
+	BaseSpeed = 600.0f;
+	NormalSpeed = BaseSpeed;
 	SprintSpeedMultiplier = 1.7f;
 	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
 
@@ -62,6 +69,9 @@ APlayerCharacter::APlayerCharacter()
 	CurrentWeapon = nullptr; 
 	MaxHealth = 100.0f;
 	Health = MaxHealth;
+	BaseDefense = 0;
+	Defense = BaseDefense;
+	Attack_Increase = 0;
 }
 
 void APlayerCharacter::HealOnWaveClear(float HealAmount)
@@ -230,9 +240,19 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			EnhancedInput->BindAction(GrenadeAction, ETriggerEvent::Started, this, &APlayerCharacter::ThrowGrenade);
 		}
 
+		if (TurretAction)
+		{
+			EnhancedInput->BindAction(TurretAction, ETriggerEvent::Started, this, &APlayerCharacter::SpawnTurret);
+		}
+
 		if (EquipShotgunAction) EnhancedInput->BindAction(EquipShotgunAction, ETriggerEvent::Started, this, &APlayerCharacter::EquipShotgun);
 		if (EquipRifleAction) EnhancedInput->BindAction(EquipRifleAction, ETriggerEvent::Started, this, &APlayerCharacter::EquipRifle);
 		if (EquipPistolAction) EnhancedInput->BindAction(EquipPistolAction, ETriggerEvent::Started, this, &APlayerCharacter::EquipPistol);
+
+		if (InventoryAction)
+		{
+			EnhancedInput->BindAction(InventoryAction, ETriggerEvent::Started, this, &APlayerCharacter::ToggleInventory);
+		}
 	}
 }
 
@@ -299,10 +319,20 @@ void APlayerCharacter::StartReload(const FInputActionValue& value)
 	if (CurrentWeapon) CurrentWeapon->Reload();
 }
 
+// Inventory & Equipment Widget Open / Close
+void APlayerCharacter::ToggleInventory(const FInputActionValue& value)
+{
+	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
+	if (!GameInstance) return;
+	UE_LOG(LogTemp, Warning, TEXT("ToggleInventory"));
+	GameInstance->ToggleInventoryWidget();
+}
+
 // Equip helpers
 void APlayerCharacter::EquipShotgun(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Shotgun); }
 void APlayerCharacter::EquipRifle(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Rifle); }
 void APlayerCharacter::EquipPistol(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Pistol); }
+
 
 void APlayerCharacter::EquipWeaponByType(EWeaponType TypeToEquip)
 {
@@ -477,7 +507,85 @@ void APlayerCharacter::ThrowGrenade(const FInputActionValue& Value)
 	}
 }
 
+
+void APlayerCharacter::SpawnTurret()
+{
+	if (!bCanUseTurretSkill || !TurretClass) return;
+
+	FVector SpawnLoc = GetActorLocation() + GetActorForwardVector() * 200.f;
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	// 아래 방향으로 1000만큼 트레이스 (지면 감지)
+	FVector TraceStart = SpawnLoc;
+	FVector TraceEnd = SpawnLoc - FVector(0, 0, 1000.f);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, Params))
+	{
+		SpawnLoc = HitResult.Location; // 땅에 맞은 지점으로 위치 보정
+	}
+
+	// 살짝 위로 띄워서 겹침 방지
+	SpawnLoc.Z += 5.f;
+
+	ATurret* NewTurret = GetWorld()->SpawnActor<ATurret>(TurretClass, SpawnLoc, GetActorRotation());
+	bCanUseTurretSkill = false;
+
+	// 30초 쿨타임
+	GetWorldTimerManager().SetTimer(TurretCooldownHandle, this, &APlayerCharacter::ResetTurretCooldown, 30.0f, false);
+	UE_LOG(LogTemp, Log, TEXT("Turret Spawned! Cooldown started."));
+}
+
+void APlayerCharacter::ResetTurretCooldown()
+{
+	bCanUseTurretSkill = true;
+	UE_LOG(LogTemp, Log, TEXT("Turret skill ready again."));
+}
+
 void APlayerCharacter::OnWeaponFinishReload()
 {
 	// HUD ������Ʈ ��
+}
+
+bool APlayerCharacter::CalculateStats()
+{
+	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
+	if (GameInstance) return false;
+
+	Attack_Increase = 0;
+	int32 Defense_Increase = 0;
+	int32 Speed_Increase = 0;
+
+	UInventory* GemSlots = GameInstance->GemSlots;
+	for (int32 i = 0; i < GemSlots->GetCurrentSize(); ++i)
+	{
+		UItem* Item = GemSlots->GetItem(i);
+		if (!Item) continue;
+
+		UEquipmentItem* EquipmentItem = Cast<UEquipmentItem>(Item);
+		if (!EquipmentItem) continue;
+
+		UGem* Gem = Cast<UGem>(EquipmentItem);
+		if (!Gem) continue;
+
+		if (UAttackGem* ATKGem = Cast<UAttackGem>(Gem))
+		{
+			Attack_Increase += ATKGem->GetAttackValue();
+		}
+		else if (UDefenseGem* DEFGem = Cast<UDefenseGem>(Gem))
+		{
+			Defense_Increase += DEFGem->GetDefenseValue();
+		}
+		else if (USpeedGem* SPDGem = Cast<USpeedGem>(Gem))
+		{
+			Speed_Increase += SPDGem->GetSpeedValue();
+		}
+	}
+	// Attack_Increase = Attack_Increase;
+	Defense_Increase = BaseDefense + Defense_Increase;
+	NormalSpeed = BaseSpeed + (float)Speed_Increase;
+	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
+
+	return true;
 }

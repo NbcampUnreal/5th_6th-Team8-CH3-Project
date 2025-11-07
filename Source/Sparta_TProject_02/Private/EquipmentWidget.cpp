@@ -27,6 +27,7 @@
 #include "ItemButtonWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "MyGameInstance.h"
+#include "PlayerCharacter.h"
 
 UEquipmentWidget::UEquipmentWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -37,14 +38,14 @@ UEquipmentWidget::UEquipmentWidget(const FObjectInitializer& ObjectInitializer) 
    UnEquipBox = nullptr;
    UnEquipButton = nullptr;
    GridMaxColumn = 6;
-   PlayerContlloer = nullptr;
+   PlayerController = nullptr;
    DynamicButtonClass = nullptr;
 }
 
 void UEquipmentWidget::NativeConstruct()
 {
    Super::NativeConstruct();
-   PlayerContlloer = GetOwningPlayer();
+   PlayerController = GetOwningPlayer();
    GemSlotsGrid = Cast<UGridPanel>(GetWidgetFromName(TEXT("GemSlotsGrid")));
    SelectGrid = Cast<UGridPanel>(GetWidgetFromName(TEXT("EquipmentSelectGrid")));
    UnEquipBox = Cast<USizeBox>(GetWidgetFromName(TEXT("UnEquipBox")));
@@ -55,22 +56,23 @@ void UEquipmentWidget::NativeConstruct()
 
 void UEquipmentWidget::SetupWidget()
 {
-   UMyGameInstance* GameInstance = Cast<UMyGameInstance>(PlayerContlloer->GetGameInstance());
-   if (GameInstance)
-   {
-      Inventory = GameInstance->Inventory;
-      GemSlots = GameInstance->GemSlots;
-      GemSlots->SetMaxSize(GridMaxColumn);
-      RefreshWidget();
-   }
+   UMyGameInstance* GameInstance = Cast<UMyGameInstance>(PlayerController->GetGameInstance());
+   if (!GameInstance) return;
+   Inventory = GameInstance->Inventory;
+   GemSlots = GameInstance->GemSlots;
+   GemSlots->SetMaxSize(GridMaxColumn);
+
    if (!UnEquipButton) return;
    UnEquipButton->OnClicked.AddDynamic(this, &UEquipmentWidget::UnEquip);
    UnEquipButton->SetupClickBinding();
+
+   RefreshWidget();
+   ItemTooltipHide();
+   EquipmentSelectHide();
 }
 bool UEquipmentWidget::RefreshWidget()
 {
-   EquipmentSelectHide();
-   ItemTooltipHide();
+   if (GetVisibility() == ESlateVisibility::Collapsed) return false;
    for (int32 i = GemSlotsGrid->GetChildrenCount(); i > 0; --i)
    {
       GemSlotsGrid->RemoveChildAt(0);
@@ -98,7 +100,29 @@ bool UEquipmentWidget::RefreshWidget()
          return false;
       }
    }
+   if (!DisplayStatusInfo()) return false;
 
+   return true;
+}
+
+bool UEquipmentWidget::DisplayStatusInfo()
+{
+   UTextBlock* StatusTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("StatusTextBlock")));
+   if (!StatusTextBlock) return false;
+   APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(PlayerController->GetPawn());
+   PlayerCharacter->CalculateStats();
+   FString StatusPrint;
+
+   int32 Health = 0;
+   int32 MaxHealth = 0;
+   int32 BaseDefense = 0;
+   int32 Defense = 0;
+   int32 BaseSpeed = 0;
+   int32 Speed = 0;
+   StatusPrint =  FString::Printf(TEXT("Health: %d / %d \n"), Health, MaxHealth);
+   StatusPrint += FString::Printf(TEXT("Defense: %d (%d + %d) \n"), Defense, BaseDefense, Defense - BaseDefense);
+   StatusPrint += FString::Printf(TEXT("Speed: %d (%d + %d) \n"), Speed, BaseSpeed, Speed - BaseSpeed);
+   StatusTextBlock->SetText(FText::FromString(StatusPrint));
    return true;
 }
 
@@ -132,7 +156,7 @@ bool UEquipmentWidget::AddGemToGrid(UItem* Item, int32 Index)
 
 UOverlay* UEquipmentWidget::CreateItemOverlay(UItem* Item, const FVector2D& ItemOverlaySize, FItemButtonData ButtonData)
 {
-   UOverlay* ItemOverlay = NewObject<UOverlay>(PlayerContlloer);
+   UOverlay* ItemOverlay = NewObject<UOverlay>(PlayerController);
    if (!ItemOverlay) return nullptr;
 
    UItemButtonWidget* ItemButtonWidget = CreateItemButton(Item, ItemOverlaySize, ButtonData);
@@ -312,7 +336,7 @@ bool UEquipmentWidget::AddGemToSelectGrid(UItem* Item, int32 Index, int32 Column
    ButtonData.ButtonPosition.X += (Column * ItemOverlaySize.X) + ((Column + 1) * ItemMargin.Left);
    ButtonData.ButtonPosition.Y += (Row * ItemOverlaySize.Y) + ((Row + 1) * ItemMargin.Top);
 
-   USizeBox* SizeBox = NewObject<USizeBox>(PlayerContlloer);
+   USizeBox* SizeBox = NewObject<USizeBox>(PlayerController);
    if (!SizeBox) return false;
    SizeBox->SetWidthOverride(ItemOverlaySize.X);
    SizeBox->SetHeightOverride(ItemOverlaySize.Y);
@@ -331,7 +355,7 @@ bool UEquipmentWidget::AddGemToSelectGrid(UItem* Item, int32 Index, int32 Column
 
 UOverlay* UEquipmentWidget::CreateSelectItemOverlay(UItem* Item, const FVector2D& ItemOverlaySize, FItemButtonData ButtonData)
 {
-   UOverlay* ItemOverlay = NewObject<UOverlay>(PlayerContlloer);
+   UOverlay* ItemOverlay = NewObject<UOverlay>(PlayerController);
    if (!ItemOverlay) return nullptr;
 
    UItemButtonWidget* ItemButtonWidget = CreateItemButton(Item, ItemOverlaySize, ButtonData);
@@ -417,8 +441,8 @@ void UEquipmentWidget::Equip(const FItemButtonData& ItemButtonData)
    UItem* Item = Inventory->GetItem(Index);
    Inventory->RemoveItemIndex(Index);
    GemSlots->AddItem(Item);
+   ItemTooltipHide();
    EquipmentSelectHide();
-   RefreshWidget();
 }
 
 void UEquipmentWidget::UnEquip(const FItemButtonData& ItemButtonData)
@@ -429,7 +453,7 @@ void UEquipmentWidget::UnEquip(const FItemButtonData& ItemButtonData)
    UItem* Item = GemSlots->GetItem(Index);
    GemSlots->RemoveItemIndex(Index);
    Inventory->AddItem(Item);
+   ItemTooltipHide();
    EquipmentSelectHide();
-   RefreshWidget();
 }
 

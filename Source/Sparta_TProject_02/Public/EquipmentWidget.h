@@ -42,7 +42,7 @@ protected:
 	int32 GridMaxColumn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")
-	APlayerController* PlayerContlloer;
+	APlayerController* PlayerController;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")
 	TSubclassOf<UItemButtonWidget> DynamicButtonClass;
@@ -55,6 +55,7 @@ public:
 	UEquipmentWidget(const FObjectInitializer& ObjectInitializer);
 	void SetupWidget();
 	bool RefreshWidget();
+	bool DisplayStatusInfo();
 	bool AddGemToGrid(UItem* Item, int32 Index);
 	
 	UFUNCTION()
