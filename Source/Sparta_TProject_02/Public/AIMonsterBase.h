@@ -48,7 +48,8 @@ public:
     // --- 몬스터 공통 기능 ---
 
     // 데미지를 받는 함수 (언리얼 기본 함수 오버라이드)
-    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+        class AController* EventInstigator, AActor* DamageCauser) override;
 
     // 공격 함수 (자식 클래스에서 구체적인 내용을 구현하도록 virtual로 선언)
     UFUNCTION(BlueprintCallable, Category = "AI Behavior")

@@ -15,8 +15,8 @@ class AGunBase;
 struct FInputActionValue;
 class AShop;
 
-// 🔸 Hit 이벤트용 델리게이트 정의
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyHitSignature);
+class ATurret;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API APlayerCharacter : public ACharacter
@@ -116,6 +116,18 @@ protected:
 
 	UFUNCTION()
 	void ThrowGrenade(const FInputActionValue& Value);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	TSubclassOf<class ATurret> TurretClass;
+
+	FTimerHandle TurretCooldownHandle;
+	bool bCanUseTurretSkill = true;
+
+	void SpawnTurret();
+	void ResetTurretCooldown();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* TurretAction;
 
 public:
 	// --- Weapon 관련 함수 ---
