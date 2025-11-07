@@ -104,6 +104,14 @@ void ATurret::ScanForTargets()
 	for (AActor* Target : OverlappingActors)
 	{
 		if (!Target) continue;
+
+		AAIMonsterBase* MonsterTarget = Cast<AAIMonsterBase>(Target);
+
+		if (MonsterTarget && MonsterTarget->IsDead())
+		{
+			continue;
+		}
+
 		float DistSq = FVector::DistSquared(MyLocation, Target->GetActorLocation());
 		if (DistSq < MinDistSq)
 		{

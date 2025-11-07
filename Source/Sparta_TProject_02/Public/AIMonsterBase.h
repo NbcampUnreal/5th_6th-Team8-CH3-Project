@@ -67,9 +67,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AI Behavior")
     virtual void Die();
 
-    // 스테이지에 따라 변경할 체력 배율
-    void ApplyHealthMultiplier(float Multiplier);
-
 protected:
     // 체력바를 표시할 위젯 컴포넌트
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
