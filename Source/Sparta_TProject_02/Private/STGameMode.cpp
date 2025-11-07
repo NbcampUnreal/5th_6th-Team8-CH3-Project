@@ -12,7 +12,8 @@
 ASTGameMode::ASTGameMode()
 {
 	GameStateClass = ASTGameState::StaticClass();
-
+	DefaultPawnClass = APlayerCharacter::StaticClass();
+	PlayerControllerClass = APlayerCharacterController::StaticClass();
 	CurrentWave = 0;
 	EnemiesAlive = 0;
 	TotalEnemiesSpawned = 0;
