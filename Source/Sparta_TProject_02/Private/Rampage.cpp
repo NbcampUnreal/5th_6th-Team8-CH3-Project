@@ -12,6 +12,7 @@ ARampage::ARampage()
 	MaxHealth = 1500.0f;
 	AttackDamage = 75.0f;
 	AttackRange = 300.0f;
+	Defense = 5.0f;
 }
 
 void ARampage::BeginPlay()
@@ -22,6 +23,7 @@ void ARampage::BeginPlay()
 	{
 		OriginalWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	}
+	OriginalDefense = Defense;
 
 	USkeletalMeshComponent* RampageMesh = GetMesh();
 	if (RampageMesh)
@@ -84,6 +86,9 @@ void ARampage::Energize()
 		}
 	}
 
+	Defense = OriginalDefense * 2.0f;
+	UE_LOG(LogTemp, Warning, TEXT("Rampage [%s] Defense increased to: %.1f"), *GetName(), Defense);
+
 	GetWorldTimerManager().SetTimer(EnergizeTimerHandle, this, &ARampage::EndEnergize, 7.0f, false);
 }
 
@@ -111,6 +116,9 @@ void ARampage::EndEnergize()
 			DynMat->SetVectorParameterValue(ColorOverlayParamName, DefaultColor);
 		}
 	}
+
+	Defense = OriginalDefense;
+	UE_LOG(LogTemp, Warning, TEXT("Rampage [%s] Defense reverted to: %.1f"), *GetName(), Defense);
 }
 
 void ARampage::Die()

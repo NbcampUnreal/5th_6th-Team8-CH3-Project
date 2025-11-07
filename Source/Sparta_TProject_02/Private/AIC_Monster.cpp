@@ -23,8 +23,8 @@ AAIC_Monster::AAIC_Monster()
     SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
     if (SightConfig)
     {
-        SightConfig->SightRadius = 1500.0f;       // 시야 반경
-        SightConfig->LoseSightRadius = 1600.0f;  // 시야를 잃는 반경 (더 크게 설정해야 안정적)
+        SightConfig->SightRadius = 3000.0f;       // 시야 반경
+        SightConfig->LoseSightRadius = 3100.0f;  // 시야를 잃는 반경 (더 크게 설정해야 안정적)
         SightConfig->PeripheralVisionAngleDegrees = 75.0f; // 시야각
         SightConfig->SetMaxAge(5.0f); // 감지 정보를 5초간 기억함
 

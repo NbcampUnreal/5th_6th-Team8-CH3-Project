@@ -1,6 +1,4 @@
-﻿// AIZombie.h
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "AIMonsterBase.h"
@@ -15,8 +13,4 @@ public:
     AAIZombie();
 
     virtual void Attack() override;
-
-
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Combat")
-    //class UAnimMontage* AttackMontage;
 };

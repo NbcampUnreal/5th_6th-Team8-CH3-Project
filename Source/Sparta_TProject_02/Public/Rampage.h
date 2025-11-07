@@ -1,6 +1,4 @@
-﻿// Rampage.h
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "BrainComponent.h"
@@ -44,4 +42,6 @@ private:
 	// 분노 버프 관련 변수
 	FTimerHandle EnergizeTimerHandle;
 	float OriginalWalkSpeed;
+
+	float OriginalDefense;
 };
