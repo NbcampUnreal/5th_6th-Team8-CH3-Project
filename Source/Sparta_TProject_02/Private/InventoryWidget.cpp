@@ -1,4 +1,4 @@
-#include "InventoryWidget.h"
+﻿#include "InventoryWidget.h"
 #include "Item.h"
 #include "MaterialItem.h"
 #include "Inventory.h"
@@ -129,18 +129,6 @@ UOverlay* UInventoryWidget::CreateItemOverlay(UItem* Item, const FVector2D& Item
    if (!ItemButtonWidget) return nullptr;
    ItemOverlay->AddChild(Cast<UWidget>(ItemButtonWidget));
 
-   if (UMaterialItem* MaterialItem = Cast<UMaterialItem>(Item))
-   {
-      UTextBlock* ItemStackTextBlock = CreateItemStackTextBlock(Item, ItemOverlay);
-      if (!ItemStackTextBlock) return nullptr;
-      ItemOverlay->AddChild(Cast<UWidget>(ItemStackTextBlock));
-
-      UOverlaySlot* OverlaySlot = ItemOverlay->AddChildToOverlay(ItemStackTextBlock);
-      OverlaySlot->SetPadding(FMargin(0.0f, 0.0f, 5.0f, 5.0f));
-      OverlaySlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
-      OverlaySlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Bottom);
-   }
-
    UImage* Image = CreateItemImage(Item, ItemOverlay);
    if (Image)
    {
@@ -148,6 +136,19 @@ UOverlay* UInventoryWidget::CreateItemOverlay(UItem* Item, const FVector2D& Item
       OverlaySlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
       OverlaySlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
    }
+
+   if (UMaterialItem* MaterialItem = Cast<UMaterialItem>(Item))
+   {
+       UTextBlock* ItemStackTextBlock = CreateItemStackTextBlock(Item, ItemOverlay);
+       if (!ItemStackTextBlock) return nullptr;
+       ItemOverlay->AddChild(Cast<UWidget>(ItemStackTextBlock));
+
+       UOverlaySlot* OverlaySlot = ItemOverlay->AddChildToOverlay(ItemStackTextBlock);
+       OverlaySlot->SetPadding(FMargin(0.0f, 0.0f, 5.0f, 5.0f));
+       OverlaySlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
+       OverlaySlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Bottom);
+   }
+
    return ItemOverlay;
 }
 

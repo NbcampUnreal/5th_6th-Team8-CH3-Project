@@ -59,9 +59,13 @@ void AShop::OpenShop()
 		ShopVisible = true;
 
 		UShopUserWidget* ShopWidget = Cast<UShopUserWidget>(ShopWidgetInstance);
+
 		if (ShopWidget)
 		{
 			ShopWidget->PopulateItemList(AvailableItems);
+
+			// 상점 인벤토리 목록 갱신 호출
+			ShopWidget->PopulateInventoryList();
 		}
 
 		if (PC)
@@ -89,7 +93,21 @@ void AShop::CloseShop()
 
 void AShop::UpdateList()
 {
+	UShopUserWidget* ShopWidget = Cast<UShopUserWidget>(ShopWidgetInstance);
 
+	if (ShopWidget)
+	{
+		// 상점 인벤토리 목록 갱신 호출 
+		ShopWidget->PopulateInventoryList();
+
+		// (선택 사항) 만약 상점 목록도 재료 개수 변화 때문에 갱신이 필요하다면 아래를 호출 - 추후 이런 기능 도입 한다면 -
+		// ShopWidget->PopulateItemList(AvailableItems);
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("Shop and Inventory Lists Updated."));
+		}
+	}
 }
 
 void AShop::UpdateDescription()
