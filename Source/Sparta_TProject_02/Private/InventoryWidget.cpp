@@ -314,5 +314,4 @@ void UInventoryWidget::ItemDestory(const FItemButtonData& ItemButtonData)
       TEXT("DestoryIndex: %d"), ItemButtonData.Index));
    Inventory->RemoveItemIndex(ItemButtonData.Index);
    ItemContextMenuHide();
-   RefreshWidget();
 }

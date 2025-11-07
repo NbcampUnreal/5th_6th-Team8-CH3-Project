@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "InventoryWidgetBase.h"
 #include "EquipmentWidget.generated.h"
 
 class UItem;
@@ -15,7 +15,7 @@ class USizeBox;
 struct FItemButtonData;
 
 UCLASS()
-class SPARTA_TPROJECT_02_API UEquipmentWidget : public UUserWidget
+class SPARTA_TPROJECT_02_API UEquipmentWidget : public UInventoryWidgetBase
 {
 	GENERATED_BODY()
 	
@@ -41,7 +41,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")
 	int32 GridMaxColumn;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment")
 	APlayerController* PlayerController;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")
@@ -54,7 +54,7 @@ protected:
 public:
 	UEquipmentWidget(const FObjectInitializer& ObjectInitializer);
 	void SetupWidget();
-	bool RefreshWidget();
+	virtual bool RefreshWidget() override;
 	bool DisplayStatusInfo();
 	bool AddGemToGrid(UItem* Item, int32 Index);
 	

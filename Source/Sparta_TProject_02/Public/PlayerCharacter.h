@@ -182,12 +182,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Attack_Increase;
 
-	//float GetMaxHealth() const;
-	//float GetHealth() const;
-	//float GetBaseDefense() const;
-	//float GetDefense() const;
-	//float GetAttack_Increase() const;
-
 	UFUNCTION()
 	void OnWeaponStartFire();
 	UFUNCTION()
@@ -216,6 +210,13 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnEnemyHitSignature OnEnemyHit;
 
+	float GetMaxHealth() const;
+	float GetHealth() const;
+	int32 GetBaseDefense() const;
+	int32 GetDefense() const;
+	int32 GetAttack_Increase() const;
+	float GetBaseSpeed() const;
+	float GetNormalSpeed() const;
 	// Gem 장착으로 인한 스탯변화를 계산하는 함수
 	bool CalculateStats();
 protected:

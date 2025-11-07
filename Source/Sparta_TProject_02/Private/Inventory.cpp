@@ -1,7 +1,7 @@
 ﻿#include "Inventory.h"
 #include "Item.h"
 #include "MaterialItem.h"
-#include "MyGameInstance.h"
+#include "InventoryWidgetBase.h"
 #include "InventoryWidget.h"
 #include "EquipmentWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,11 +13,24 @@
 UInventory::UInventory()
 {
 	MaxSize = 16;
+	LinkedWidget = nullptr;
 }
 
 TArray<UItem*> UInventory::GetInventory() const
 {
 	return ItemArray;
+}
+
+UUserWidget* UInventory::GetLinkedWidget() const
+{
+	return LinkedWidget;
+}
+
+bool UInventory::SetLinkedWidget(UInventoryWidgetBase* InLinkedWidget)
+{
+	if (!InLinkedWidget) return false;
+	LinkedWidget = InLinkedWidget;
+	return true;
 }
 
 UItem* UInventory::GetItem(int32 index) const
@@ -55,9 +68,6 @@ bool UInventory::AddItem(UItem* Item)
 {
 	int32 Size = ItemArray.Num();
 
-	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
-	if (!GameInstance) return false;
-
 	if (UMaterialItem* StackableItem = Cast<UMaterialItem>(Item))
 	{
 		if (StackableItem->IsStackable() && StackableItem->GetItemMaxStack() > 1)
@@ -80,8 +90,10 @@ bool UInventory::AddItem(UItem* Item)
 			}
 			if (bSuccess)
 			{
-				GameInstance->GetInventoryWidget()->RefreshWidget();
-				GameInstance->GetEquipmentWidget()->RefreshWidget();
+				if (LinkedWidget)
+				{
+					LinkedWidget->RefreshWidget();
+				}
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 				return true;
 			}
@@ -91,8 +103,10 @@ bool UInventory::AddItem(UItem* Item)
 
 	ItemArray.Add(Item);
 	++Size;
-	GameInstance->GetInventoryWidget()->RefreshWidget();
-	GameInstance->GetEquipmentWidget()->RefreshWidget();
+	if (LinkedWidget)
+	{
+		LinkedWidget->RefreshWidget();
+	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 	return true;
@@ -103,12 +117,11 @@ bool UInventory::RemoveItemIndex(int32 Index)
 	int32 Size = ItemArray.Num();
 	if (Size <= Index) return false;
 
-	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this));
-	if (!GameInstance) return false;
-
 	ItemArray.RemoveAt(Index);
-	GameInstance->GetInventoryWidget()->RefreshWidget();
-	GameInstance->GetEquipmentWidget()->RefreshWidget();
+	if (LinkedWidget)
+	{
+		LinkedWidget->RefreshWidget();
+	}
 
 	return true;
 }

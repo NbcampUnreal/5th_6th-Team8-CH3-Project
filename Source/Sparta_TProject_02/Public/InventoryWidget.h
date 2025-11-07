@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "InventoryWidgetBase.h"
 #include "ItemButtonWidget.h"
 #include "InventoryWidget.generated.h"
 
@@ -14,7 +14,7 @@ class UImage;
 struct FItemButtonData;
 
 UCLASS()
-class SPARTA_TPROJECT_02_API UInventoryWidget : public UUserWidget
+class SPARTA_TPROJECT_02_API UInventoryWidget : public UInventoryWidgetBase
 {
 	GENERATED_BODY()
 	
@@ -31,7 +31,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 GridMaxColumn;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	APlayerController* PlayerContlloer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
@@ -47,7 +47,7 @@ protected:
 public:
 	UInventoryWidget(const FObjectInitializer& ObjectInitializer);
 	void SetupWidget();
-	bool RefreshWidget();
+	virtual bool RefreshWidget() override;
 	bool AddItemToGrid(UItem* Item, int32 Index);
 	UOverlay* CreateItemOverlay(UItem* Item, const FVector2D& ItemOverlaySize, FItemButtonData ButtonData);
 	UFUNCTION()
