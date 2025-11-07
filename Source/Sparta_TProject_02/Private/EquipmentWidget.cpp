@@ -113,12 +113,15 @@ bool UEquipmentWidget::DisplayStatusInfo()
    PlayerCharacter->CalculateStats();
    FString StatusPrint;
 
-   int32 Health = 0;
-   int32 MaxHealth = 0;
-   int32 BaseDefense = 0;
-   int32 Defense = 0;
-   int32 BaseSpeed = 0;
-   int32 Speed = 0;
+   int32 Health = (int32)PlayerCharacter->GetHealth();
+   int32 MaxHealth = (int32)PlayerCharacter->GetMaxHealth();
+   int32 BaseDefense = PlayerCharacter->GetBaseDefense();
+   int32 Defense = PlayerCharacter->GetDefense();
+   int32 BaseSpeed = PlayerCharacter->GetBaseSpeed();
+   int32 Speed = PlayerCharacter->GetNormalSpeed();
+
+   PlayerCharacter->GetCurrentWeapon();
+
    StatusPrint =  FString::Printf(TEXT("Health: %d / %d \n"), Health, MaxHealth);
    StatusPrint += FString::Printf(TEXT("Defense: %d (%d + %d) \n"), Defense, BaseDefense, Defense - BaseDefense);
    StatusPrint += FString::Printf(TEXT("Speed: %d (%d + %d) \n"), Speed, BaseSpeed, Speed - BaseSpeed);
