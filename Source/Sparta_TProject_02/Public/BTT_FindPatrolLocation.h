@@ -22,7 +22,7 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "AI")
-	float PatrolRadius = 1000.0f;
+	float PatrolRadius = 500.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector PatrolLocationKey;
