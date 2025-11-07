@@ -59,6 +59,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AI Behavior")
     virtual void Die();
 
+    bool IsDead() const { return bIsDead; }
     //체력 배율 반환
     void ApplyHealthMultiplier(float Multiplier);
 

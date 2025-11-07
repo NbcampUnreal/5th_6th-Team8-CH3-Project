@@ -58,12 +58,12 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	AmmoReserve.Add(EWeaponType::WT_Pistol, 0);
-	AmmoReserve.Add(EWeaponType::WT_Rifle, 360);
-	AmmoReserve.Add(EWeaponType::WT_Shotgun, 120);
+	AmmoReserve.Add(EWeaponType::WT_Rifle, 90);
+	AmmoReserve.Add(EWeaponType::WT_Shotgun, 30);
 
 	MaxCarryAmmo.Add(EWeaponType::WT_Pistol, 0);
-	MaxCarryAmmo.Add(EWeaponType::WT_Rifle, 999);
-	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 999);
+	MaxCarryAmmo.Add(EWeaponType::WT_Rifle, 180);
+	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 60);
 
 	CurrentWeaponIndex = 0;
 	CurrentWeapon = nullptr; 
