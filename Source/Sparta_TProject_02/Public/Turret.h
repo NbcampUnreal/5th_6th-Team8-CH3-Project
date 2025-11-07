@@ -50,6 +50,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	USoundBase* FireSound;
 
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	USoundBase* SpawnSound;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UParticleSystem* DestroyEffect;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	USoundBase* DestroySound;
+
+
+
 	UPROPERTY(EditAnywhere, Category = "Turret|Projectile")
 	TSubclassOf<AProjectile> ProjectileClass;
 
