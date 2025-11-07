@@ -58,12 +58,12 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	AmmoReserve.Add(EWeaponType::WT_Pistol, 0);
-	AmmoReserve.Add(EWeaponType::WT_Rifle, 360);
-	AmmoReserve.Add(EWeaponType::WT_Shotgun, 120);
+	AmmoReserve.Add(EWeaponType::WT_Rifle, 90);
+	AmmoReserve.Add(EWeaponType::WT_Shotgun, 30);
 
 	MaxCarryAmmo.Add(EWeaponType::WT_Pistol, 0);
-	MaxCarryAmmo.Add(EWeaponType::WT_Rifle, 999);
-	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 999);
+	MaxCarryAmmo.Add(EWeaponType::WT_Rifle, 180);
+	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 60);
 
 	CurrentWeaponIndex = 0;
 	CurrentWeapon = nullptr; 
@@ -413,41 +413,6 @@ int32 APlayerCharacter::GetReserveAmmo(EWeaponType WeaponType) const
 	return Found ? *Found : 0;
 }
 
-float APlayerCharacter::GetMaxHealth() const
-{
-	return MaxHealth;
-}
-
-float APlayerCharacter::GetHealth() const
-{
-	return Health;
-}
-
-int32 APlayerCharacter::GetBaseDefense() const
-{
-	return BaseDefense;
-}
-
-int32 APlayerCharacter::GetDefense() const
-{
-	return Defense;
-}
-
-int32 APlayerCharacter::GetAttack_Increase() const
-{
-	return Attack_Increase;
-}
-
-float APlayerCharacter::GetBaseSpeed() const
-{
-	return BaseSpeed;
-}
-
-float APlayerCharacter::GetNormalSpeed() const
-{
-	return NormalSpeed;
-}
-
 void APlayerCharacter::OnWeaponStartFire()
 {
 	bIsFiring = true; // << [���� 1] �߻� ���� ������Ʈ
@@ -585,9 +550,8 @@ void APlayerCharacter::OnWeaponFinishReload()
 
 bool APlayerCharacter::CalculateStats()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("CalculateStats"));
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
-	if (!GameInstance) return false;
+	if (GameInstance) return false;
 
 	Attack_Increase = 0;
 	int32 Defense_Increase = 0;
@@ -619,7 +583,7 @@ bool APlayerCharacter::CalculateStats()
 		}
 	}
 	// Attack_Increase = Attack_Increase;
-	Defense = BaseDefense + Defense_Increase;
+	Defense_Increase = BaseDefense + Defense_Increase;
 	NormalSpeed = BaseSpeed + (float)Speed_Increase;
 	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
 
