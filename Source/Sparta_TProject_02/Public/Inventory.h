@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-
 #include "UObject/NoExportTypes.h"
 #include "ItemRecipe.h"
-
 #include "Inventory.generated.h"
+
 class UItem;
+class UInventoryWidgetBase;
 
 UCLASS(Blueprintable, BlueprintType)
 class SPARTA_TPROJECT_02_API UInventory : public UObject
@@ -16,11 +16,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Variable")
 	TArray<UItem*> ItemArray;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widget")
+	UInventoryWidgetBase* LinkedWidget;
+
 	int32 MaxSize;
 
 public:
 	UInventory();
 	TArray<UItem*> GetInventory() const;
+	UUserWidget* GetLinkedWidget() const;
+	bool SetLinkedWidget(UInventoryWidgetBase* InLinkedWidget);
 	UItem* GetItem(int32 index) const;
 	int32 GetCurrentSize() const;
 	int32 GetMaxSize() const;
