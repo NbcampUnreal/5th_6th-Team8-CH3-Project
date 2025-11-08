@@ -28,6 +28,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "MyGameInstance.h"
 #include "PlayerCharacter.h"
+#include "GunBase.h"
 
 UEquipmentWidget::UEquipmentWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -113,6 +114,12 @@ bool UEquipmentWidget::DisplayStatusInfo()
    PlayerCharacter->CalculateStats();
    FString StatusPrint;
 
+   AGunBase* Weapon = PlayerCharacter->GetCurrentWeapon();
+   if (!Weapon) return false;
+
+   int32 Damage = (int32)Weapon->GetDamage();
+   int32 Attack_Increase = PlayerCharacter->GetAttack_Increase();
+
    int32 Health = (int32)PlayerCharacter->GetHealth();
    int32 MaxHealth = (int32)PlayerCharacter->GetMaxHealth();
    int32 BaseDefense = PlayerCharacter->GetBaseDefense();
@@ -120,11 +127,11 @@ bool UEquipmentWidget::DisplayStatusInfo()
    int32 BaseSpeed = PlayerCharacter->GetBaseSpeed();
    int32 Speed = PlayerCharacter->GetNormalSpeed();
 
-   PlayerCharacter->GetCurrentWeapon();
-
    StatusPrint =  FString::Printf(TEXT("Health: %d / %d \n"), Health, MaxHealth);
+   StatusPrint += FString::Printf(TEXT("Damage: %d (%d + %d) \n"), Damage + Attack_Increase, Damage, Attack_Increase);
    StatusPrint += FString::Printf(TEXT("Defense: %d (%d + %d) \n"), Defense, BaseDefense, Defense - BaseDefense);
    StatusPrint += FString::Printf(TEXT("Speed: %d (%d + %d) \n"), Speed, BaseSpeed, Speed - BaseSpeed);
+   
    StatusTextBlock->SetText(FText::FromString(StatusPrint));
    return true;
 }

@@ -123,7 +123,7 @@ void UMyGameInstance::SetupInventoryWidget(APlayerCharacterController* PlayerCon
    InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PlayerContorller, InventoryWidgetClass);
    Inventory->SetLinkedWidget(InventoryWidgetInstance);
 
-   InventoryWidgetInstance->AddToViewport();
+   InventoryWidgetInstance->AddToViewport(4);
    InventoryWidgetInstance->SetupWidget();
    InventoryWidgetInstance->ItemTooltipHide();
    InventoryWidgetInstance->ItemContextMenuHide();
@@ -138,7 +138,7 @@ void UMyGameInstance::SetupEquipmentWidget(APlayerCharacterController* PlayerCon
    EquipmentWidgetInstance = CreateWidget<UEquipmentWidget>(PlayerContorller, EquipmentWidgetClass);
    GemSlots->SetLinkedWidget(EquipmentWidgetInstance);
 
-   EquipmentWidgetInstance->AddToViewport();
+   EquipmentWidgetInstance->AddToViewport(3);
    EquipmentWidgetInstance->SetupWidget();
    EquipmentWidgetInstance->ItemTooltipHide();
    EquipmentWidgetInstance->EquipmentSelectHide();

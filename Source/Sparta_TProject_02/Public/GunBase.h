@@ -73,6 +73,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	int32 GetMaxMagazineAmmo() const { return MaxMagazineAmmo; }
 
+	// Get Damage for Info UI
+	float GetDamage() const { return Damage; }
+
 protected:
 	// perform actual trace / damage; can be overridden by derived classes (shotgun)
 	virtual void TraceFire();
