@@ -448,6 +448,11 @@ float APlayerCharacter::GetNormalSpeed() const
 	return NormalSpeed;
 }
 
+void APlayerCharacter::SetHealth(float NewHealth)
+{
+	Health = FMath::Clamp(NewHealth, Health, MaxHealth);
+}
+
 void APlayerCharacter::OnWeaponStartFire()
 {
 	bIsFiring = true; // << [���� 1] �߻� ���� ������Ʈ

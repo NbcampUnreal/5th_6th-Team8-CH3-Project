@@ -229,6 +229,8 @@ public:
 	int32 GetAttack_Increase() const;
 	float GetBaseSpeed() const;
 	float GetNormalSpeed() const;
+
+	void SetHealth(float NewHealth);
 	// Gem 장착으로 인한 스탯변화를 계산하는 함수
 	bool CalculateStats();
 protected:

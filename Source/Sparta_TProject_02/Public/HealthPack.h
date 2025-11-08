@@ -21,6 +21,11 @@ protected:
 	float BobbingStartpos;
 	float BobbingHeight;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable")
+	bool bUsePercentHeal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable")
+	float HealValue;
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 public:

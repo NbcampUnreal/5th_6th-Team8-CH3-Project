@@ -1,5 +1,6 @@
 #include "HealthPack.h"
 #include "Components/SphereComponent.h"
+#include "PlayerCharacter.h"
 
 AHealthPack::AHealthPack()
 {
@@ -15,6 +16,9 @@ AHealthPack::AHealthPack()
 
 	SphereComponent->SetCollisionProfileName("OverlapAllDynamic");
 	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AHealthPack::OnOverlap);
+
+	bUsePercentHeal = true;
+	HealValue = 40.0f;
 }
 
 void AHealthPack::BeginPlay()
@@ -43,9 +47,31 @@ void AHealthPack::Bobbing()
 
 void AHealthPack::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor)
+	if (!OtherActor) return;
+
+	APawn* PawnActor = Cast<APawn>(OtherActor);
+	if (!PawnActor) return;
+
+	ACharacter* Character = Cast<ACharacter>(PawnActor);
+	if (!Character) return;
+
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Character);
+	if (!PlayerCharacter) return;
+
+	float Health = PlayerCharacter->GetHealth();
+	float MaxHealth = PlayerCharacter->GetMaxHealth();
+	float Heal = 50.0f;
+
+	if (bUsePercentHeal)	// 퍼센트 회복
 	{
-		Destroy();
+		Health += (HealValue / 100.0f) * MaxHealth;
 	}
+	else
+	{
+		Health += Health + HealValue;
+	}
+	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
+	PlayerCharacter->SetHealth(Health);
+	Destroy();
 }
 
