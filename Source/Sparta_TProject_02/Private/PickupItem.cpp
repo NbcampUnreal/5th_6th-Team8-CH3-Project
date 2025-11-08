@@ -3,6 +3,7 @@
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
 #include "Inventory.h"
+#include "PlayerCharacter.h"
 #include "MyGameInstance.h"
 
 APickupItem::APickupItem()
@@ -57,8 +58,11 @@ void APickupItem::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 	APawn* PawnActor = Cast<APawn>(OtherActor);
 	if (!PawnActor) return;
 
-	//ACharacter* Character = Cast<ACharacter>(PawnActor);
-	//if (!Character) return;
+	ACharacter* Character = Cast<ACharacter>(PawnActor);
+	if (!Character) return;
+
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Character);
+	if (!PlayerCharacter) return;
 
 	if (!Item) return;
 
@@ -66,5 +70,4 @@ void APickupItem::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 	if (!GameInstance) return;
 	GameInstance->Inventory->AddItem(Item);
 	Destroy();
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("BasicPistol"));
 }

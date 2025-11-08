@@ -13,6 +13,7 @@
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
 #include "Components/Border.h"
+#include "Components/BorderSlot.h"
 #include "Components/Button.h"
 #include "Components/ButtonSlot.h"
 #include "Components/Overlay.h"
@@ -286,9 +287,13 @@ void UInventoryWidget::ItemContextMenuShow(const FItemButtonData& ItemButtonData
    Border->SetVisibility(ESlateVisibility::Hidden);
    Border->ForceLayoutPrepass();
 
+   UBorderSlot* BolderSlot = Cast<UBorderSlot>(InventoryGrid->Slot);
+   if (!BolderSlot) return;
+
    FVector2D BorderSize = Border->GetCachedGeometry().GetLocalSize();
    FVector2D MenuPos = { ButtonPosition.X, ButtonPosition.Y };
-   MenuPos.Y -= 5;
+   MenuPos.Y += BolderSlot->GetPadding().Top - 5;
+   MenuPos.X += BolderSlot->GetPadding().Left;
 
    UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Border->Slot);
    if (!CanvasPanelSlot) return;
