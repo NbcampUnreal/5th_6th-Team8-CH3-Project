@@ -4,6 +4,9 @@
 #include "Blueprint/UserWidget.h"
 #include "GameHUDWidget.generated.h"
 
+class APlayerCharacter;
+class UTextBlock;
+class UProgressBar;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API UGameHUDWidget : public UUserWidget
@@ -46,4 +49,32 @@ protected:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Visuals")
     void PlayHitMarkerVisual();
+
+    virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+    
+    APlayerController* PlayerController;
+    //APlayerCharacter* PC;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
+    UProgressBar* HP_Bar;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
+
+    UTextBlock* Weapon_Text;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
+
+    UTextBlock* Ammo_Text;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
+
+    UTextBlock* Wave_Text;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
+
+    UTextBlock* Kill_Text;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
+
+    UTextBlock* Coin_Text;
 };

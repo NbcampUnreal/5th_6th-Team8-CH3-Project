@@ -325,7 +325,7 @@ void APlayerCharacter::ToggleInventory(const FInputActionValue& value)
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
 	if (!GameInstance) return;
 	UE_LOG(LogTemp, Warning, TEXT("ToggleInventory"));
-	GameInstance->ToggleInventoryWidget();
+	GameInstance->GetUIManager()->ToggleInventoryWidget();
 }
 
 // Equip helpers
@@ -593,7 +593,7 @@ bool APlayerCharacter::CalculateStats()
 	int32 Defense_Increase = 0;
 	int32 Speed_Increase = 0;
 
-	UInventory* GemSlots = GameInstance->GemSlots;
+	UInventory* GemSlots = GameInstance->GetGemSlots();
 	for (int32 i = 0; i < GemSlots->GetCurrentSize(); ++i)
 	{
 		UItem* Item = GemSlots->GetItem(i);

@@ -46,13 +46,15 @@ void APlayerCharacterController::BeginPlay()
 		}
 	}
 
-	UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance());
-	if (MyGameInstance)
+	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
+	if (GameInstance)
 	{
-		MyGameInstance->SetupInventoryWidget(this);
-		MyGameInstance->SetupEquipmentWidget(this);
-		MyGameInstance->CloseInventoryWidget();
-		MyGameInstance->CloseEquipmentWidget();
+		GameInstance->SetupInventroyAndEquipment(this);
+		GameInstance->SetupUIManager(this);
+		GameInstance->GetUIManager()->SetupInventoryWidget();
+		GameInstance->GetUIManager()->SetupEquipmentWidget();
+		GameInstance->GetUIManager()->CloseInventoryWidget();
+		GameInstance->GetUIManager()->CloseEquipmentWidget();
 	}
 }
 

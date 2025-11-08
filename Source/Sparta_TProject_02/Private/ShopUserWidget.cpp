@@ -151,7 +151,7 @@ UInventory* UShopUserWidget::GetPlayerInventory() const
 
 	if (GameInstance)
 	{
-		UInventoryWidget* InventoryWidget = GameInstance->GetInventoryWidget();
+		UInventoryWidget* InventoryWidget = GameInstance->GetUIManager()->GetInventoryWidget();
 
 		if (InventoryWidget)
 		{
