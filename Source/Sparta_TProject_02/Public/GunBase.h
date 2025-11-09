@@ -55,7 +55,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void FinishReload();
 
-	// Getter montages for external (Player) to play on FP mesh
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	UAnimMontage* GetFireMontage() const { return FireMontage; }
 
@@ -74,7 +73,6 @@ public:
 	int32 GetMaxMagazineAmmo() const { return MaxMagazineAmmo; }
 
 protected:
-	// perform actual trace / damage; can be overridden by derived classes (shotgun)
 	virtual void TraceFire();
 
 	// Components

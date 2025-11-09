@@ -17,11 +17,11 @@
 #include "AttackGem.h"
 #include "DefenseGem.h"
 #include "SpeedGem.h"
-
+#include "GameFramework/Controller.h" 
 //상점UI
-#include "Kismet/GameplayStatics.h"
 #include "Shop.h"
-
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "GameFramework/PlayerController.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -58,12 +58,12 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	AmmoReserve.Add(EWeaponType::WT_Pistol, 0);
-	AmmoReserve.Add(EWeaponType::WT_Rifle, 360);
-	AmmoReserve.Add(EWeaponType::WT_Shotgun, 120);
+	AmmoReserve.Add(EWeaponType::WT_Rifle, 9999);
+	AmmoReserve.Add(EWeaponType::WT_Shotgun, 9999);
 
 	MaxCarryAmmo.Add(EWeaponType::WT_Pistol, 0);
-	MaxCarryAmmo.Add(EWeaponType::WT_Rifle, 999);
-	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 999);
+	MaxCarryAmmo.Add(EWeaponType::WT_Rifle, 9999);
+	MaxCarryAmmo.Add(EWeaponType::WT_Shotgun, 9999);
 
 	CurrentWeaponIndex = 0;
 	CurrentWeapon = nullptr; 
@@ -87,12 +87,16 @@ void APlayerCharacter::HealOnWaveClear(float HealAmount)
 
 	bWantsToSprint = false;
 	bIsAiming = false;
-	bIsFiring = false; // 
+	bIsFiring = false;
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CalculateStats();
+
+	HandleHealthChanged(Health, MaxHealth);
 
 	if (StartWeaponClasses.Num() > 0)
 	{
@@ -107,13 +111,10 @@ void APlayerCharacter::BeginPlay()
 				AGunBase* NewWeapon = GetWorld()->SpawnActor<AGunBase>(WeaponClass, SpawnParams);
 				if (NewWeapon)
 				{
-					// --- �� �κ��� ���� ---
-					FName AttachSocketName = TEXT("GripPoint"); // �⺻��
+					FName AttachSocketName = TEXT("GripPoint"); 
 
-					// 1. ������ Ÿ���� �����ͼ�
-					EWeaponType Type = NewWeapon->GetWeaponType(); // AGunBase�� GetWeaponType() �Լ��� �ִٰ� ����
+					EWeaponType Type = NewWeapon->GetWeaponType();
 
-					// 2. Ÿ�Կ� ���� ���� �̸��� ����
 					if (Type == EWeaponType::WT_Rifle)
 					{
 						AttachSocketName = TEXT("GripPoint_Rifle");
@@ -127,11 +128,10 @@ void APlayerCharacter::BeginPlay()
 						AttachSocketName = TEXT("GripPoint_Pistol");
 					}
 
-					// 3. ������ ���� �̸����� ����
 					NewWeapon->AttachToComponent(
 						FP_Mesh,
 						FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-						AttachSocketName // <-- ������ ���� �̸� ���
+						AttachSocketName
 					);
 
 					NewWeapon->SetWeaponHidden(true);
@@ -180,22 +180,6 @@ void APlayerCharacter::BeginPlay()
 
 }
 
-//Open Shop UI
-void APlayerCharacter::OpenShop()
-{
-	if (ShopActor)
-	{
-		ShopActor->OpenShop();
-	}
-}
-//Close Shop UI
-void APlayerCharacter::CloseShop()
-{
-	if (ShopActor)
-	{
-		ShopActor->CloseShop();
-	}
-}
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -253,6 +237,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		{
 			EnhancedInput->BindAction(InventoryAction, ETriggerEvent::Started, this, &APlayerCharacter::ToggleInventory);
 		}
+
+		if (OpenShopAction)
+		{
+			EnhancedInput->BindAction(OpenShopAction, ETriggerEvent::Started, this, &APlayerCharacter::ToggleShop);
+		}
+			
+	
 	}
 }
 
@@ -319,7 +310,6 @@ void APlayerCharacter::StartReload(const FInputActionValue& value)
 	if (CurrentWeapon) CurrentWeapon->Reload();
 }
 
-// Inventory & Equipment Widget Open / Close
 void APlayerCharacter::ToggleInventory(const FInputActionValue& value)
 {
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
@@ -328,7 +318,6 @@ void APlayerCharacter::ToggleInventory(const FInputActionValue& value)
 	GameInstance->ToggleInventoryWidget();
 }
 
-// Equip helpers
 void APlayerCharacter::EquipShotgun(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Shotgun); }
 void APlayerCharacter::EquipRifle(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Rifle); }
 void APlayerCharacter::EquipPistol(const FInputActionValue& value) { EquipWeaponByType(EWeaponType::WT_Pistol); }
@@ -364,11 +353,11 @@ void APlayerCharacter::EquipWeapon(int32 Index)
 
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->StopFire(); // << [���� 3] ���� ��ü �� ���� ���� �߻� ���� (�ִϸ��̼�/Ÿ�̸� �ʱ�ȭ�� ����)
+		CurrentWeapon->StopFire(); 
 		CurrentWeapon->SetWeaponHidden(true);
 	}
 
-	bIsFiring = false; // << [���� 3] ���� ��ü �� �߻� ���� �ʱ�ȭ
+	bIsFiring = false;
 
 	CurrentWeapon = Weapons[Index];
 	CurrentWeapon->SetWeaponHidden(false);
@@ -415,12 +404,12 @@ int32 APlayerCharacter::GetReserveAmmo(EWeaponType WeaponType) const
 
 void APlayerCharacter::OnWeaponStartFire()
 {
-	bIsFiring = true; // << [���� 1] �߻� ���� ������Ʈ
+	bIsFiring = true;
 }
 
 void APlayerCharacter::OnWeaponStopFire()
 {
-	bIsFiring = false; // << [���� 1] �߻� ���� ������Ʈ
+	bIsFiring = false; 
 }
 
 void APlayerCharacter::OnWeaponStartReload()
@@ -447,12 +436,10 @@ void APlayerCharacter::ThrowGrenade(const FInputActionValue& Value)
 	UWorld* World = GetWorld();
 	if (!World) return;
 
-	// 1��Ī ī�޶� ���� �߻� ����/��ġ ���
 	FVector CamLoc;
 	FRotator CamRot;
 	if (AController* C = GetController())
 	{
-		// GetPlayerViewPoint ��� (ī�޶� ��ġ�� ȸ�� ���)
 		C->GetPlayerViewPoint(CamLoc, CamRot);
 	}
 	else
@@ -461,7 +448,6 @@ void APlayerCharacter::ThrowGrenade(const FInputActionValue& Value)
 		CamRot = CameraComp ? CameraComp->GetComponentRotation() : GetActorRotation();
 	}
 
-	// ī�޶� ���� �ణ ������ ��ġ���� ���� (�ڱ� �ڽŰ� �浹 ����)
 	const float SpawnForwardOffset = 100.f;
 	FVector SpawnLocation = CamLoc + CamRot.Vector() * SpawnForwardOffset;
 	FRotator SpawnRotation = CamRot;
@@ -493,14 +479,12 @@ void APlayerCharacter::ThrowGrenade(const FInputActionValue& Value)
 		}
 	}
 
-	// ======= [��ٿ� ó��] =======
 	bCanThrowGrenade = false;
 	GetWorldTimerManager().SetTimer(GrenadeCooldownHandle, [this]()
 		{
 			bCanThrowGrenade = true;
 		}, GrenadeCooldown, false);
 
-	// ======= [���� ���] =======
 	if (ThrowGrenadeSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(World, ThrowGrenadeSound, GetActorLocation());
@@ -517,22 +501,19 @@ void APlayerCharacter::SpawnTurret()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	// 아래 방향으로 1000만큼 트레이스 (지면 감지)
 	FVector TraceStart = SpawnLoc;
 	FVector TraceEnd = SpawnLoc - FVector(0, 0, 1000.f);
 
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, Params))
 	{
-		SpawnLoc = HitResult.Location; // 땅에 맞은 지점으로 위치 보정
+		SpawnLoc = HitResult.Location; 
 	}
 
-	// 살짝 위로 띄워서 겹침 방지
 	SpawnLoc.Z += 5.f;
 
 	ATurret* NewTurret = GetWorld()->SpawnActor<ATurret>(TurretClass, SpawnLoc, GetActorRotation());
 	bCanUseTurretSkill = false;
 
-	// 30초 쿨타임
 	GetWorldTimerManager().SetTimer(TurretCooldownHandle, this, &APlayerCharacter::ResetTurretCooldown, 30.0f, false);
 	UE_LOG(LogTemp, Log, TEXT("Turret Spawned! Cooldown started."));
 }
@@ -545,7 +526,6 @@ void APlayerCharacter::ResetTurretCooldown()
 
 void APlayerCharacter::OnWeaponFinishReload()
 {
-	// HUD ������Ʈ ��
 }
 
 bool APlayerCharacter::CalculateStats()
@@ -582,10 +562,90 @@ bool APlayerCharacter::CalculateStats()
 			Speed_Increase += SPDGem->GetSpeedValue();
 		}
 	}
-	// Attack_Increase = Attack_Increase;
 	Defense_Increase = BaseDefense + Defense_Increase;
 	NormalSpeed = BaseSpeed + (float)Speed_Increase;
 	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
 
+
+
 	return true;
+}
+
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (bIsDead || DamageAmount <= 0.0f)
+	{
+		return 0.0f;
+	}
+
+	float EffectiveDefense = (float)Defense;
+	float DamageAfterDefense = DamageAmount * (100.0f / (100.0f + EffectiveDefense));
+	float DamageApplied = FMath::Clamp(DamageAfterDefense, 0.0f, Health);
+
+	Health = FMath::Clamp(Health - DamageApplied, 0.0f, MaxHealth);
+
+	HandleHealthChanged(Health, MaxHealth);
+
+	UE_LOG(LogTemp, Log, TEXT("Player took %f damage (after def %f). Health now %f/%f"), DamageAmount, DamageApplied, Health, MaxHealth);
+
+	if (Health <= 0.0f)
+	{
+		Die();
+	}
+
+	return DamageApplied;
+}
+
+void APlayerCharacter::Die()
+{
+	if (bIsDead) return;
+	bIsDead = true;
+
+	if (APlayerController* PC = Cast<APlayerController>(Controller))
+	{
+		DisableInput(PC);
+	}
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->StopFire();
+	}
+
+	if (PlayerMesh)
+	{
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Player Died."));
+
+	OnDeath();
+}
+
+void APlayerCharacter::OpenShop()
+{
+	if (ShopActor)
+	{
+		ShopActor->OpenShop();
+	}
+}
+
+void APlayerCharacter::CloseShop()
+{
+	if (ShopActor)
+	{
+		ShopActor->CloseShop();
+	}
+}
+
+void APlayerCharacter::ToggleShop()
+{
+	if (!ShopActor) return;
+
+	if (ShopActor->IsShopVisible())
+	{
+		CloseShop();
+	}
+	else
+	{
+		OpenShop();
+	}
 }

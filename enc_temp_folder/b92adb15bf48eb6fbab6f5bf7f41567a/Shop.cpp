@@ -55,11 +55,12 @@ void AShop::OpenShop()
 
 	PC->bShowMouseCursor = true;
 
-	FInputModeGameAndUI InputMode;
+	FInputModeUIOnly InputMode;
 	InputMode.SetWidgetToFocus(ShopWidgetInstance->TakeWidget());
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	PC->SetInputMode(InputMode);
 
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Shop Opened: Mouse + UI Mode Active"));
 }
 
 void AShop::CloseShop()
@@ -75,6 +76,8 @@ void AShop::CloseShop()
 	PC->SetInputMode(InputMode);
 
 	UWidgetBlueprintLibrary::SetFocusToGameViewport();
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, TEXT("Shop Closed: Game Mode Restored"));
 }
 
 void AShop::UpdateList()
@@ -89,5 +92,6 @@ void AShop::UpdateDescription()
 {
 	if (GEngine)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("UpdateDescription(): Shop.cpp Called."));
 	}
 }

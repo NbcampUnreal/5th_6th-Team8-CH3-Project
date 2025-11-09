@@ -107,7 +107,6 @@ void ARampage::EndEnergize()
 	{
 		if (DynMat)
 		{
-			// 헤더 파일에 정의된 "Enrage State Tint" 이름의 파라미터 값을 변경합니다.
 			DynMat->SetVectorParameterValue(ColorOverlayParamName, DefaultColor);
 		}
 	}
