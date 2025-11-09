@@ -148,7 +148,6 @@ public:
 	bool IsFiring() const { return bIsFiring; }
 
 protected:
-	// --- Shop 관련 ---
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
 	AShop* ShopActor;
 
@@ -157,6 +156,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Shop")
 	void CloseShop();
+
+	UFUNCTION(BlueprintCallable, Category = "Shop")
+	void ToggleShop();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Shop")
+	UInputAction* OpenShopAction;
 
 protected:
 	// --- Input 처리 함수 ---
@@ -193,6 +198,25 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Attack_Increase;
+
+
+	//float GetMaxHealth() const;
+	//float GetHealth() const;
+	//float GetBaseDefense() const;
+	//float GetDefense() const;
+	//float GetAttack_Increase() const;
+
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser
+	) override;
+
+	void Die();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	bool bIsDead = false;
 
 	UFUNCTION()
 	void OnWeaponStartFire();
@@ -231,6 +255,9 @@ public:
 	float GetNormalSpeed() const;
 
 	void SetHealth(float NewHealth);
+	UFUNCTION(BlueprintImplementableEvent, Category = "Stats")
+	void OnDeath();
+
 	// Gem 장착으로 인한 스탯변화를 계산하는 함수
 	bool CalculateStats();
 protected:

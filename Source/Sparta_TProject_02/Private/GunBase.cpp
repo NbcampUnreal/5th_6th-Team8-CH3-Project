@@ -46,17 +46,13 @@ void AGunBase::StartFire()
 {
     if (bIsReloading) return;
 
-    // [해결책 2: 빈 탄창 발사]
-    // 발사 로직을 시작하기 전, 총알이 있는지 가장 먼저 확인합니다.
     if (CurrentAmmo <= 0)
     {
         return;
     }
-    // ------------------------------------
 
     if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle)) return;
 
-    // (이제 이 코드는 총알이 1발 이상 있을 때만 실행됩니다)
     OnStartFire.Broadcast();
 
     if (FireRate <= 0.f)
@@ -82,13 +78,11 @@ void AGunBase::Reload()
     if (bIsReloading) return;
     if (!OwningPlayer) return;
 
-    // if weapon uses reserve ammo, check
     if (WeaponType != EWeaponType::WT_Pistol && OwningPlayer->GetReserveAmmo(WeaponType) <= 0)
     {
         return;
     }
 
-    // 탄창이 가득 차 있으면 리로드 불가능
     if (CurrentAmmo == MaxMagazineAmmo)
     {
         return;
@@ -98,7 +92,6 @@ void AGunBase::Reload()
     StopFire();
     OnStartReload.Broadcast();
 
-    // 1. 리로드 시작 사운드 재생
     if (ReloadSound)
     {
         UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, GetActorLocation());
@@ -106,25 +99,20 @@ void AGunBase::Reload()
 
     float ReloadTime = 3.0f;
 
-    // 2. 리로드 몽타주 재생 및 재생 시간으로 타이머 설정
     if (ReloadMontage && OwningPlayer && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
     {
-        // 1인칭 메시의 애니메이션 인스턴스를 가져와 몽타주를 재생
         UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
         FPAnimInstance->Montage_Play(ReloadMontage, 1.0f);
 
-        // 몽타주의 길이로 ReloadTime을 설정하여 애니메이션과 타이머를 동기화
         ReloadTime = ReloadMontage->GetPlayLength();
     }
 
-    // << [수정 4] OwningPlayer->GetFPMesh() 호출을 통해 FP_Mesh에 접근합니다.
     if (ReloadMontage && OwningPlayer && OwningPlayer->GetFPMesh() && OwningPlayer->GetFPMesh()->GetAnimInstance())
     {
-        // 1인칭 메시의 애니메이션 인스턴스를 가져옵니다.
+
         UAnimInstance* FPAnimInstance = OwningPlayer->GetFPMesh()->GetAnimInstance();
 
-        // 몽타주를 재생하고, 그 재생 시간으로 ReloadTime을 설정합니다.
-        FPAnimInstance->Montage_Play(ReloadMontage, 1.0f); // 1.0f는 재생 속도
+        FPAnimInstance->Montage_Play(ReloadMontage, 1.0f); 
         ReloadTime = ReloadMontage->GetPlayLength();
     }
 
@@ -150,7 +138,6 @@ void AGunBase::FinishReload()
 
     int32 AmmoConsumed = 0;
 
-    // 권총은 예비탄 개념 없이 항상 장전 가능
     if (WeaponType == EWeaponType::WT_Pistol)
     {
         AmmoConsumed = AmmoToReload;
@@ -187,7 +174,6 @@ void AGunBase::TraceFire()
     AController* OwnerController = OwningPlayer->GetController();
     if (!OwnerController) return;
 
-    // Effects
     if (MuzzleFlash && GunMesh)
     {
         UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GunMesh, FName("Muzzle"));

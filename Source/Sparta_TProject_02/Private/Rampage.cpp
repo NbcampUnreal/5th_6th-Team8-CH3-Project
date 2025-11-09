@@ -46,6 +46,76 @@ void ARampage::BeginPlay()
 			}
 		}
 		// UE_LOG(LogTemp, Warning, TEXT("BeginPlay: Created %d dynamic material instances."), DynamicMaterialInstances.Num());
+		UE_LOG(LogTemp, Warning, TEXT("BeginPlay: Created %d dynamic material instances."), DynamicMaterialInstances.Num()); // 로그 추가 2
+	}
+}
+
+void ARampage::PerformSmashAttack()
+{
+	if (bIsDead) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Rampage [%s]: Performing SMASH Attack!"), *GetName());
+
+	UGameplayStatics::ApplyRadialDamage(
+		GetWorld(), 120.0f, GetActorLocation(), 550.0f,
+		nullptr, TArray<AActor*>(), this, GetController(), true, ECC_Pawn
+	);
+}
+
+void ARampage::Energize()
+{
+	if (bIsDead || GetWorldTimerManager().IsTimerActive(EnergizeTimerHandle)) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Rampage [%s]: ENERGIZED!"), *GetName());
+
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController && AIController->GetBlackboardComponent())
+	{
+		AIController->GetBlackboardComponent()->SetValueAsBool(TEXT("IsEnergized"), true);
+	}
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = OriginalWalkSpeed * 1.7f;
+	}
+
+	const FLinearColor EnergizeColor = FLinearColor(2.5f, 0.1f, 0.1f, 1.0f);
+	UE_LOG(LogTemp, Warning, TEXT("Energize: Attempting to change color on %d materials."), DynamicMaterialInstances.Num());
+	for (UMaterialInstanceDynamic* DynMat : DynamicMaterialInstances)
+	{
+		if (DynMat)
+		{
+			// 헤더 파일에 정의된 "Enrage State Tint" 이름의 파라미터 값을 변경합니다.
+			UE_LOG(LogTemp, Warning, TEXT("Energize: Setting Vector Parameter on %s"), *DynMat->GetName());
+			DynMat->SetVectorParameterValue(ColorOverlayParamName, EnergizeColor);
+		}
+	}
+
+	GetWorldTimerManager().SetTimer(EnergizeTimerHandle, this, &ARampage::EndEnergize, 7.0f, false);
+}
+
+void ARampage::EndEnergize()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Rampage [%s]: Energize buff ended."), *GetName());
+
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController && AIController->GetBlackboardComponent())
+	{
+		AIController->GetBlackboardComponent()->SetValueAsBool(TEXT("IsEnergized"), false);
+	}
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = OriginalWalkSpeed;
+	}
+
+	const FLinearColor DefaultColor = FLinearColor::White;
+	for (UMaterialInstanceDynamic* DynMat : DynamicMaterialInstances)
+	{
+		if (DynMat)
+		{
+			DynMat->SetVectorParameterValue(ColorOverlayParamName, DefaultColor);
+		}
 	}
 }
 

@@ -19,6 +19,7 @@
 #include "Components/Button.h"
 #include "MaterialItem.h"
 #include "Components/OverlaySlot.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 void UShopUserWidget::NativeConstruct()
 {

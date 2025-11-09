@@ -11,7 +11,6 @@ class SPARTA_TPROJECT_02_API UGameHUDWidget : public UUserWidget
     GENERATED_BODY()
 
 protected:
-    // ������ ������ ��(Construct) ȣ��Ǵ� �Լ�
     virtual void NativeConstruct() override;
 
     UFUNCTION()
