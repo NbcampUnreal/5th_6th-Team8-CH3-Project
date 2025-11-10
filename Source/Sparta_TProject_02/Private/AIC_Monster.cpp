@@ -23,8 +23,8 @@ AAIC_Monster::AAIC_Monster()
     SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
     if (SightConfig)
     {
-        SightConfig->SightRadius = 2000.0f;                 // 시야 반경(초기값 2000)
-        SightConfig->LoseSightRadius = 2100.0f;             // 시야를 잃는 반경 (더 크게 설정해야 안정적)
+        SightConfig->SightRadius = 3000.0f;                 // 시야 반경(초기값 3000)
+        SightConfig->LoseSightRadius = 3100.0f;             // 시야를 잃는 반경 (더 크게 설정해야 안정적)
         SightConfig->PeripheralVisionAngleDegrees = 95.0f;  // 시야각 (초기값:90)
         SightConfig->SetMaxAge(5.0f);                       // 감지 정보를 5초간 기억함
 
@@ -41,7 +41,7 @@ AAIC_Monster::AAIC_Monster()
     UAISenseConfig_Hearing* HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
     if (HearingConfig)
     {
-        HearingConfig->HearingRange = 1500.0f;                          // 청력 반경
+        HearingConfig->HearingRange = 3000.0f;                          // 청력 반경
         HearingConfig->DetectionByAffiliation.bDetectEnemies = true;    // 적이 내는 소리만 듣도록 설정
         HearingConfig->DetectionByAffiliation.bDetectNeutrals = false;
         HearingConfig->DetectionByAffiliation.bDetectFriendlies = false;
@@ -70,55 +70,63 @@ void AAIC_Monster::OnPossess(APawn* InPawn)
     // 현재는 BP로 구성
 }
 
-// 감각 정보 업데이트 시 실행될 함수
+// --- 감각 정보 업데이트 시 실행될 함수 ---
 void AAIC_Monster::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-    // 폰, 블랙보드 유효성 검증
-    if (GetPawn() == nullptr || GetBlackboardComponent() == nullptr)
-    {
-        return;
-    }
+    // 폰, 블랙보드, 액터 유효성 검증
+    if (GetPawn() == nullptr || GetBlackboardComponent() == nullptr || Actor == nullptr) return;
 
-    /*const FAISenseID SenseID = Stimulus.Type;
-    if (SenseID == UAISense::GetSenseID<UAISense_Sight>())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Perception: SIGHT stimulus received from %s"), *Actor->GetName());
-    }
-    else if (SenseID == UAISense::GetSenseID<UAISense_Damage>())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Perception: DAMAGE stimulus received from %s"), *Actor->GetName());
-    }
-    else if (SenseID == UAISense::GetSenseID<UAISense_Hearing>())
-    {
-        UE_LOG(LogT emp, Warning, TEXT("Perception: HEARING stimulus received from %s"), *Actor->GetName());
-    }*/
+    //const FAISenseID SenseID = Stimulus.Type;
+    //if (SenseID == UAISense::GetSenseID<UAISense_Sight>())
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("Perception: SIGHT stimulus received from %s"), *Actor->GetName());
+    //}
+    //else if (SenseID == UAISense::GetSenseID<UAISense_Damage>())
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("Perception: DAMAGE stimulus received from %s"), *Actor->GetName());
+    //}
+    //else if (SenseID == UAISense::GetSenseID<UAISense_Hearing>())
+    //{
+    //    UE_LOG(LogT emp, Warning, TEXT("Perception: HEARING stimulus received from %s"), *Actor->GetName());
+    //}
 
-    // 감지된 액터를 '플레이어 캐릭터 클래스'로 캐스팅 시도
+    // 블랙보드 컴포넌트 Get
     UBlackboardComponent* MyBlackboard = GetBlackboardComponent();
 
     if (Stimulus.WasSuccessfullySensed())
     {
-        // 감지된 Actor가 Pawn 타입인지 확인 
+        AActor* DetectedEnemy = nullptr; // 최종적으로 적으로 인식될 액터를 담을 변수
+
+        // 감지된 액터를 '플레이어 캐릭터 클래스'로 캐스팅 시도 (주로 시각 센서)
         APawn* DetectedPawn = Cast<APawn>(Actor);
-        if (DetectedPawn)
+        if (DetectedPawn && DetectedPawn->GetController() && DetectedPawn->GetController()->IsA<APlayerController>())
         {
-            // 감지된 Pawn의 컨트롤러가 PlayerController인지 확인
-            if (DetectedPawn->GetController() && DetectedPawn->GetController()->IsA<APlayerController>())
+            DetectedEnemy = DetectedPawn;
+        }
+        // 아니라면, 자극 출처의 주인(Instigator)이 플레이어가 조종하는 Pawn인지 확인 (주로 데미지 센서)
+        else if (Actor->GetInstigator())
+        {
+            APawn* InstigatorPawn = Cast<APawn>(Actor->GetInstigator());
+            if (InstigatorPawn && InstigatorPawn->GetController() && InstigatorPawn->GetController()->IsA<APlayerController>())
             {
-                // 플레이어가 조종하는 Pawn이 확실하므로, 블랙보드의 'TargetActor', 'LastKnownLocation' 키를 업데이트
-                MyBlackboard->SetValueAsObject(TEXT("TargetActor"), Actor);
-                MyBlackboard->SetValueAsVector(TEXT("LastKnownLocation"), Actor->GetActorLocation());
+                DetectedEnemy = InstigatorPawn;
             }
+        }
+
+        // 위 두 가지 경우 중 하나라도 해당되어 유효한 적(DetectedEnemy)을 찾았다면, 블랙보드의 'TargetActor', 'LastKnownLocation' 키를 업데이트
+        if (DetectedEnemy)
+        {
+            MyBlackboard->SetValueAsObject(TEXT("TargetActor"), DetectedEnemy);
+            MyBlackboard->SetValueAsVector(TEXT("LastKnownLocation"), DetectedEnemy->GetActorLocation());
         }
     }
     else
     {
-        // 감지 실패 - 시야에서 놓치는 경우 등
-        // 현재 추적하던 타겟인지 확인
+        // 감지 실패 - 시야 등에서 놓침
         AActor* CurrentTarget = Cast<AActor>(MyBlackboard->GetValueAsObject(TEXT("TargetActor")));
         if (CurrentTarget == Actor)
         {
-            // 블랙보드의 'TargetActor' 키를 비움
+            // 블랙보드의 키 'TargetActor'를 비움
             MyBlackboard->ClearValue(TEXT("TargetActor"));
         }
     }
