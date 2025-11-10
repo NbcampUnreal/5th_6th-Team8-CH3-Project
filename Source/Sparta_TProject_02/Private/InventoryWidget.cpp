@@ -62,7 +62,7 @@ void UInventoryWidget::SetupWidget()
    }
    else
    {
-      GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("InventorySet Fail"));
+      //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("InventorySet Fail"));
    }
 
 }
@@ -74,7 +74,7 @@ bool UInventoryWidget::RefreshWidget()
    for (int32 i = InventoryGrid->GetChildrenCount(); i > 0; --i)
    {
       InventoryGrid->RemoveChildAt(0);
-      GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("InventoryGrid Remove"));
+      //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("InventoryGrid Remove"));
    }
 
    int32 ItemSize = Inventory->GetCurrentSize();
@@ -83,7 +83,7 @@ bool UInventoryWidget::RefreshWidget()
    {
       if (!AddItemToGrid(Inventory->GetItem(i), i))
       {
-         GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("AddItemToGrid Error"));
+         //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("AddItemToGrid Error"));
          return false;
       }
    }
@@ -278,7 +278,7 @@ void UInventoryWidget::ItemTooltipHide()
 
 void UInventoryWidget::ItemContextMenuShow(const FItemButtonData& ItemButtonData)
 {
-   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("ItemContextMenuShow"));
+   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("ItemContextMenuShow"));
    int32 Index = ItemButtonData.Index;
    FVector2D ButtonPosition = ItemButtonData.ButtonPosition;
 
@@ -316,8 +316,6 @@ void UInventoryWidget::ItemContextMenuHide()
 
 void UInventoryWidget::ItemDestory(const FItemButtonData& ItemButtonData)
 {
-   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(
-      TEXT("DestoryIndex: %d"), ItemButtonData.Index));
    Inventory->RemoveItemIndex(ItemButtonData.Index);
    ItemContextMenuHide();
 }

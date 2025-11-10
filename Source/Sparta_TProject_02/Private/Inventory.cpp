@@ -94,7 +94,7 @@ bool UInventory::AddItem(UItem* Item)
 				{
 					LinkedWidget->RefreshWidget();
 				}
-				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
+				//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 				return true;
 			}
 		}
@@ -108,7 +108,7 @@ bool UInventory::AddItem(UItem* Item)
 		LinkedWidget->RefreshWidget();
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("%d / %d"), Size, MaxSize));
 	return true;
 }
 

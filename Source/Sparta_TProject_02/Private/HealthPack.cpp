@@ -33,7 +33,7 @@ void AHealthPack::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	GetWorldTimerManager().ClearTimer(BobbingTimerHandle);
 	Super::EndPlay(EndPlayReason);
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("Healkit"));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("Healkit"));
 }
 
 void AHealthPack::Bobbing()
