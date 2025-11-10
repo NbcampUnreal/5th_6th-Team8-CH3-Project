@@ -8,7 +8,7 @@ AProjectile::AProjectile()
 	PrimaryActorTick.bCanEverTick = false;
 
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	CollisionComp->InitSphereRadius(5.f);
+	CollisionComp->InitSphereRadius(75.f);
 	CollisionComp->SetCollisionProfileName("BlockAllDynamic");
 	RootComponent = CollisionComp;
 

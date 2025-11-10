@@ -22,13 +22,13 @@ ATurret::ATurret()
 	// Detection
 	DetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
 	DetectionSphere->SetupAttachment(RootComponent);
-	DetectionSphere->SetSphereRadius(1000.f);
+	DetectionSphere->SetSphereRadius(10000.f);
 
 	// ±âº»°ª
 	bHasTarget = false;
 
 	Health = 100.f;
-	Damage = 20.f;
+	Damage = 45.0f;
 }
 
 void ATurret::BeginPlay()
@@ -150,25 +150,26 @@ void ATurret::Fire()
 	if (!bHasTarget || !CurrentTarget || !ProjectileClass) return;
 
 	FVector MuzzleLoc = TurretMesh->GetSocketLocation(FName("Muzzle"));
-	FRotator MuzzleRot = TurretMesh->GetSocketRotation(FName("Muzzle"));
+
+	FVector TargetLoc = CurrentTarget->GetActorLocation();
+	FRotator SpawnRot = (TargetLoc - MuzzleLoc).Rotation();
 
 	if (MuzzleFX)
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFX, MuzzleLoc, MuzzleRot);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFX, MuzzleLoc, SpawnRot);
 
 	if (FireSound)
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, MuzzleLoc);
 
 	if (UTurretAnimInstance* AnimInst = Cast<UTurretAnimInstance>(TurretMesh->GetAnimInstance()))
 	{
-		AnimInst->BarrelOffset = -5.f; 
+		AnimInst->BarrelOffset = -5.f;
 	}
 
 	FActorSpawnParameters Params;
 	Params.Owner = this;
 	Params.Instigator = Cast<APawn>(this);
-	GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLoc, MuzzleRot, Params);
 
-
+	GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLoc, SpawnRot, Params);
 }
 
 
