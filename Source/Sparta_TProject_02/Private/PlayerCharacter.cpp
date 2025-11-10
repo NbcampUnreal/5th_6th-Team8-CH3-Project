@@ -570,7 +570,7 @@ void APlayerCharacter::OnWeaponFinishReload()
 
 bool APlayerCharacter::CalculateStats()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("CalculateStats"));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("CalculateStats"));
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
 	if (!GameInstance) return false;
 

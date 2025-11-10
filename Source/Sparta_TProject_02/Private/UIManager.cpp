@@ -174,7 +174,7 @@ void UUIManager::SetupEquipmentWidget()
    if (!GameInstance) return;
 
    UInventory* GemSlots = GameInstance->GetGemSlots();
-   if(!GemSlots)
+   if (!GemSlots) return;
    GemSlots->SetLinkedWidget(EquipmentWidgetInstance);
 
    EquipmentWidgetInstance->AddToViewport(3);
@@ -209,6 +209,7 @@ void UUIManager::ToggleInventoryWidget()
    {
       OpenInventoryWidget();
       OpenEquipmentWidget();
+      GetInventoryWidget()->ItemContextMenuHide();
       FInputModeGameAndUI InputMode;
       InputMode.SetWidgetToFocus(nullptr);
       InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);

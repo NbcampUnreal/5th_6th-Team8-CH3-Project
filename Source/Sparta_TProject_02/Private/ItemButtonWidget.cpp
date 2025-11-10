@@ -18,7 +18,7 @@ void UItemButtonWidget::BeginDestroy()
 {
    Super::BeginDestroy();
    UE_LOG(LogTemp, Warning, TEXT("UItemButtonWidget GC complted"));
-   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("UItemButtonWidget GC complted"));
+   //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, TEXT("UItemButtonWidget GC complted"));
 }
 
 void UItemButtonWidget::HandleButtonHovered()
