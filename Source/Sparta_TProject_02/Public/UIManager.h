@@ -25,7 +25,6 @@ class SPARTA_TPROJECT_02_API UUIManager : public UObject
 public:
     // 초기화 (PlayerController로부터 호출)
     UUIManager();
-    void Init(UGameInstance* InGI);
     void Init(APlayerController* InPC);
 
     // --- UI 표시 함수들 ---
@@ -37,6 +36,7 @@ public:
 
     UInventoryWidget* GetInventoryWidget() const;
     UEquipmentWidget* GetEquipmentWidget() const;
+    void SetupGameOverWidget();
     void SetupInventoryWidget();
     void SetupEquipmentWidget();
 
@@ -65,8 +65,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<UUserWidget> ShopWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> GameOverWidgetClass;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+    UUserWidget* GameOverWidgetInstance;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UInventoryWidget> InventoryWidgetClass;
@@ -77,4 +79,6 @@ protected:
     TSubclassOf<UEquipmentWidget> EquipmentWidgetClass;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
     UEquipmentWidget* EquipmentWidgetInstance;
+
+    
 };
