@@ -94,7 +94,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CalculateStats();
+	// CalculateStats();
 
 	HandleHealthChanged(Health, MaxHealth);
 
