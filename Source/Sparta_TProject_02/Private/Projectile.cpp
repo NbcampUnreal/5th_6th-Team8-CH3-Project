@@ -1,6 +1,7 @@
 ﻿#include "Projectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "PlayerCharacter.h" 
 #include "Kismet/GameplayStatics.h"
 
 AProjectile::AProjectile()
@@ -8,7 +9,7 @@ AProjectile::AProjectile()
 	PrimaryActorTick.bCanEverTick = false;
 
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	CollisionComp->InitSphereRadius(75.f);
+	CollisionComp->InitSphereRadius(15.f);
 	CollisionComp->SetCollisionProfileName("BlockAllDynamic");
 	RootComponent = CollisionComp;
 
@@ -52,8 +53,13 @@ void AProjectile::BeginPlay()
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (OtherActor && OtherActor != this)
+    if (OtherActor && OtherActor != this && OtherActor != GetOwner())
     {
+        if (OtherActor->IsA(APlayerCharacter::StaticClass()))
+        {
+            return;
+        }
+
         AController* InstigatorController = GetInstigatorController();
 
         if (!InstigatorController && GetOwner())

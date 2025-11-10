@@ -67,7 +67,7 @@ APlayerCharacter::APlayerCharacter()
 
 	CurrentWeaponIndex = 0;
 	CurrentWeapon = nullptr; 
-	MaxHealth = 100.0f;
+	MaxHealth = 300.0f;
 	Health = MaxHealth;
 	BaseDefense = 0;
 	Defense = BaseDefense;
@@ -660,6 +660,9 @@ void APlayerCharacter::Die()
 
 	UE_LOG(LogTemp, Warning, TEXT("Player Died."));
 
+	UMyGameInstance* GameInstance = GetGameInstance<UMyGameInstance>();
+	if (!GameInstance) return;
+	GameInstance->GetUIManager()->ShowGameOver();
 	OnDeath();
 }
 

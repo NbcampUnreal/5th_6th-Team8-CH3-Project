@@ -3,7 +3,7 @@
 ASTPlayerState::ASTPlayerState()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	MaxHealth = 100.f;
+	MaxHealth = 300.f;
 	CurrentHealth = MaxHealth;
 	MaxAmmo = 30;
 	CurrentAmmo = MaxAmmo;

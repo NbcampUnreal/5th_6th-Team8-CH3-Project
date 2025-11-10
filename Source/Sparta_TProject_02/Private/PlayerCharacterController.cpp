@@ -51,6 +51,7 @@ void APlayerCharacterController::BeginPlay()
 	{
 		GameInstance->SetupInventroyAndEquipment(this);
 		GameInstance->SetupUIManager(this);
+		GameInstance->GetUIManager()->SetupGameOverWidget();
 		GameInstance->GetUIManager()->SetupInventoryWidget();
 		GameInstance->GetUIManager()->SetupEquipmentWidget();
 		GameInstance->GetUIManager()->CloseInventoryWidget();

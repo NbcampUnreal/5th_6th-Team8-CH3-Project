@@ -17,8 +17,8 @@ AGrenadeActor::AGrenadeActor()
     ProjectileMovement->bShouldBounce = true;
     ProjectileMovement->Bounciness = 0.3f;
     ProjectileMovement->ProjectileGravityScale = 1.0f;
-    ProjectileMovement->InitialSpeed = 1000.f;
-    ProjectileMovement->MaxSpeed = 1500.f;
+    ProjectileMovement->InitialSpeed = 2000.f;
+    ProjectileMovement->MaxSpeed = 2500.f;
 }
 
 void AGrenadeActor::BeginPlay()

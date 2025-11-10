@@ -28,7 +28,7 @@ ATurret::ATurret()
 	bHasTarget = false;
 
 	Health = 100.f;
-	Damage = 45.0f;
+	Damage = 60.0f;
 }
 
 void ATurret::BeginPlay()

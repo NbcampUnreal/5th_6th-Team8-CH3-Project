@@ -23,6 +23,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	float GetCurrentDamage() const;
+
 	// Events
 	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
 	FOnWeaponEvent OnStartFire;
