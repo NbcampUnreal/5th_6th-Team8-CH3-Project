@@ -13,7 +13,7 @@
 #include "MonsterHealthBar.h"
 #include "Perception/AIPerceptionSystem.h"
 #include "Perception/AISense_Damage.h"
-
+#include "STGameMode.h"
 
 AAIMonsterBase::AAIMonsterBase()
 {
@@ -201,6 +201,11 @@ void AAIMonsterBase::Die()
 
     // 일정 시간 후 월드에서 액터를 제거
     SetLifeSpan(7.0f);
+
+    AGameModeBase* GameModeBase = GetWorld()->GetAuthGameMode();
+    if (!GameModeBase) return;
+    ASTGameMode* GameMode = Cast<ASTGameMode>(GameModeBase);
+    GameMode->OnEnemyKilled(this);
 }
 
 void AAIMonsterBase::ApplyHealthMultiplier(float Multiplier)
