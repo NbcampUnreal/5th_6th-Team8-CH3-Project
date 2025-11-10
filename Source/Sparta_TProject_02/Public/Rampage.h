@@ -19,6 +19,8 @@ protected:
 
 	virtual void Die() override;
 
+	virtual void Attack() override;
+
 	// --- Skills ---
 public:
 	// Rampage의 광역 공격(Smash) 데미지 판정을 수행
