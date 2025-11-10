@@ -660,6 +660,9 @@ void APlayerCharacter::Die()
 
 	UE_LOG(LogTemp, Warning, TEXT("Player Died."));
 
+	UMyGameInstance* GameInstance = GetGameInstance<UMyGameInstance>();
+	if (!GameInstance) return;
+	GameInstance->GetUIManager()->ShowGameOver();
 	OnDeath();
 }
 

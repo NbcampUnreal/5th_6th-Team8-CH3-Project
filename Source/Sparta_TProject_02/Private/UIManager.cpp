@@ -1,5 +1,6 @@
 #include "UIManager.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
 #include "GameHUDWidget.h"
 //#include "ShopWidget.h"
 #include "GameFramework/PlayerController.h"
@@ -10,6 +11,9 @@
 
 UUIManager::UUIManager()
 {
+   GameOverWidgetClass = nullptr;
+   GameOverWidgetInstance = nullptr;
+
    InventoryWidgetClass = nullptr;
    InventoryWidgetInstance = nullptr;
 
@@ -90,19 +94,34 @@ void UUIManager::HideShop()
 }
 
 // --- 게임오버 UI 표시 ---
+//void UUIManager::ShowGameOver()
+//{
+//    if (CurrentPopup)
+//        CurrentPopup->RemoveFromParent();
+//
+//    if (GameOverWidgetClass && PC)
+//    {
+//        CurrentPopup = CreateWidget<UUserWidget>(PC, GameOverWidgetClass);
+//        if (CurrentPopup)
+//        {
+//            CurrentPopup->AddToViewport(1);
+//        }
+//    }
+//}
+
+void UUIManager::SetupGameOverWidget()
+{
+   if (!GameOverWidgetClass) return;
+   GameOverWidgetInstance = CreateWidget<UUserWidget>(PC, GameOverWidgetClass);
+}
 void UUIManager::ShowGameOver()
 {
-    if (CurrentPopup)
-        CurrentPopup->RemoveFromParent();
-
-    if (GameOverWidgetClass && PC)
-    {
-        CurrentPopup = CreateWidget<UUserWidget>(PC, GameOverWidgetClass);
-        if (CurrentPopup)
-        {
-            CurrentPopup->AddToViewport(1);
-        }
-    }
+   //UButton* TitleButton = Cast<UButton>(GetWidgetFromName("TitleButton"));
+   //UButton* ExitButton = Cast<UButton>(GetWidgetFromName(TEXT("ExitButton")));
+   if (!GameOverWidgetInstance) return;
+   GameOverWidgetInstance->AddToViewport(5);
+   PC->SetInputMode(FInputModeUIOnly()); // UI 조작 모드로 전환
+   PC->bShowMouseCursor = true;
 }
 
 // --- 전체 UI 제거 ---
