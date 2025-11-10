@@ -2,15 +2,8 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Inventory.h"
-#include "Components/Button.h"
+#include "UIManager.h"
 #include "MyGameInstance.generated.h"
-
-class UUserWidget;
-class UGridPanel;
-struct FItemButtonData;
-class UInventoryWidget;
-class UEquipmentWidget;
-class APlayerCharacterController;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API UMyGameInstance : public UGameInstance
@@ -18,16 +11,16 @@ class SPARTA_TPROJECT_02_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUIManager> UiManagerClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	UUIManager* UiManagerInstance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	UInventoryWidget* InventoryWidgetInstance;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
-	TSubclassOf<UEquipmentWidget> EquipmentWidgetClass;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
-	UEquipmentWidget* EquipmentWidgetInstance;
+	//아이템
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
+	UInventory* Inventory;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment")
+	UInventory* GemSlots;
 
 	virtual void Init() override;
 
@@ -53,23 +46,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Score")
 	int32 GetHighScore() const;
 
-	//아이템
-	UInventoryWidget* GetInventoryWidget() const;
-	UEquipmentWidget* GetEquipmentWidget() const;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
-	UInventory* Inventory;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment")
-	UInventory* GemSlots;
+	// UI
+	UUIManager* GetUIManager() const { return UiManagerInstance; };
+	// Item (Inventory and Equipment)
+	void SetupUIManager(APlayerController* PlayerContorller);
+	void SetupInventroyAndEquipment(APlayerController* PlayerContorller);
 
-	void SetupInventoryWidget(APlayerCharacterController* PlayerContorller);
-	void SetupEquipmentWidget(APlayerCharacterController* PlayerContorller);
-
-	void OpenInventoryWidget();
-	void CloseInventoryWidget();
-	void OpenEquipmentWidget();
-	void CloseEquipmentWidget();
-	UFUNCTION(Exec)
-	void ToggleInventoryWidget();
+	UInventory* GetInventory() const { return Inventory; }
+	UInventory* GetGemSlots() const { return GemSlots; }
 
 	//Shop 연동용
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
@@ -86,5 +70,4 @@ protected:
 	// ===== 점수 관련 =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Score")
 	int32 HighScore;
-
 };

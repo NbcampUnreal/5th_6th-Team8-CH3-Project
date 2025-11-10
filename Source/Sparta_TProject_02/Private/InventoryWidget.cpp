@@ -58,7 +58,7 @@ void UInventoryWidget::SetupWidget()
    UMyGameInstance* GameInstance = Cast<UMyGameInstance>(PlayerContlloer->GetGameInstance());
    if (GameInstance)
    {
-      Inventory = GameInstance->Inventory;
+      Inventory = GameInstance->GetInventory();
    }
    else
    {

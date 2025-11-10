@@ -68,6 +68,6 @@ void APickupItem::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 
 	UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance());
 	if (!GameInstance) return;
-	GameInstance->Inventory->AddItem(Item);
+	GameInstance->GetInventory()->AddItem(Item);
 	Destroy();
 }

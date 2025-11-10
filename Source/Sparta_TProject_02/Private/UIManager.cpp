@@ -3,6 +3,32 @@
 #include "GameHUDWidget.h"
 //#include "ShopWidget.h"
 #include "GameFramework/PlayerController.h"
+#include "InventoryWidget.h"
+#include "EquipmentWidget.h"
+#include "Components/Widget.h"
+#include "MyGameInstance.h"
+
+UUIManager::UUIManager()
+{
+   InventoryWidgetClass = nullptr;
+   InventoryWidgetInstance = nullptr;
+
+   EquipmentWidgetClass = nullptr;
+   EquipmentWidgetInstance = nullptr;
+
+   static ConstructorHelpers::FClassFinder<UInventoryWidget> InvenHUDFInder(
+      TEXT("/Game/Blueprints/WBP_InventoryWidget.WBP_InventoryWidget_C"));
+   if (InvenHUDFInder.Succeeded())
+   {
+      InventoryWidgetClass = InvenHUDFInder.Class;
+   }
+   static ConstructorHelpers::FClassFinder<UEquipmentWidget> EquipHUDFInder(
+      TEXT("/Game/Blueprints/WBP_EquipmentWidget.WBP_EquipmentWidget_C"));
+   if (EquipHUDFInder.Succeeded())
+   {
+      EquipmentWidgetClass = EquipHUDFInder.Class;
+   }
+}
 
 void UUIManager::Init(APlayerController* InPC)
 {
@@ -90,4 +116,101 @@ void UUIManager::ClearAllUI()
         CurrentPopup->RemoveFromParent();
         CurrentPopup = nullptr;
     }
+}
+
+
+void UUIManager::SetupInventoryWidget()
+{
+   if (!InventoryWidgetClass) return;
+
+   InventoryWidgetInstance = CreateWidget<UInventoryWidget>(PC, InventoryWidgetClass);
+   if (!InventoryWidgetInstance) return;
+
+   if (!PC) return;
+   if (!PC->GetGameInstance()) return;
+
+   UMyGameInstance* GameInstance = Cast<UMyGameInstance>(PC->GetGameInstance());
+   if (!GameInstance) return;
+
+   UInventory* Inventory = GameInstance->GetInventory();
+   if(!Inventory)
+   Inventory->SetLinkedWidget(InventoryWidgetInstance);
+
+   InventoryWidgetInstance->AddToViewport(4);
+   InventoryWidgetInstance->SetupWidget();
+   InventoryWidgetInstance->ItemTooltipHide();
+   InventoryWidgetInstance->ItemContextMenuHide();
+}
+
+void UUIManager::SetupEquipmentWidget()
+{
+   if (!EquipmentWidgetClass) return;
+   EquipmentWidgetInstance = CreateWidget<UEquipmentWidget>(PC, EquipmentWidgetClass);
+   if (!EquipmentWidgetInstance) return;
+
+   if (!PC) return;
+   if (!PC->GetGameInstance()) return;
+
+   UMyGameInstance* GameInstance = Cast<UMyGameInstance>(PC->GetGameInstance());
+   if (!GameInstance) return;
+
+   UInventory* GemSlots = GameInstance->GetGemSlots();
+   if(!GemSlots)
+   GemSlots->SetLinkedWidget(EquipmentWidgetInstance);
+
+   EquipmentWidgetInstance->AddToViewport(3);
+   EquipmentWidgetInstance->SetupWidget();
+   EquipmentWidgetInstance->ItemTooltipHide();
+   EquipmentWidgetInstance->EquipmentSelectHide();
+}
+
+void UUIManager::OpenInventoryWidget()
+{
+   InventoryWidgetInstance->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+   InventoryWidgetInstance->RefreshWidget();
+}
+void UUIManager::CloseInventoryWidget()
+{
+   InventoryWidgetInstance->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UUIManager::OpenEquipmentWidget()
+{
+   EquipmentWidgetInstance->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+   EquipmentWidgetInstance->RefreshWidget();
+}
+void UUIManager::CloseEquipmentWidget()
+{
+   EquipmentWidgetInstance->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UUIManager::ToggleInventoryWidget()
+{
+   if (InventoryWidgetInstance->GetVisibility() == ESlateVisibility::Collapsed)
+   {
+      OpenInventoryWidget();
+      OpenEquipmentWidget();
+      FInputModeGameAndUI InputMode;
+      InputMode.SetWidgetToFocus(nullptr);
+      InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+      PC->SetInputMode(InputMode);
+      PC->bShowMouseCursor = true;
+   }
+   else
+   {
+      CloseInventoryWidget();
+      CloseEquipmentWidget();
+      PC->SetInputMode(FInputModeGameOnly());
+      PC->bShowMouseCursor = false;
+   }
+}
+
+UInventoryWidget* UUIManager::GetInventoryWidget() const
+{
+   return InventoryWidgetInstance;
+}
+
+UEquipmentWidget* UUIManager::GetEquipmentWidget() const
+{
+   return EquipmentWidgetInstance;
 }

@@ -59,8 +59,8 @@ void UEquipmentWidget::SetupWidget()
 {
    UMyGameInstance* GameInstance = Cast<UMyGameInstance>(PlayerController->GetGameInstance());
    if (!GameInstance) return;
-   Inventory = GameInstance->Inventory;
-   GemSlots = GameInstance->GemSlots;
+   Inventory = GameInstance->GetInventory();
+   GemSlots = GameInstance->GetGemSlots();
    GemSlots->SetMaxSize(GridMaxColumn);
 
    if (!UnEquipButton) return;
