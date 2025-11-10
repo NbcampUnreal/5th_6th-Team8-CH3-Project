@@ -1,4 +1,4 @@
-#include "Rampage.h"
+﻿#include "Rampage.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -11,7 +11,7 @@ ARampage::ARampage()
 {
 	// --- Rampage의 스탯 설정 ---
 	MaxHealth = 2000.0f;	// Rampge 체력
-	AttackDamage = 50.0f;	// Rampage 데미지
+	AttackDamage = 40.0f;	// Rampage 데미지
 	AttackRange = 300.0f;	// 공격범위(근접)
 	Defense = 5.0f;			// 방어력
 }
@@ -77,6 +77,16 @@ void ARampage::Die()
 	SetLifeSpan(7.0f);
 }
 
+// --- 기본 공격 ---
+void ARampage::Attack()
+{
+	// 부모의 Attack 함수 호출
+	// UE_LOG(LogTemp, Warning, TEXT("Rampage is attacking!"));
+	Super::Attack();
+
+	if (bIsDead) return;
+}
+
 //==================================================
 //--- Skills ---
 //==================================================
@@ -89,9 +99,9 @@ void ARampage::PerformSmashAttack()
 
 	UGameplayStatics::ApplyRadialDamage(
 		GetWorld(),
-		120.0f,
+		40.0f,
 		GetActorLocation(),
-		550.0f,
+		400.0f,
 		nullptr,
 		TArray<AActor*>(),
 		this,

@@ -5,7 +5,7 @@
 AAIBoss::AAIBoss()
 {
     // --- 보스 스탯 설정 ---
-    MaxHealth = 1000.0f;     // 보스의 체력
+    MaxHealth = 500.0f;     // 보스의 체력
     AttackDamage = 30.0f;   // 보스의 데미지
     AttackRange = 200.0f;   // 공격 범위(근접)
     Defense = 5.0f;         // 방어력

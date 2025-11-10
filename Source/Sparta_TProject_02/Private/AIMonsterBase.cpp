@@ -33,6 +33,7 @@ AAIMonsterBase::AAIMonsterBase()
     HealthBarWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f)); // 몬스터 머리 위로 위치 조정
     HealthBarWidgetComponent->SetDrawSize(FVector2D(150.0f, 20.0f)); // 체력바 크기 조정
     HealthBarWidgetComponent->SetVisibility(false); // 평소에는 숨김
+    HealthBarWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     // --- 충돌체 범위 설정 ---
     AggroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AggroSphere"));
@@ -113,7 +114,10 @@ float AAIMonsterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
         {
             HealthBarWidgetComponent->SetVisibility(true); // 체력바를 보이게 함
             const float HealthRatio = CurrentHealth / MaxHealth; 
-            HealthBarWidget->UpdateHealthBar(HealthRatio); // 현재 체력 비율만큼 위젯을 업데이트.
+            HealthBarWidget->UpdateHealthBar(HealthRatio); // 현재 체력 비율만큼 위젯을 업데이트
+
+            HealthBarWidget->PlayDamageText(ActualDamage); // 받은 데미지 만큼 데미지 텍스트 팝업 요청
+
             GetWorldTimerManager().SetTimer(HealthBarTimerHandle, this, &AAIMonsterBase::HideHealthBar, 3.0f, false); // 3초 뒤에 체력바를 다시 숨기도록 타이머를 설정
         }
     }
