@@ -40,6 +40,9 @@ AAIMonsterBase::AAIMonsterBase()
     AggroSphere->SetCollisionProfileName(TEXT("Trigger")); // 물리적 충돌 없이 겹침(Overlap) 이벤트만 발생
     AggroSphere->SetSphereRadius(500.0f); // 인지 범위 (5미터). 이 값은 블루프린트에서 조절 가능
     AggroSphere->OnComponentBeginOverlap.AddDynamic(this, &AAIMonsterBase::OnAggroSphereOverlap); // Overlap 이벤트가 발생했을 때 호출될 함수를 연결(바인딩)합니다.
+
+    // --- 컨트롤러 점유 설정 ---
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned; // 레벨에 미리 배치되거나(Placed in World), 게임 중에 스폰될 때(Spawned) 모두
 }
 
 // --- 게임 시작 시 ---
