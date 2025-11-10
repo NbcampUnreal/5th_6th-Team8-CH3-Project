@@ -15,6 +15,9 @@
 #include "Perception/AISense_Damage.h"
 #include "STGameMode.h"
 #include "PlayerCharacterController.h"
+#include "ItemDropTable.h"
+#include "Engine/DataTable.h"
+#include "PickupItem.h"
 
 AAIMonsterBase::AAIMonsterBase()
 {
@@ -210,6 +213,9 @@ void AAIMonsterBase::Die()
         PlayAnimMontage(DeathMontage);
     }
 
+    // 아이템 드랍 로직 추가
+    DropItem();
+
     // 일정 시간 후 월드에서 액터를 제거
     SetLifeSpan(7.0f);
 
@@ -217,6 +223,56 @@ void AAIMonsterBase::Die()
     if (!GameModeBase) return;
     ASTGameMode* GameMode = Cast<ASTGameMode>(GameModeBase);
     GameMode->OnEnemyKilled(this);
+}
+
+// 죽은 후 아이템 드랍 함수
+void AAIMonsterBase::DropItem()
+{
+    UE_LOG(LogTemp, Warning, TEXT("DropItem() Activated"));
+    if (!DropTableAsset)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DropTableAsset is not set"));
+        return;
+    }
+
+    const float DropRoll = FMath::FRand();
+
+    TArray<FItemDropTable*> AllRows;
+    FString ContextString = TEXT("DropItem Context");
+    DropTableAsset->GetAllRows(ContextString, AllRows);
+
+    for (const FItemDropTable* DropEntry : AllRows)
+    {
+        if (DropRoll <= DropEntry->CumulativeChance)
+        {
+            // 아이템 스폰
+            if (DropEntry->DropItemBlueprint)
+            {
+                // 몬스터 위치에서 아이템 스폰
+                FVector SpawnLocation = GetActorLocation();
+                // 몬스터 모델의 바닥에 스폰되도록 z축 위치를 조정
+                SpawnLocation.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+                // 스폰 파라미터 설정
+                FActorSpawnParameters SpawnParams;
+                SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn; // 충돌 시 조정하여 스폰 시도
+
+                // 아이템 액터 스폰
+                APickupItem* DroppedItem = GetWorld()->SpawnActor<APickupItem>(
+                    DropEntry->DropItemBlueprint,
+                    SpawnLocation,
+                    FRotator::ZeroRotator,
+                    SpawnParams
+                );
+
+                if (DroppedItem)
+                {
+                    UE_LOG(LogTemp, Log, TEXT("%s dropped item: %s"), *GetName(), *DropEntry->ItemID.ToString());
+                }
+            }
+            break; // 아이템을 찾았으므로 루프 종료
+        }
+    }
 }
 
 void AAIMonsterBase::ApplyHealthMultiplier(float Multiplier)

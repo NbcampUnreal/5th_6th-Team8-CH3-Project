@@ -8,6 +8,7 @@
 class UWidgetComponent;
 class UMonsterHealthBar;
 class USphereComponent;
+struct FItemDropTable;
 
 UCLASS()
 class SPARTA_TPROJECT_02_API AAIMonsterBase : public ACharacter
@@ -57,6 +58,13 @@ public:
     // 죽을 때 재생할 애니메이션 몽타주
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI Combat")
     class UAnimMontage* DeathMontage;
+
+    // 죽을 때 드랍테이블
+    UFUNCTION(BlueprintCallable, Category = "Drop Item")
+    virtual void DropItem();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Item")
+    class UDataTable* DropTableAsset;
 
     // --- AI Combat & Damage (전투 기능) ---
 
