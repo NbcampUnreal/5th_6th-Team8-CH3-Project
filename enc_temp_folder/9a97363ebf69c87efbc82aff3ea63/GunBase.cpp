@@ -154,18 +154,6 @@ void AGunBase::FinishReload()
     OnFinishReload.Broadcast();
 }
 
-float AGunBase::GetCurrentDamage() const
-{
-    float TotalDamage = Damage;
-
-    if (OwningPlayer)
-    {
-        TotalDamage += OwningPlayer->GetAttack_Increase();
-    }
-
-    return TotalDamage;
-}
-
 void AGunBase::TraceFire()
 {
     if (CurrentAmmo <= 0 || bIsReloading)
@@ -215,7 +203,7 @@ void AGunBase::TraceFire()
     {
         UGameplayStatics::ApplyPointDamage(
             Hit.GetActor(),
-            GetCurrentDamage(),
+            Damage,
             CameraRotation.Vector(),
             Hit,
             OwnerController,
