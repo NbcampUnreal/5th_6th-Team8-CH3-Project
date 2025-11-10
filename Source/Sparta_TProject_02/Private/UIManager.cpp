@@ -133,7 +133,7 @@ void UUIManager::SetupInventoryWidget()
    if (!GameInstance) return;
 
    UInventory* Inventory = GameInstance->GetInventory();
-   if(!Inventory)
+   if (!Inventory) return;
    Inventory->SetLinkedWidget(InventoryWidgetInstance);
 
    InventoryWidgetInstance->AddToViewport(4);
