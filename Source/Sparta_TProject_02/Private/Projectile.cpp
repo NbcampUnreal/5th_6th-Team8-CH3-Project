@@ -1,4 +1,4 @@
-#include "Projectile.h"
+﻿#include "Projectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -39,6 +39,14 @@ void AProjectile::BeginPlay()
             InstigatorController = OwnerPawn->GetController();
         }
     }
+
+    if (!InstigatorController)
+    {
+        if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+        {
+            InstigatorController = PC;
+        }
+    }
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
@@ -52,6 +60,13 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
         {
             if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
                 InstigatorController = OwnerPawn->GetController();
+        }
+        if (!InstigatorController)
+        {
+            if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+            {
+                InstigatorController = PC;
+            }
         }
 
         UE_LOG(LogTemp, Warning, TEXT("Projectile hit %s (Controller: %s)"),

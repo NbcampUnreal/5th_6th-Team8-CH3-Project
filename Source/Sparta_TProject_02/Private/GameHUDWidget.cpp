@@ -1,4 +1,4 @@
-#include "GameHUDWidget.h"
+﻿#include "GameHUDWidget.h"
 #include "STGameState.h"
 #include "PlayerCharacter.h"
 #include "GunBase.h"
@@ -56,6 +56,19 @@ void UGameHUDWidget::BindToDelegates()
                 PC->OnEnemyHit.AddDynamic(this, &UGameHUDWidget::OnEnemyHit);
             }
         }
+
+        // --- STPlayerState 델리게이트 연결 ---
+        if (APlayerController* PC = GetOwningPlayer())
+        {
+            if (ASTPlayerState* PS = PC->GetPlayerState<ASTPlayerState>())
+            {
+                if (!PS->OnKillCountChanged.IsAlreadyBound(this, &UGameHUDWidget::OnKillCountChanged))
+                {
+                    PS->OnKillCountChanged.AddDynamic(this, &UGameHUDWidget::OnKillCountChanged);
+                    OnKillCountChanged(PS->KillCount);
+                }
+            }
+        }
     }
 }
 
@@ -76,9 +89,16 @@ void UGameHUDWidget::OnScoreChanged(int32 NewScore)
     UpdateScoreVisual(NewScore);
 }
 
+void UGameHUDWidget::OnKillCountChanged(int32 NewKillCount)
+{
+    Kill_Text->SetText(FText::FromString(TEXT("Kills: " + FString::FromInt(NewKillCount))));
+}
+
 void UGameHUDWidget::OnWaveChanged(int32 NewWave)
 {
     UpdateWaveVisual(NewWave);
+
+    Wave_Text->SetText(FText::FromString(TEXT("Wave: " + FString::FromInt(NewWave))));
 }
 
 void UGameHUDWidget::OnEnemyHit()

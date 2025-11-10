@@ -199,6 +199,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Attack_Increase;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	int32 KillCount;
+
 
 	//float GetMaxHealth() const;
 	//float GetHealth() const;
@@ -246,6 +249,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnEnemyHitSignature OnEnemyHit;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnKillCountChangedSignature OnKillCountChanged;
+
 	float GetMaxHealth() const;
 	float GetHealth() const;
 	int32 GetBaseDefense() const;
@@ -276,6 +282,6 @@ protected:
 	UFUNCTION()
 	void HandleKillCountChanged(int32 Kills)
 	{
-		// 필요시 UI용 델리게이트 추가
+		OnKillCountChanged.Broadcast(Kills);// 필요시 UI용 델리게이트 추가
 	}
 };
