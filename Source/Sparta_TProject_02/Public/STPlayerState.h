@@ -1,14 +1,14 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "STPlayerState.generated.h"
 
-//Ã¼·Â º¯°æ ¾Ë¶÷: ÇöÀçÃ¼·Â, ÃÖ´ëÃ¼·Â
+//ì²´ë ¥ ë³€ê²½ ì•ŒëŒ: í˜„ì¬ì²´ë ¥, ìµœëŒ€ì²´ë ¥
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, CurrentHealth, float, MaxHealth);
-//Åº¾à º¯°æ ¾Ë¶÷: ÇöÀçÅº¾à, ÃÖ´ëÅº¾à
+//íƒ„ì•½ ë³€ê²½ ì•ŒëŒ: í˜„ì¬íƒ„ì•½, ìµœëŒ€íƒ„ì•½
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoChangedSignature, int32, CurrentAmmo, int32, MaxAmmo);
-//Å³ ¼ö º¯°æ: »õ Å³ ¼ö
+//í‚¬ ìˆ˜ ë³€ê²½: ìƒˆ í‚¬ ìˆ˜
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKillCountChangedSignature, int32, NewKillCount);
 
 UCLASS()
@@ -19,7 +19,7 @@ class SPARTA_TPROJECT_02_API ASTPlayerState : public APlayerState
 public:
 	ASTPlayerState();
 
-	//-------UI¹ÙÀÎµù µ¨¸®°ÔÀÌÆ®---------
+	//-------UIë°”ì¸ë”© ë¸ë¦¬ê²Œì´íŠ¸---------
 	UPROPERTY(BlueprintAssignable, Category="PlayerState | Events")
 	FOnHealthChangedSignature OnHealthChanged;
 
@@ -29,9 +29,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "PlayerState | Events")
 	FOnKillCountChangedSignature OnKillCountChanged;
 
-	//---°ª ¼öÁ¤À» À§ÇÑ ÇÔ¼ö (Ä³¸¯ÅÍ/ ¾ÆÀÌÅÛ È£Ãâ¿ë)
+	//---ê°’ ìˆ˜ì •ì„ ìœ„í•œ í•¨ìˆ˜ (ìºë¦­í„°/ ì•„ì´í…œ í˜¸ì¶œìš©)
 
-	//Ã¼·Â
+	//ì²´ë ¥
 	UFUNCTION(BlueprintCallable, Category = "PlayerState | Health")
 	void SetHealth(float NewHealth);
 
@@ -41,7 +41,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerState | Health")
 	void SetMaxHealth(float NewMaxHealth);
 
-	//Åº¾à
+	//íƒ„ì•½
 	UFUNCTION(BlueprintCallable, Category = "PlayerState | Ammo")
 	void SetCurrentAmmo(int32 NewAmmo);
 
@@ -54,12 +54,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerState | Ammo")
 	bool UseAmmo(int32 AmmoToUse = 1);
 
-	//Å³ ¼ö
+	//í‚¬ ìˆ˜
 	UFUNCTION(BlueprintCallable, Category = "PlayerState | Combat")
 	void AddKill();
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerState | Combat")
 	void ResetKills(const FString& NewName);
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "PlayerState | Config")
+	int32 KillCount;
 
 	//Getters
 
@@ -86,7 +89,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	//---µ¥ÀÌÅÍ º¯¼ö
+	//---ë°ì´í„° ë³€ìˆ˜
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PlayerState | Identity")
 	FString PlayerName;
 
@@ -101,8 +104,5 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "PlayerState | Config")
 	int32 CurrentAmmo;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "PlayerState | Config")
-	int32 KillCount;
 
 };

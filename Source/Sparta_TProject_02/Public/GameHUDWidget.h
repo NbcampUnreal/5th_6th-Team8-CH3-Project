@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -30,6 +30,9 @@ protected:
 
     UFUNCTION()
     void OnWaveChanged(int32 NewWave);
+
+    UFUNCTION()
+    void OnKillCountChanged(int32 NewKillCount);
 
     UFUNCTION()
     void OnEnemyHit();
@@ -73,7 +76,7 @@ protected:
 
     UTextBlock* Kill_Text;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), Category = "UI")
 
-    UTextBlock* Coin_Text;
+    //UTextBlock* Coin_Text;
 };

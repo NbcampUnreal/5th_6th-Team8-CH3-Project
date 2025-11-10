@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
@@ -57,6 +57,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Game Events")
 	FOnBoolChangedSignature OnIsGameWinChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Game Events")
+	FOnIntChangedSignature OnKillCountChanged;
 
 	// --- ���� ���� ������ ---
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Game State")

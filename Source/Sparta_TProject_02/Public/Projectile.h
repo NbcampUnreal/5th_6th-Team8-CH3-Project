@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -32,6 +32,6 @@ protected:
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 public:
-	// ¿ÜºÎ¿¡¼­ ´ë¹ÌÁö ¼³Á¤ÇÒ ¼ö ÀÖ°Ô Setter Ãß°¡
+	// ì™¸ë¶€ì—ì„œ ëŒ€ë¯¸ì§€ ì„¤ì •í•  ìˆ˜ ìˆê²Œ Setter ì¶”ê°€
 	void SetDamage(float InDamage) { Damage = InDamage; }
 };
